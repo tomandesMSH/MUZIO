@@ -1,4 +1,4 @@
-# Keyboard Hero - web app
+# Muzio - web app
 
 React + TypeScript + Vite + Tailwind (v4) + Supabase. Built from the product spec described in
 `HUDEBN~1.docx` - see the repo's plan history for why this stack was chosen over the spec's

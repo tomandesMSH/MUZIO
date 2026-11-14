@@ -1,4 +1,6 @@
-# 🎹 Keyboard Hero
+# 🎹 Muzio
+
+*Dříve známé jako Keyboard Hero.*
 
 Webová aplikace pro žáky základní umělecké školy Moravský Krumlov, jejímž cílem je motivovat děti k pravidelnému domácímu cvičení na hudební nástroj hravou formou.
 

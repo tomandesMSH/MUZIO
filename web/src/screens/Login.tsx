@@ -94,7 +94,8 @@ export function Login() {
         {darkMode ? '☀️' : '🌙'}
       </button>
       <h1 className="text-2xl font-heading font-bold mb-1">Muzio</h1>
-      <p className="text-text-muted text-sm mb-8">Uč se hudbu hravě, každý den.</p>
+      <p className="text-text-muted text-sm">Uč se hudbu hravě, každý den.</p>
+      <p className="text-text-muted text-xs opacity-70 mb-8">Dříve známé jako Keyboard Hero.</p>
 
       <div className="flex gap-2 mb-6">
         <button
