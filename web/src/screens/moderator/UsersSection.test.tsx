@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { UsersSection } from './UsersSection'
-import { setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
+import { setUserAdmin, setUserRole, updateAccount } from '../../lib/data/adminUsers'
 import type { Profile } from '../../lib/data/types'
 
 const ME = 'me'
@@ -21,7 +21,11 @@ vi.mock('../../lib/data/profiles', () => ({
   setTeacherVerified: vi.fn(),
 }))
 vi.mock('../../lib/data/moderation', () => ({ reinstateAccount: vi.fn(), suspendAccount: vi.fn() }))
-vi.mock('../../lib/data/adminUsers', () => ({ setUserRole: vi.fn(async () => {}), setUserAdmin: vi.fn(async () => {}) }))
+vi.mock('../../lib/data/adminUsers', () => ({
+  setUserRole: vi.fn(async () => {}),
+  setUserAdmin: vi.fn(async () => {}),
+  updateAccount: vi.fn(async () => {}),
+}))
 vi.mock('../../lib/reauth', () => ({ isReauthed: () => true }))
 
 const card = async (name: string) => (await screen.findByText(name)).closest('div.rounded-2xl') as HTMLElement
@@ -32,10 +36,20 @@ describe('UsersSection - roles and admin rights', () => {
     vi.mocked(setUserAdmin).mockClear()
   })
 
-  it('offers nothing on your own account', async () => {
+  it('on your own account offers only Upravit', async () => {
     render(<UsersSection />)
     const mine = await card('Já Admin')
-    expect(within(mine).queryByRole('button')).toBeNull()
+    expect(within(mine).getAllByRole('button').map((b) => b.textContent)).toEqual(['Upravit'])
+  })
+
+  it('renames an account', async () => {
+    render(<UsersSection />)
+    fireEvent.click(within(await card('Pavla Žákyně')).getByRole('button', { name: 'Upravit' }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.change(within(dialog).getAllByRole('textbox')[1], { target: { value: 'pavla.z' } })
+    expect(within(dialog).getByText('pavla.z')).toBeInTheDocument() // "sign in with the new name" warning
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Uložit' }))
+    await waitFor(() => expect(updateAccount).toHaveBeenCalledWith('p1', 'Pavla Žákyně', 'pavla.z'))
   })
 
   it('makes a pupil a teacher after confirming', async () => {

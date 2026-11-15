@@ -13,6 +13,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, fetchAllUsers, setTeacherVerified } from '../../lib/data/profiles'
 import { reinstateAccount, suspendAccount } from '../../lib/data/moderation'
 import { setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
+import { EditAccountModal } from '../../components/admin/EditAccountModal'
 import { isReauthed } from '../../lib/reauth'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
@@ -48,6 +49,7 @@ export function UsersSection() {
   const [banTarget, setBanTarget] = useState<Profile>()
   // A role / admin-rights change waiting for confirmation.
   const [pending, setPending] = useState<PendingChange>()
+  const [editTarget, setEditTarget] = useState<Profile>()
   const [reauthOpen, setReauthOpen] = useState(false)
   const [busy, setBusy] = useState<string>()
   const { message, show } = useToast()
@@ -73,6 +75,11 @@ export function UsersSection() {
   // (migration 0028 enforces the same).
   function canChangeRole(user: Profile): boolean {
     return user.id !== profile?.id && user.role !== 'moderator'
+  }
+
+  // Renaming: any account but other dedicated admin accounts (0029).
+  function canEdit(user: Profile): boolean {
+    return user.id === profile?.id || user.role !== 'moderator'
   }
 
   function requestChange(change: PendingChange) {
@@ -187,6 +194,18 @@ export function UsersSection() {
         onCancel={() => setPending(undefined)}
       />
 
+      {editTarget && (
+        <EditAccountModal
+          user={editTarget}
+          onClose={() => setEditTarget(undefined)}
+          onSaved={() => {
+            setEditTarget(undefined)
+            show('Účet byl upraven')
+            users.refetch()
+          }}
+        />
+      )}
+
       <SearchBar value={search} onChange={setSearch} placeholder="Hledat podle jména nebo přihlašovacího jména" />
       <div className="flex gap-2 overflow-x-auto">
         <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
@@ -282,17 +301,24 @@ export function UsersSection() {
               </div>
             )}
 
-            {canChangeRole(user) && (
+            {(canChangeRole(user) || canEdit(user)) && (
               <div className="flex flex-wrap gap-1.5 border-t border-border pt-2.5">
-                <Button
-                  variant="ghost"
-                  className="!px-3 !py-1.5 text-xs"
-                  disabled={busy === user.id}
-                  onClick={() => requestChange(roleChange(user))}
-                >
-                  {user.role === 'student' ? 'Udělat učitelem' : 'Udělat žákem'}
-                </Button>
-                {user.role === 'teacher' && (user.is_verified || user.is_moderator) && (
+                {canEdit(user) && (
+                  <Button variant="ghost" className="!px-3 !py-1.5 text-xs" onClick={() => setEditTarget(user)}>
+                    Upravit
+                  </Button>
+                )}
+                {canChangeRole(user) && (
+                  <Button
+                    variant="ghost"
+                    className="!px-3 !py-1.5 text-xs"
+                    disabled={busy === user.id}
+                    onClick={() => requestChange(roleChange(user))}
+                  >
+                    {user.role === 'student' ? 'Udělat učitelem' : 'Udělat žákem'}
+                  </Button>
+                )}
+                {canChangeRole(user) && user.role === 'teacher' && (user.is_verified || user.is_moderator) && (
                   <Button
                     variant="ghost"
                     className="!px-3 !py-1.5 text-xs"
