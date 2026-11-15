@@ -19,6 +19,7 @@ import { getErrorMessage } from '../../lib/errors'
 import { UsersSection } from './UsersSection'
 import { HistorySection } from './HistorySection'
 import { ClassroomsSection } from './ClassroomsSection'
+import { UsageSection } from './UsageSection'
 import type { PracticeLog, Profile } from '../../lib/data/types'
 
 interface SuspendTarget {
@@ -27,7 +28,7 @@ interface SuspendTarget {
   name: string
 }
 
-type Tab = 'reports' | 'recordings' | 'users' | 'classrooms' | 'history'
+type Tab = 'reports' | 'recordings' | 'users' | 'classrooms' | 'usage' | 'history'
 
 // The admin's sections; the bar scrolls sideways on a phone.
 const TABS: { id: Tab; label: string }[] = [
@@ -35,6 +36,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'recordings', label: 'Nahrávky' },
   { id: 'users', label: 'Uživatelé' },
   { id: 'classrooms', label: 'Třídy' },
+  { id: 'usage', label: 'Využití' },
   { id: 'history', label: 'Historie' },
 ]
 
@@ -221,6 +223,7 @@ export function Queue() {
       {tab === 'recordings' && <RecordingsSection />}
       {tab === 'users' && <UsersSection />}
       {tab === 'classrooms' && <ClassroomsSection />}
+      {tab === 'usage' && <UsageSection />}
       {tab === 'history' && <HistorySection />}
     </div>
   )
