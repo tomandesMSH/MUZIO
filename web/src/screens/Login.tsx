@@ -155,7 +155,11 @@ export function Login() {
             </li>
             <li className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5">
               <span className="font-heading font-semibold">Učitel</span> - požádej správce appky (moderátora), který ti
-              heslo nastaví.
+              heslo nastaví:{' '}
+              <a href="mailto:tomandes@tuta.io" className="underline underline-offset-2 hover:text-text-primary">
+                tomandes@tuta.io
+              </a>
+              .
             </li>
           </ul>
           <p className="text-xs text-text-muted">
