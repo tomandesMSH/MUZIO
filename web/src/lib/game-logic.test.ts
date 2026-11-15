@@ -2,21 +2,21 @@ import { describe, expect, it } from 'vitest'
 import * as KHGame from './game-logic'
 
 describe('computeLevel', () => {
-  it('0 stars is level 1 Nováček', () => {
+  it('0 recordings is level 1 Nováček', () => {
     const result = KHGame.computeLevel(0)
     expect(result.level).toBe(1)
     expect(result.title).toBe('Nováček')
-    expect(result.starsInLevel).toBe(0)
-    expect(result.starsToNext).toBe(10)
+    expect(result.recordingsInLevel).toBe(0)
+    expect(result.recordingsToNext).toBe(10)
     expect(result.progress).toBe(0)
   })
 
-  it('25 stars is level 3, mid-progress', () => {
+  it('25 recordings is level 3, mid-progress', () => {
     const result = KHGame.computeLevel(25)
     expect(result.level).toBe(3)
     expect(result.title).toBe('Talent')
-    expect(result.starsInLevel).toBe(5)
-    expect(result.starsToNext).toBe(5)
+    expect(result.recordingsInLevel).toBe(5)
+    expect(result.recordingsToNext).toBe(5)
     expect(result.progress).toBe(0.5)
   })
 
@@ -26,13 +26,19 @@ describe('computeLevel', () => {
     expect(result.title).toBe('Legenda +1')
   })
 
-  it('negative/undefined stars treated as 0', () => {
+  it('negative/undefined recordings treated as 0', () => {
     expect(KHGame.computeLevel(-5).level).toBe(1)
     expect(KHGame.computeLevel(undefined).level).toBe(1)
   })
 })
 
 describe('computeBadges', () => {
+  it('every badge says how to earn it, so it can be shown without a tooltip', () => {
+    for (const badge of KHGame.computeBadges({})) {
+      expect(badge.description.length).toBeGreaterThan(0)
+    }
+  })
+
   it('no activity unlocks nothing', () => {
     const badges = KHGame.computeBadges({ stars: 0, streak: 0, totalRecordings: 0 })
     expect(badges.every((b) => b.unlocked === false)).toBe(true)

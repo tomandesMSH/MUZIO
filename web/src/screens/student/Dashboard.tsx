@@ -51,7 +51,7 @@ export function StudentDashboard() {
     celebratedRef.current = true
 
     const dateKeys = weekly.data.dateKeys
-    const result = detectNewUnlocks(userId, profile.stars, {
+    const result = detectNewUnlocks(userId, logsCount.data, {
       stars: profile.stars,
       streak: profile.streak,
       totalRecordings: logsCount.data,
@@ -133,7 +133,7 @@ export function StudentDashboard() {
         </div>
 
         <Card>
-          <LevelProgress stars={profile.stars} />
+          <LevelProgress recordings={logsCount.data ?? 0} />
         </Card>
 
         <Quests quests={quests} />
