@@ -13,6 +13,7 @@ import { getErrorMessage } from '../../lib/errors'
 import type { PracticeLog } from '../../lib/data/types'
 import { BADGES, xpForLog } from '../../lib/game-logic'
 import { awardsByLog, fetchAwardedBadges } from '../../lib/data/badges'
+import { FeedbackImages } from '../../components/feedback/FeedbackImages'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
 
 export function Feedback() {
@@ -98,6 +99,9 @@ export function Feedback() {
                         </div>
                         <p className="text-text-muted">{log.feedback_good}</p>
                       </div>
+                    )}
+                    {log.feedback_images && log.feedback_images.length > 0 && (
+                      <FeedbackImages paths={log.feedback_images} />
                     )}
                     {log.feedback_improve && (
                       <div>
