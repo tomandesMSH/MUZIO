@@ -13,6 +13,8 @@ import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, fetchAllUsers, setTeacherVerified } from '../../lib/data/profiles'
 import { reinstateAccount, suspendAccount } from '../../lib/data/moderation'
 import { setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
+import { adjustStudentStars } from '../../lib/data/practiceLogs'
+import { computeLevel } from '../../lib/game-logic'
 import { EditAccountModal } from '../../components/admin/EditAccountModal'
 import { isReauthed } from '../../lib/reauth'
 import { useToast } from '../../lib/useToast'
@@ -236,6 +238,11 @@ export function UsersSection() {
                   {user.role === 'teacher' ? 'Učitel' : 'Žák'}
                   {user.username ? ` · ${user.username}` : ''}
                 </div>
+                {user.role === 'student' && (
+                  <div className="text-text-muted text-xs">
+                    🔥 {user.streak} · ✨ {user.xp ?? 0} XP (level {computeLevel(user.xp ?? 0).level}) · ⭐ {user.stars}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -317,6 +324,30 @@ export function UsersSection() {
                   >
                     {user.role === 'student' ? 'Udělat učitelem' : 'Udělat žákem'}
                   </Button>
+                )}
+                {user.role === 'student' && (
+                  <span className="inline-flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="!px-2.5 !py-1.5 text-xs"
+                      aria-label={`Odebrat hvězdu: ${user.full_name}`}
+                      disabled={busy === user.id || user.stars <= 0}
+                      onClick={() => runAction(user.id, () => adjustStudentStars(user.id, -1).then(() => {}), 'Hvězda odebrána')}
+                    >
+                      ⭐ −
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="!px-2.5 !py-1.5 text-xs"
+                      aria-label={`Přidat hvězdu: ${user.full_name}`}
+                      disabled={busy === user.id}
+                      onClick={() =>
+                        runAction(user.id, () => adjustStudentStars(user.id, 1).then(() => {}), `⭐ Hvězda pro ${user.full_name}`)
+                      }
+                    >
+                      ⭐ +
+                    </Button>
+                  </span>
                 )}
                 {canChangeRole(user) && user.role === 'teacher' && (user.is_verified || user.is_moderator) && (
                   <Button

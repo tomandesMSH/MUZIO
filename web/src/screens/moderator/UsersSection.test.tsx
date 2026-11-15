@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { UsersSection } from './UsersSection'
 import { setUserAdmin, setUserRole, updateAccount } from '../../lib/data/adminUsers'
+import { adjustStudentStars } from '../../lib/data/practiceLogs'
 import type { Profile } from '../../lib/data/types'
 
 const ME = 'me'
@@ -26,6 +27,7 @@ vi.mock('../../lib/data/adminUsers', () => ({
   setUserAdmin: vi.fn(async () => {}),
   updateAccount: vi.fn(async () => {}),
 }))
+vi.mock('../../lib/data/practiceLogs', () => ({ adjustStudentStars: vi.fn(async () => 1) }))
 vi.mock('../../lib/reauth', () => ({ isReauthed: () => true }))
 
 const card = async (name: string) => (await screen.findByText(name)).closest('div.rounded-2xl') as HTMLElement
@@ -73,5 +75,14 @@ describe('UsersSection - roles and admin rights', () => {
     fireEvent.click(within(other).getByRole('button', { name: 'Odebrat práva admina' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Odebrat práva' }))
     await waitFor(() => expect(setUserAdmin).toHaveBeenCalledWith('t2', false))
+  })
+
+  it('shows the counters of a pupil and gives a star', async () => {
+    render(<UsersSection />)
+    const pupil = await card('Pavla Žákyně')
+    expect(within(pupil).getByText(/✨ 0 XP \(level 1\) · ⭐ 0/)).toBeInTheDocument()
+    expect(within(pupil).getByRole('button', { name: 'Odebrat hvězdu: Pavla Žákyně' })).toBeDisabled()
+    fireEvent.click(within(pupil).getByRole('button', { name: 'Přidat hvězdu: Pavla Žákyně' }))
+    await waitFor(() => expect(adjustStudentStars).toHaveBeenCalledWith('p1', 1))
   })
 })
