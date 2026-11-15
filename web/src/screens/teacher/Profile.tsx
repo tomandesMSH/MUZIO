@@ -6,6 +6,7 @@ import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
+import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { AppShell } from '../../components/layout/AppShell'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
@@ -58,6 +59,7 @@ export function Profile() {
             }
           />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
+          <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
           <SettingsRow label="Notifikace" onClick={notReady} />
         </div>
 

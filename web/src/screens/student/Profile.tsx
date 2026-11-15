@@ -7,6 +7,7 @@ import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
+import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -157,6 +158,7 @@ export function Profile() {
           <SettingsRow label="Notifikace" onClick={notReady} />
           <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
+          <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
           <SettingsRow label="Nahlásit problém nebo nápad" onClick={openReportForm} />
         </div>
 
