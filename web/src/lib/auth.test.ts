@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { generateTempPassword, makeInternalEmail } from './auth'
+
+// These are pure helpers - keep the real client (which needs .env.local) out.
+vi.mock('./supabase', () => ({ supabase: {} }))
 
 describe('generateTempPassword', () => {
   it('has the requested length and only unambiguous characters', () => {

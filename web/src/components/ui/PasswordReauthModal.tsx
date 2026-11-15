@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
-import { Input } from './Input'
+import { PasswordInput } from './PasswordInput'
 import { useAuth } from '../../lib/AuthProvider'
 import { reauthenticate } from '../../lib/auth'
 import { markReauthed } from '../../lib/reauth'
@@ -43,9 +43,9 @@ export function PasswordReauthModal({ open, onSuccess, onCancel }: PasswordReaut
           Tahle akce je nevratná - ověř prosím svoje heslo, než budeš pokračovat. Pro zbytek session se už ptát
           nebudeme.
         </p>
-        <Input
-          type="password"
+        <PasswordInput
           placeholder="Heslo"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoFocus
