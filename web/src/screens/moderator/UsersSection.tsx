@@ -12,6 +12,7 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, fetchAllUsers, setTeacherVerified } from '../../lib/data/profiles'
 import { reinstateAccount, suspendAccount } from '../../lib/data/moderation'
+import { setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
 import { isReauthed } from '../../lib/reauth'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
@@ -19,6 +20,15 @@ import { isTeacherAdmin } from '../../lib/roles'
 import type { Profile } from '../../lib/data/types'
 
 type Filter = 'all' | 'pending' | 'student' | 'teacher'
+
+interface PendingChange {
+  user: Profile
+  title: string
+  message: string
+  confirmLabel: string
+  run: () => Promise<void>
+  success: string
+}
 
 // Students wait for approval and teachers for identity verification.
 function isPending(user: Profile): boolean {
@@ -36,6 +46,8 @@ export function UsersSection() {
   const [filter, setFilter] = useState<Filter>('all')
   const [resetTarget, setResetTarget] = useState<Profile>()
   const [banTarget, setBanTarget] = useState<Profile>()
+  // A role / admin-rights change waiting for confirmation.
+  const [pending, setPending] = useState<PendingChange>()
   const [reauthOpen, setReauthOpen] = useState(false)
   const [busy, setBusy] = useState<string>()
   const { message, show } = useToast()
@@ -51,8 +63,56 @@ export function UsersSection() {
     .filter((u) => u.full_name.toLowerCase().includes(query) || (u.username ?? '').toLowerCase().includes(query))
     .sort((a, b) => a.role.localeCompare(b.role) || a.full_name.localeCompare(b.full_name, 'cs'))
 
+  // Admins (and you) get no everyday actions - the database refuses those
+  // for admin accounts anyway.
   function isProtected(user: Profile): boolean {
     return user.id === profile?.id || user.role === 'moderator' || !!user.is_moderator
+  }
+
+  // Role and admin rights: any account but yours and dedicated admin accounts
+  // (migration 0028 enforces the same).
+  function canChangeRole(user: Profile): boolean {
+    return user.id !== profile?.id && user.role !== 'moderator'
+  }
+
+  function requestChange(change: PendingChange) {
+    setPending(change)
+    if (!isReauthed()) setReauthOpen(true)
+  }
+
+  function roleChange(user: Profile): PendingChange {
+    const toTeacher = user.role === 'student'
+    return {
+      user,
+      title: toTeacher ? 'Udělat z žáka učitele?' : 'Udělat z učitele žáka?',
+      message: toTeacher
+        ? `„${user.full_name}“ bude učitel (rovnou ověřený) a odejde ze tříd, ve kterých je jako žák. Nahrávky mu zůstanou.`
+        : `„${user.full_name}“ bude žák${user.is_moderator ? ' a přijde o práva admina' : ''}. Učitel, který má třídy, se změnit nedá – nejdřív třídy smaž nebo předej.`,
+      confirmLabel: toTeacher ? 'Udělat učitelem' : 'Udělat žákem',
+      run: () => setUserRole(user.id, toTeacher ? 'teacher' : 'student'),
+      success: toTeacher ? `„${user.full_name}“ je teď učitel` : `„${user.full_name}“ je teď žák`,
+    }
+  }
+
+  function adminChange(user: Profile): PendingChange {
+    const grant = !user.is_moderator
+    return {
+      user,
+      title: grant ? 'Dát práva admina?' : 'Odebrat práva admina?',
+      message: grant
+        ? `„${user.full_name}“ uvidí admin dashboard: všechny účty, nahlášený obsah a historii, a bude moct banovat a měnit role.`
+        : `„${user.full_name}“ zůstane učitelem, ale do admin dashboardu se už nedostane.`,
+      confirmLabel: grant ? 'Dát práva' : 'Odebrat práva',
+      run: () => setUserAdmin(user.id, grant),
+      success: grant ? `„${user.full_name}“ je teď Učitel + Admin` : `„${user.full_name}“ už není admin`,
+    }
+  }
+
+  function handleConfirmChange() {
+    if (!pending) return
+    const change = pending
+    setPending(undefined)
+    void runAction(change.user.id, change.run, change.success)
   }
 
   function requestReset(user: Profile) {
@@ -94,6 +154,7 @@ export function UsersSection() {
           setReauthOpen(false)
           setResetTarget(undefined)
           setBanTarget(undefined)
+          setPending(undefined)
         }}
         onSuccess={() => setReauthOpen(false)}
       />
@@ -115,6 +176,15 @@ export function UsersSection() {
         confirmLabel="Zabanovat"
         onConfirm={handleConfirmBan}
         onCancel={() => setBanTarget(undefined)}
+      />
+
+      <ConfirmDialog
+        open={!reauthOpen && !!pending}
+        title={pending?.title ?? ''}
+        message={pending?.message}
+        confirmLabel={pending?.confirmLabel}
+        onConfirm={handleConfirmChange}
+        onCancel={() => setPending(undefined)}
       />
 
       <SearchBar value={search} onChange={setSearch} placeholder="Hledat podle jména nebo přihlašovacího jména" />
@@ -207,6 +277,29 @@ export function UsersSection() {
                     onClick={() => requestBan(user)}
                   >
                     Zabanovat
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {canChangeRole(user) && (
+              <div className="flex flex-wrap gap-1.5 border-t border-border pt-2.5">
+                <Button
+                  variant="ghost"
+                  className="!px-3 !py-1.5 text-xs"
+                  disabled={busy === user.id}
+                  onClick={() => requestChange(roleChange(user))}
+                >
+                  {user.role === 'student' ? 'Udělat učitelem' : 'Udělat žákem'}
+                </Button>
+                {user.role === 'teacher' && (user.is_verified || user.is_moderator) && (
+                  <Button
+                    variant="ghost"
+                    className="!px-3 !py-1.5 text-xs"
+                    disabled={busy === user.id}
+                    onClick={() => requestChange(adminChange(user))}
+                  >
+                    {user.is_moderator ? 'Odebrat práva admina' : 'Dát práva admina'}
                   </Button>
                 )}
               </div>
