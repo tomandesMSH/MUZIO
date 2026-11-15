@@ -18,6 +18,7 @@ import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import { UsersSection } from './UsersSection'
 import { HistorySection } from './HistorySection'
+import { ClassroomsSection } from './ClassroomsSection'
 import type { PracticeLog, Profile } from '../../lib/data/types'
 
 interface SuspendTarget {
@@ -26,13 +27,14 @@ interface SuspendTarget {
   name: string
 }
 
-type Tab = 'reports' | 'recordings' | 'users' | 'history'
+type Tab = 'reports' | 'recordings' | 'users' | 'classrooms' | 'history'
 
 // The admin's sections; the bar scrolls sideways on a phone.
 const TABS: { id: Tab; label: string }[] = [
   { id: 'reports', label: 'Nahlášený obsah' },
   { id: 'recordings', label: 'Nahrávky' },
   { id: 'users', label: 'Uživatelé' },
+  { id: 'classrooms', label: 'Třídy' },
   { id: 'history', label: 'Historie' },
 ]
 
@@ -218,6 +220,7 @@ export function Queue() {
 
       {tab === 'recordings' && <RecordingsSection />}
       {tab === 'users' && <UsersSection />}
+      {tab === 'classrooms' && <ClassroomsSection />}
       {tab === 'history' && <HistorySection />}
     </div>
   )
