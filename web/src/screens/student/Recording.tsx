@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { RecordingUI } from '../../components/audio/RecordingUI'
+import { AudioFilePicker } from '../../components/audio/AudioFilePicker'
 import { Toast } from '../../components/ui/Toast'
 import { Confetti } from '../../components/gamification/Confetti'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -34,11 +35,11 @@ export function Recording() {
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
 
-  async function handleRecorded(blob: Blob) {
-    if (!profile) return
+  async function handleRecorded(blob: Blob, format?: { extension: string; contentType: string }) {
+    if (!profile || uploading) return
     setUploading(true)
     try {
-      const audioUrl = await uploadRecording(profile.id, blob)
+      const audioUrl = await uploadRecording(profile.id, blob, format)
       await insertPracticeLog(profile.id, audioUrl, assignmentId)
       const session = await recordPracticeSession(profile.id)
       show('Nahrávka odeslána ke kontrole')
@@ -84,6 +85,10 @@ export function Recording() {
         </div>
       )}
       <RecordingUI onRecorded={handleRecorded} />
+      <AudioFilePicker
+        disabled={uploading}
+        onSend={({ file, extension, contentType }) => handleRecorded(file, { extension, contentType })}
+      />
       {uploading && <p className="text-center text-text-muted text-sm">Nahrávám…</p>}
     </div>
   )
