@@ -74,6 +74,8 @@ export interface PracticeLog {
   graded_by?: string | null
   // Length measured by the app on upload (migration 0024); null for older ones.
   duration_seconds?: number | null
+  // Storage paths of the teacher's pictures, at most 3 (migration 0026).
+  feedback_images?: string[] | null
 }
 
 // A badge the teacher gave while grading a recording (migration 0025).

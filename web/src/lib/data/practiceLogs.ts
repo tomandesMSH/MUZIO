@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { toDateKey } from '../game-logic'
 import type { PracticeLog } from './types'
+import { FEEDBACK_IMAGES_BUCKET } from '../feedbackImages'
 
 export async function fetchOwnLogs(userId: string): Promise<PracticeLog[]> {
   const { data, error } = await supabase
@@ -71,6 +72,8 @@ export interface GradingInput {
   rating: number
   feedback_good: string
   feedback_improve: string
+  // Left out = pictures untouched (and no need for migration 0026).
+  feedback_images?: string[] | null
 }
 
 export async function submitGrading(logId: string, input: GradingInput, gradedBy: string): Promise<void> {
@@ -84,6 +87,7 @@ export async function submitGrading(logId: string, input: GradingInput, gradedBy
       feedback_improve: input.feedback_improve,
       teacher_comment: input.feedback_good,
       graded_by: gradedBy,
+      ...(input.feedback_images !== undefined ? { feedback_images: input.feedback_images } : {}),
     })
     .eq('id', logId)
   if (error) throw error
@@ -114,6 +118,9 @@ export async function deletePracticeLog(log: PracticeLog): Promise<void> {
   const markerIndex = log.audio_url.indexOf(marker)
   if (markerIndex !== -1) {
     await supabase.storage.from(RECORDINGS_BUCKET).remove([log.audio_url.slice(markerIndex + marker.length)])
+  }
+  if (log.feedback_images?.length) {
+    await supabase.storage.from(FEEDBACK_IMAGES_BUCKET).remove(log.feedback_images)
   }
 
   const { error } = await supabase.from('practice_logs').delete().eq('id', log.id)

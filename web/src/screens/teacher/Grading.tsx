@@ -16,6 +16,8 @@ import type { PracticeLog } from '../../lib/data/types'
 import { xpForLog, xpMinutes } from '../../lib/game-logic'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
 import { fetchAwardsForLog, setLogAwards } from '../../lib/data/badges'
+import { FeedbackImagesEditor, type FeedbackImageItem } from '../../components/feedback/FeedbackImagesEditor'
+import { fetchFeedbackImageUrls, removeFeedbackImages, uploadFeedbackImage } from '../../lib/data/feedbackImages'
 import { BADGES, type TeacherBadgeId } from '../../lib/game-logic'
 import type { AwardedBadge } from '../../lib/data/types'
 
@@ -56,6 +58,7 @@ export function Grading() {
   const [deleting, setDeleting] = useState(false)
   const [awards, setAwards] = useState<AwardedBadge[]>([])
   const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
+  const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
   const { message, show } = useToast()
 
   function nameFor(userId: string): string {
@@ -69,6 +72,19 @@ export function Grading() {
     setFeedbackImprove(log.feedback_improve ?? '')
     setAwards([])
     setWantedBadges(new Set())
+    const savedPaths = log.feedback_images ?? []
+    setImageItems(savedPaths.map((path) => ({ kind: 'saved', path })))
+    if (savedPaths.length > 0) {
+      fetchFeedbackImageUrls(savedPaths)
+        .then((urls) =>
+          setImageItems((items) =>
+            items.map((item) => (item.kind === 'saved' ? { ...item, url: urls.get(item.path) } : item)),
+          ),
+        )
+        .catch(() => {
+          // Thumbnails missing; the pictures themselves stay attached.
+        })
+    }
     fetchAwardsForLog(log.id)
       .then((current) => {
         setAwards(current)
@@ -106,21 +122,39 @@ export function Grading() {
   async function handleSubmit() {
     if (!selectedLog || !profile) return
     setSubmitting(true)
+    const uploaded: string[] = []
     try {
+      // New pictures first, so the grade only ever points at files that exist.
+      const finalPaths: string[] = []
+      for (const item of imageItems) {
+        if (item.kind === 'saved') finalPaths.push(item.path)
+        else {
+          const path = await uploadFeedbackImage(selectedLog.id, item.image)
+          uploaded.push(path)
+          finalPaths.push(path)
+        }
+      }
+      const savedBefore = selectedLog.feedback_images ?? []
+      const imagesChanged = savedBefore.join('|') !== finalPaths.join('|')
       await submitGrading(
         selectedLog.id,
         {
           rating,
           feedback_good: feedbackGood,
           feedback_improve: feedbackImprove,
+          ...(imagesChanged ? { feedback_images: finalPaths.length > 0 ? finalPaths : null } : {}),
         },
         profile.id,
       )
+      uploaded.length = 0
+      await removeFeedbackImages(savedBefore.filter((path) => !finalPaths.includes(path)))
       await setLogAwards(selectedLog, awards, wantedBadges)
       show('Hodnocení odesláno žákovi')
       setSelectedLog(undefined)
       logs.refetch()
     } catch (err) {
+      // Pictures uploaded for a grade that didn't save would just lie around.
+      await removeFeedbackImages(uploaded)
       show(getErrorMessage(err, 'Odeslání se nepovedlo, zkus to znovu.'))
     } finally {
       setSubmitting(false)
@@ -191,6 +225,7 @@ export function Grading() {
             {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
           </p>
         </div>
+        <FeedbackImagesEditor items={imageItems} onChange={setImageItems} />
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
             <span aria-hidden>🏅</span> Odznak za tuhle nahrávku
