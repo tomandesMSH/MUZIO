@@ -57,8 +57,8 @@ describe('UsersSection - roles and admin rights', () => {
 
   it('makes a pupil a teacher after confirming', async () => {
     render(<UsersSection />)
-    fireEvent.click(within(await card('Pavla Žákyně')).getByRole('button', { name: 'Udělat učitelem' }))
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Udělat učitelem' }))
+    fireEvent.click(within(await card('Pavla Žákyně')).getByRole('button', { name: 'Změnit na učitele' }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Změnit na učitele' }))
     await waitFor(() => expect(setUserRole).toHaveBeenCalledWith('p1', 'teacher'))
   })
 

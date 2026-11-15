@@ -93,11 +93,11 @@ export function UsersSection() {
     const toTeacher = user.role === 'student'
     return {
       user,
-      title: toTeacher ? 'Udělat z žáka učitele?' : 'Udělat z učitele žáka?',
+      title: toTeacher ? 'Změnit roli na učitele?' : 'Změnit roli na žáka?',
       message: toTeacher
         ? `„${user.full_name}“ bude učitel (rovnou ověřený) a odejde ze tříd, ve kterých je jako žák. Nahrávky mu zůstanou.`
         : `„${user.full_name}“ bude žák${user.is_moderator ? ' a přijde o práva admina' : ''}. Učitel, který má třídy, se změnit nedá – nejdřív třídy smaž nebo předej.`,
-      confirmLabel: toTeacher ? 'Udělat učitelem' : 'Udělat žákem',
+      confirmLabel: toTeacher ? 'Změnit na učitele' : 'Změnit na žáka',
       run: () => setUserRole(user.id, toTeacher ? 'teacher' : 'student'),
       success: toTeacher ? `„${user.full_name}“ je teď učitel` : `„${user.full_name}“ je teď žák`,
     }
@@ -338,7 +338,7 @@ export function UsersSection() {
                     disabled={busy === user.id}
                     onClick={() => requestChange(roleChange(user))}
                   >
-                    {user.role === 'student' ? 'Udělat učitelem' : 'Udělat žákem'}
+                    {user.role === 'student' ? 'Změnit na učitele' : 'Změnit na žáka'}
                   </Button>
                 )}
                 {user.role === 'student' && (
