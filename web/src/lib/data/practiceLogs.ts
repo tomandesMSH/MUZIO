@@ -91,11 +91,17 @@ export async function submitGrading(logId: string, input: GradingInput, gradedBy
 
 const RECORDINGS_BUCKET = 'recordings'
 
-export async function uploadRecording(userId: string, blob: Blob): Promise<string> {
-  const fileName = `${userId}/${Date.now()}.wav`
+// A recording from the in-app recorder is stored as .wav; a file the pupil
+// picked keeps its own format (see lib/audio/audioFile.ts).
+export async function uploadRecording(
+  userId: string,
+  blob: Blob,
+  format: { extension: string; contentType: string } = { extension: 'wav', contentType: 'audio/wav' },
+): Promise<string> {
+  const fileName = `${userId}/${Date.now()}.${format.extension}`
   const { error: uploadError } = await supabase.storage
     .from(RECORDINGS_BUCKET)
-    .upload(fileName, blob, { contentType: 'audio/wav' })
+    .upload(fileName, blob, { contentType: format.contentType })
   if (uploadError) throw uploadError
   const { data } = supabase.storage.from(RECORDINGS_BUCKET).getPublicUrl(fileName)
   return data.publicUrl
