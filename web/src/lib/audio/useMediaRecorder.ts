@@ -62,7 +62,10 @@ export function useMediaRecorder(maxSeconds = 60): MediaRecorderState {
     source.connect(analyser)
     analyserRef.current = analyser
 
-    const recorder = new MediaRecorder(stream)
+    // 48 kbps (~0.35 MB a minute) is plenty to hear practice, and keeps a
+    // class's recordings within the free Supabase storage much longer than
+    // the browser's default (often 128 kbps).
+    const recorder = new MediaRecorder(stream, { audioBitsPerSecond: 48_000 })
     recorderRef.current = recorder
     recorder.ondataavailable = (e) => {
       if (e.data.size > 0) chunksRef.current.push(e.data)
