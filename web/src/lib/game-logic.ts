@@ -10,31 +10,34 @@ export const LEVEL_TITLES = [
   'Legenda',
 ] as const
 
-export const STARS_PER_LEVEL = 10
+// A level is earned by sending recordings, not by stars: stars are the
+// teacher's to give and adjust, and changing them shouldn't move a pupil's
+// level (issue #3).
+export const RECORDINGS_PER_LEVEL = 10
 
 export interface LevelInfo {
   level: number
   title: string
-  starsInLevel: number
-  starsToNext: number
+  recordingsInLevel: number
+  recordingsToNext: number
   progress: number
 }
 
-export function computeLevel(stars: number | undefined): LevelInfo {
-  const safeStars = Math.max(0, stars || 0)
-  const level = 1 + Math.floor(safeStars / STARS_PER_LEVEL)
+export function computeLevel(recordings: number | undefined): LevelInfo {
+  const safeCount = Math.max(0, recordings || 0)
+  const level = 1 + Math.floor(safeCount / RECORDINGS_PER_LEVEL)
   const titleIndex = Math.min(level - 1, LEVEL_TITLES.length - 1)
   let title: string = LEVEL_TITLES[titleIndex]
   if (level > LEVEL_TITLES.length) {
     title = `${LEVEL_TITLES[LEVEL_TITLES.length - 1]} +${level - LEVEL_TITLES.length}`
   }
-  const starsInLevel = safeStars % STARS_PER_LEVEL
+  const recordingsInLevel = safeCount % RECORDINGS_PER_LEVEL
   return {
     level,
     title,
-    starsInLevel,
-    starsToNext: STARS_PER_LEVEL - starsInLevel,
-    progress: starsInLevel / STARS_PER_LEVEL,
+    recordingsInLevel,
+    recordingsToNext: RECORDINGS_PER_LEVEL - recordingsInLevel,
+    progress: recordingsInLevel / RECORDINGS_PER_LEVEL,
   }
 }
 
@@ -60,6 +63,8 @@ interface BadgeDef {
   id: string
   icon: string
   label: string
+  // How to earn it, shown next to the badge (a tooltip alone never shows on a phone).
+  description: string
   check: (ctx: SafeBadgeContext) => boolean
   progress: (ctx: SafeBadgeContext) => { current: number; target: number }
 }
@@ -68,22 +73,23 @@ export interface BadgeResult {
   id: string
   icon: string
   label: string
+  description: string
   unlocked: boolean
   progressLabel?: string
 }
 
 export const BADGES: BadgeDef[] = [
-  { id: 'novacek', icon: '🌱', label: 'Nováček', check: (ctx) => ctx.totalRecordings >= 1, progress: (ctx) => ({ current: ctx.totalRecordings, target: 1 }) },
-  { id: 'pravidelnost', icon: '🎯', label: 'Pravidelnost', check: (ctx) => ctx.streak >= 3, progress: (ctx) => ({ current: ctx.streak, target: 3 }) },
-  { id: 'tyden-v-ohni', icon: '🔥', label: 'Týden v ohni', check: (ctx) => ctx.streak >= 7, progress: (ctx) => ({ current: ctx.streak, target: 7 }) },
-  { id: 'mesic-discipliny', icon: '🔥🔥', label: 'Měsíc disciplíny', check: (ctx) => ctx.streak >= 30, progress: (ctx) => ({ current: ctx.streak, target: 30 }) },
-  { id: 'stoleti-legenda', icon: '🔥🔥🔥', label: 'Stoletá legenda', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
-  { id: 'deset-melodii', icon: '🎵', label: 'Deset melodií', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
-  { id: 'padesat-melodii', icon: '🎼', label: 'Padesát melodií', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
-  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', check: (ctx) => ctx.stars >= 10, progress: (ctx) => ({ current: ctx.stars, target: 10 }) },
-  { id: 'virtuoz', icon: '⭐⭐', label: 'Virtuoz', check: (ctx) => ctx.stars >= 50, progress: (ctx) => ({ current: ctx.stars, target: 50 }) },
-  { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
-  { id: 'tydenni-cil', icon: '🏁', label: 'Týdenní cíl', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
+  { id: 'novacek', icon: '🌱', label: 'Nováček', description: 'Pošli první nahrávku.', check: (ctx) => ctx.totalRecordings >= 1, progress: (ctx) => ({ current: ctx.totalRecordings, target: 1 }) },
+  { id: 'pravidelnost', icon: '🎯', label: 'Pravidelnost', description: 'Cvič 3 dny po sobě.', check: (ctx) => ctx.streak >= 3, progress: (ctx) => ({ current: ctx.streak, target: 3 }) },
+  { id: 'tyden-v-ohni', icon: '🔥', label: 'Týden v ohni', description: 'Cvič 7 dní po sobě.', check: (ctx) => ctx.streak >= 7, progress: (ctx) => ({ current: ctx.streak, target: 7 }) },
+  { id: 'mesic-discipliny', icon: '🔥🔥', label: 'Měsíc disciplíny', description: 'Cvič 30 dní po sobě.', check: (ctx) => ctx.streak >= 30, progress: (ctx) => ({ current: ctx.streak, target: 30 }) },
+  { id: 'stoleti-legenda', icon: '🔥🔥🔥', label: 'Stoletá legenda', description: 'Cvič 100 dní po sobě.', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
+  { id: 'deset-melodii', icon: '🎵', label: 'Deset melodií', description: 'Pošli 10 nahrávek.', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
+  { id: 'padesat-melodii', icon: '🎼', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
+  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Získej 10 hvězd.', check: (ctx) => ctx.stars >= 10, progress: (ctx) => ({ current: ctx.stars, target: 10 }) },
+  { id: 'virtuoz', icon: '⭐⭐', label: 'Virtuoz', description: 'Získej 50 hvězd.', check: (ctx) => ctx.stars >= 50, progress: (ctx) => ({ current: ctx.stars, target: 50 }) },
+  { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', description: 'Cvič každý den v týdnu.', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
+  { id: 'tydenni-cil', icon: '🏁', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
 ]
 
 export function computeBadges(ctx: BadgeContext): BadgeResult[] {
@@ -97,7 +103,13 @@ export function computeBadges(ctx: BadgeContext): BadgeResult[] {
   }
   return BADGES.map((badge) => {
     const unlocked = badge.check(safeCtx)
-    const result: BadgeResult = { id: badge.id, icon: badge.icon, label: badge.label, unlocked }
+    const result: BadgeResult = {
+      id: badge.id,
+      icon: badge.icon,
+      label: badge.label,
+      description: badge.description,
+      unlocked,
+    }
     if (!unlocked) {
       const p = badge.progress(safeCtx)
       const current = Math.min(p.current, p.target)

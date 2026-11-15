@@ -40,7 +40,7 @@ export function Profile() {
 
   if (!profile) return null
 
-  const level = computeLevel(profile.stars)
+  const level = computeLevel(logsCount.data ?? 0)
   const badges = computeBadges({
     stars: profile.stars,
     streak: profile.streak,
@@ -120,19 +120,35 @@ export function Profile() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-2">Odznaky</h2>
-          <div className="flex gap-2 flex-wrap">
+          {/* Name and how to earn it are written out - a hover tooltip never shows on a phone. */}
+          <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {badges.map((badge) => (
-              <span
+              <li
                 key={badge.id}
-                title={`${badge.label}${badge.progressLabel ? ` (${badge.progressLabel})` : ''}`}
-                className={`w-11 h-11 rounded-full bg-bg-card shadow-clay-sm flex items-center justify-center text-lg ${
-                  badge.unlocked ? '' : 'grayscale opacity-40'
+                className={`rounded-2xl p-3 flex items-start gap-2.5 ${
+                  badge.unlocked ? 'bg-bg-card shadow-clay-sm' : 'bg-bg-card-alt'
                 }`}
               >
-                {badge.icon}
-              </span>
+                <span
+                  aria-hidden="true"
+                  className={`shrink-0 w-9 h-9 rounded-full bg-bg-card shadow-clay-sm flex items-center justify-center text-base ${
+                    badge.unlocked ? '' : 'grayscale opacity-50'
+                  }`}
+                >
+                  {badge.icon}
+                </span>
+                <div className="min-w-0">
+                  <div className={`text-xs font-heading font-semibold ${badge.unlocked ? '' : 'text-text-muted'}`}>
+                    {badge.label}
+                  </div>
+                  <div className="text-[11px] leading-snug text-text-muted">{badge.description}</div>
+                  <div className="text-[11px] font-semibold mt-0.5 text-text-muted">
+                    {badge.unlocked ? '✓ Získáno' : badge.progressLabel}
+                  </div>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         <div>

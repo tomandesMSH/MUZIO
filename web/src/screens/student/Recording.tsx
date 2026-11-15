@@ -49,7 +49,7 @@ export function Recording() {
         fetchOwnLogsCount(profile.id),
         fetchWeeklyStats(profile.id, today),
       ])
-      const result = detectNewUnlocks(profile.id, session.stars, {
+      const result = detectNewUnlocks(profile.id, logsCount, {
         stars: session.stars,
         streak: session.streak,
         totalRecordings: logsCount,
