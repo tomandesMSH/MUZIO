@@ -61,6 +61,18 @@ describe('computeLevel', () => {
 })
 
 describe('computeBadges', () => {
+  it('teacher badges come only from awards, never from stars', () => {
+    const byStars = KHGame.computeBadges({ stars: 100 })
+    expect(byStars.find((b) => b.id === 'maly-virtuoz')?.unlocked).toBe(false)
+    expect(byStars.find((b) => b.id === 'maly-virtuoz')?.progressLabel).toBe('Uděluje učitel')
+
+    const awarded = KHGame.computeBadges({ awardedCounts: { 'maly-virtuoz': 3 } })
+    const maly = awarded.find((b) => b.id === 'maly-virtuoz')
+    expect(maly).toMatchObject({ unlocked: true, byTeacher: true, count: 3 })
+    expect(maly?.progressLabel).toBeUndefined()
+    expect(awarded.find((b) => b.id === 'virtuoz')?.unlocked).toBe(false)
+  })
+
   it('every badge says how to earn it, so it can be shown without a tooltip', () => {
     for (const badge of KHGame.computeBadges({})) {
       expect(badge.description.length).toBeGreaterThan(0)

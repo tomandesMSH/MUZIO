@@ -46,7 +46,10 @@ export function detectNewUnlocks(userId: string, xp: number, badgeCtx: BadgeCont
   const newBadgeIds =
     previous !== null ? unlockedBadgeIds.filter((id) => !previous.badgeIds.includes(id)) : []
 
-  writeState(userId, { level, badgeIds: unlockedBadgeIds })
+  writeState(userId, {
+    level: Math.max(level, previous?.level ?? 0),
+    badgeIds: [...new Set([...(previous?.badgeIds ?? []), ...unlockedBadgeIds])],
+  })
 
   return { newLevel, newBadgeIds, level }
 }

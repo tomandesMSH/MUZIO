@@ -34,4 +34,13 @@ describe('detectNewUnlocks', () => {
     expect(result.newLevel).toBe(false)
     expect(result.newBadgeIds).toEqual([])
   })
+
+  it('does not celebrate a badge again when a screen did not load the teacher awards', () => {
+    detectNewUnlocks(USER_ID, 0, { totalRecordings: 1 })
+    const first = detectNewUnlocks(USER_ID, 0, { totalRecordings: 1, awardedCounts: { virtuoz: 1 } })
+    expect(first.newBadgeIds).toEqual(['virtuoz'])
+    detectNewUnlocks(USER_ID, 0, { totalRecordings: 1 }) // e.g. the Recording screen
+    const again = detectNewUnlocks(USER_ID, 0, { totalRecordings: 1, awardedCounts: { virtuoz: 1 } })
+    expect(again.newBadgeIds).toEqual([])
+  })
 })

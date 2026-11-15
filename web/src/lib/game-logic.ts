@@ -63,7 +63,13 @@ export interface BadgeContext {
   perfectWeek?: boolean
   daysPlayedThisWeek?: number
   weeklyCount?: number
+  // How many times the teacher awarded each hand-given badge (migration 0025).
+  awardedCounts?: Partial<Record<TeacherBadgeId, number>>
 }
+
+// Badges the teacher gives while grading a recording (issue #4).
+export const TEACHER_BADGE_IDS = ['maly-virtuoz', 'virtuoz'] as const
+export type TeacherBadgeId = (typeof TEACHER_BADGE_IDS)[number]
 
 interface SafeBadgeContext {
   stars: number
@@ -72,6 +78,7 @@ interface SafeBadgeContext {
   perfectWeek: boolean
   daysPlayedThisWeek: number
   weeklyCount: number
+  awardedCounts: Record<TeacherBadgeId, number>
 }
 
 interface BadgeDef {
@@ -82,6 +89,8 @@ interface BadgeDef {
   description: string
   check: (ctx: SafeBadgeContext) => boolean
   progress: (ctx: SafeBadgeContext) => { current: number; target: number }
+  // Given by the teacher, can be earned again and again.
+  byTeacher?: boolean
 }
 
 export interface BadgeResult {
@@ -91,6 +100,9 @@ export interface BadgeResult {
   description: string
   unlocked: boolean
   progressLabel?: string
+  byTeacher?: boolean
+  // Times awarded, for the teacher's badges.
+  count?: number
 }
 
 export const BADGES: BadgeDef[] = [
@@ -101,8 +113,8 @@ export const BADGES: BadgeDef[] = [
   { id: 'stoleti-legenda', icon: '🔥🔥🔥', label: 'Stoletá legenda', description: 'Cvič 100 dní po sobě.', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
   { id: 'deset-melodii', icon: '🎵', label: 'Deset melodií', description: 'Pošli 10 nahrávek.', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
   { id: 'padesat-melodii', icon: '🎼', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
-  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Získej 10 hvězd.', check: (ctx) => ctx.stars >= 10, progress: (ctx) => ({ current: ctx.stars, target: 10 }) },
-  { id: 'virtuoz', icon: '⭐⭐', label: 'Virtuoz', description: 'Získej 50 hvězd.', check: (ctx) => ctx.stars >= 50, progress: (ctx) => ({ current: ctx.stars, target: 50 }) },
+  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Zahraj skladbu bez chyb – dá ti ho učitel.', byTeacher: true, check: (ctx) => ctx.awardedCounts['maly-virtuoz'] >= 1, progress: (ctx) => ({ current: ctx.awardedCounts['maly-virtuoz'], target: 1 }) },
+  { id: 'virtuoz', icon: '⭐⭐', label: 'Virtuoz', description: 'Splň výzvu od učitele, třeba stupnici v tempu 80.', byTeacher: true, check: (ctx) => ctx.awardedCounts.virtuoz >= 1, progress: (ctx) => ({ current: ctx.awardedCounts.virtuoz, target: 1 }) },
   { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', description: 'Cvič každý den v týdnu.', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
   { id: 'tydenni-cil', icon: '🏁', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
 ]
@@ -115,6 +127,10 @@ export function computeBadges(ctx: BadgeContext): BadgeResult[] {
     perfectWeek: !!ctx?.perfectWeek,
     daysPlayedThisWeek: Math.max(0, ctx?.daysPlayedThisWeek || 0),
     weeklyCount: Math.max(0, ctx?.weeklyCount || 0),
+    awardedCounts: {
+      'maly-virtuoz': Math.max(0, ctx?.awardedCounts?.['maly-virtuoz'] || 0),
+      virtuoz: Math.max(0, ctx?.awardedCounts?.virtuoz || 0),
+    },
   }
   return BADGES.map((badge) => {
     const unlocked = badge.check(safeCtx)
@@ -124,6 +140,12 @@ export function computeBadges(ctx: BadgeContext): BadgeResult[] {
       label: badge.label,
       description: badge.description,
       unlocked,
+    }
+    if (badge.byTeacher) {
+      result.byTeacher = true
+      if (unlocked) result.count = badge.progress(safeCtx).current
+      else result.progressLabel = 'Uděluje učitel'
+      return result
     }
     if (!unlocked) {
       const p = badge.progress(safeCtx)
