@@ -17,6 +17,7 @@ import { isReauthed } from '../../lib/reauth'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import { UsersSection } from './UsersSection'
+import { HistorySection } from './HistorySection'
 import type { PracticeLog, Profile } from '../../lib/data/types'
 
 interface SuspendTarget {
@@ -25,7 +26,15 @@ interface SuspendTarget {
   name: string
 }
 
-type Tab = 'reports' | 'recordings' | 'users'
+type Tab = 'reports' | 'recordings' | 'users' | 'history'
+
+// The admin's sections; the bar scrolls sideways on a phone.
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'reports', label: 'Nahlášený obsah' },
+  { id: 'recordings', label: 'Nahrávky' },
+  { id: 'users', label: 'Uživatelé' },
+  { id: 'history', label: 'Historie' },
+]
 
 export function Queue() {
   const navigate = useNavigate()
@@ -128,25 +137,20 @@ export function Queue() {
         </Button>
       </div>
 
-      <div className="flex gap-2.5 rounded-xl bg-bg-card-alt shadow-clay-press p-1">
-        <button
-          className={`flex-1 rounded-lg py-2 text-sm font-heading font-semibold ${tab === 'reports' ? 'bg-bg-card shadow-clay-sm' : 'text-text-muted'}`}
-          onClick={() => setTab('reports')}
-        >
-          Nahlášený obsah
-        </button>
-        <button
-          className={`flex-1 rounded-lg py-2 text-sm font-heading font-semibold ${tab === 'recordings' ? 'bg-bg-card shadow-clay-sm' : 'text-text-muted'}`}
-          onClick={() => setTab('recordings')}
-        >
-          Nahrávky
-        </button>
-        <button
-          className={`flex-1 rounded-lg py-2 text-sm font-heading font-semibold ${tab === 'users' ? 'bg-bg-card shadow-clay-sm' : 'text-text-muted'}`}
-          onClick={() => setTab('users')}
-        >
-          Uživatelé
-        </button>
+      <div className="flex gap-1.5 overflow-x-auto rounded-xl bg-bg-card-alt shadow-clay-press p-1" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`flex-1 shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-heading font-semibold ${
+              tab === t.id ? 'bg-bg-card shadow-clay-sm' : 'text-text-muted'
+            }`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {tab === 'reports' && (
@@ -214,6 +218,7 @@ export function Queue() {
 
       {tab === 'recordings' && <RecordingsSection />}
       {tab === 'users' && <UsersSection />}
+      {tab === 'history' && <HistorySection />}
     </div>
   )
 }
