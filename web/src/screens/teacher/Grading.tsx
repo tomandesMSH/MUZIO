@@ -15,6 +15,21 @@ import { getErrorMessage } from '../../lib/errors'
 import type { PracticeLog } from '../../lib/data/types'
 import { xpForLog, xpMinutes } from '../../lib/game-logic'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
+import { fetchAwardsForLog, setLogAwards } from '../../lib/data/badges'
+import { BADGES, type TeacherBadgeId } from '../../lib/game-logic'
+import type { AwardedBadge } from '../../lib/data/types'
+
+// The badges a teacher gives by hand, with the reason shown on the toggle.
+const TEACHER_BADGE_HINTS: Record<TeacherBadgeId, string> = {
+  'maly-virtuoz': 'bez chyb',
+  virtuoz: 'splněná výzva',
+}
+const TEACHER_BADGES = BADGES.filter((b) => b.byTeacher).map((b) => ({
+  id: b.id as TeacherBadgeId,
+  icon: b.icon,
+  label: b.label,
+  hint: TEACHER_BADGE_HINTS[b.id as TeacherBadgeId],
+}))
 
 interface LocationState {
   studentId?: string
@@ -39,6 +54,8 @@ export function Grading() {
   const [assignOpen, setAssignOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [awards, setAwards] = useState<AwardedBadge[]>([])
+  const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
   const { message, show } = useToast()
 
   function nameFor(userId: string): string {
@@ -50,6 +67,25 @@ export function Grading() {
     setRating(log.rating ?? 0)
     setFeedbackGood(log.feedback_good ?? '')
     setFeedbackImprove(log.feedback_improve ?? '')
+    setAwards([])
+    setWantedBadges(new Set())
+    fetchAwardsForLog(log.id)
+      .then((current) => {
+        setAwards(current)
+        setWantedBadges(new Set(current.map((a) => a.badge_id)))
+      })
+      .catch(() => {
+        // Without migration 0025 (or offline) grading still works, just without badges.
+      })
+  }
+
+  function toggleBadge(id: TeacherBadgeId) {
+    setWantedBadges((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
   async function handleDelete() {
@@ -80,6 +116,7 @@ export function Grading() {
         },
         profile.id,
       )
+      await setLogAwards(selectedLog, awards, wantedBadges)
       show('Hodnocení odesláno žákovi')
       setSelectedLog(undefined)
       logs.refetch()
@@ -153,6 +190,29 @@ export function Grading() {
               : 'Vyber 1–5 not. XP žák dostane až po ohodnocení.'}
             {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
           </p>
+        </div>
+        <div>
+          <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
+            <span aria-hidden>🏅</span> Odznak za tuhle nahrávku
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {TEACHER_BADGES.map((badge) => {
+              const on = wantedBadges.has(badge.id)
+              return (
+                <button
+                  key={badge.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggleBadge(badge.id)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-heading font-semibold transition ${
+                    on ? 'bg-coral-tint text-coral-dark shadow-clay-sm' : 'bg-bg-card-alt text-text-muted shadow-clay-press'
+                  }`}
+                >
+                  {badge.icon} {badge.label} <span className="font-body font-normal">· {badge.hint}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
         <Button className="w-full" disabled={submitting} onClick={handleSubmit}>
           Odeslat hodnocení

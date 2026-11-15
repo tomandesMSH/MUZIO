@@ -76,6 +76,16 @@ export interface PracticeLog {
   duration_seconds?: number | null
 }
 
+// A badge the teacher gave while grading a recording (migration 0025).
+export interface AwardedBadge {
+  id: string
+  student_id: string
+  practice_log_id: string | number
+  badge_id: 'maly-virtuoz' | 'virtuoz'
+  awarded_by: string
+  created_at: string
+}
+
 export interface ReportedContent {
   id: string
   reporter_id: string

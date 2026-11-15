@@ -18,6 +18,7 @@ import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchWeeklyStats } from
 import { fetchStudentAssignments } from '../../lib/data/classrooms'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
+import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
 import { useToast } from '../../lib/useToast'
 import type { Assignment } from '../../lib/data/types'
 
@@ -35,6 +36,7 @@ export function StudentDashboard() {
     () => (userId ? fetchWeeklyStats(userId, today) : Promise.resolve({ dateKeys: [], weeklyCount: 0 })),
     [userId],
   )
+  const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
   const assignmentIds = (assignments.data ?? []).map((a) => a.id)
   const completed = useQuery(
@@ -47,7 +49,7 @@ export function StudentDashboard() {
   const celebratedRef = useRef(false)
 
   useEffect(() => {
-    if (!userId || !profile || logsCount.data === undefined || !weekly.data) return
+    if (!userId || !profile || logsCount.data === undefined || !weekly.data || awards.loading) return
     if (celebratedRef.current) return
     celebratedRef.current = true
 
@@ -59,6 +61,7 @@ export function StudentDashboard() {
       perfectWeek: isPerfectWeek(dateKeys, today),
       daysPlayedThisWeek: dateKeys.length,
       weeklyCount: weekly.data.weeklyCount,
+      awardedCounts: countAwards(awards.data ?? []),
     })
 
     if (result.newLevel) {
@@ -70,7 +73,7 @@ export function StudentDashboard() {
       show('Nový odznak! 🏅')
       setTimeout(() => setCelebrating(false), 2500)
     }
-  }, [userId, profile, logsCount.data, weekly.data, today, show])
+  }, [userId, profile, logsCount.data, weekly.data, awards.loading, awards.data, today, show])
 
   if (!profile) return null
 

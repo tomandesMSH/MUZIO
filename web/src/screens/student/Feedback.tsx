@@ -11,12 +11,15 @@ import { reportContent } from '../../lib/data/moderation'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { PracticeLog } from '../../lib/data/types'
-import { xpForLog } from '../../lib/game-logic'
+import { BADGES, xpForLog } from '../../lib/game-logic'
+import { awardsByLog, fetchAwardedBadges } from '../../lib/data/badges'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
 
 export function Feedback() {
   const { profile } = useAuth()
   const logs = useQuery(() => (profile ? fetchOwnLogs(profile.id) : Promise.resolve([])), [profile?.id])
+  const awards = useQuery(() => (profile ? fetchAwardedBadges(profile.id) : Promise.resolve([])), [profile?.id])
+  const awardsForLog = awardsByLog(awards.data ?? [])
   const [reportTarget, setReportTarget] = useState<PracticeLog>()
   const [reporting, setReporting] = useState(false)
   const [reportError, setReportError] = useState<string>()
@@ -77,6 +80,17 @@ export function Feedback() {
                 {graded && (
                   <div className="space-y-2 text-sm">
                     <RatingNotes rating={log.rating ?? 0} />
+                    {(awardsForLog.get(String(log.id)) ?? []).map((award) => {
+                      const badge = BADGES.find((b) => b.id === award.badge_id)
+                      return (
+                        <div
+                          key={award.id}
+                          className="inline-flex items-center gap-1.5 mr-2 rounded-full bg-coral-tint text-coral-dark px-3 py-1 text-xs font-heading font-semibold"
+                        >
+                          🏅 {badge?.icon} {badge?.label ?? award.badge_id}
+                        </div>
+                      )
+                    })}
                     {log.feedback_good && (
                       <div>
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">

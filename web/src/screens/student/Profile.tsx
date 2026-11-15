@@ -17,6 +17,7 @@ import { applyTheme, getStoredTheme } from '../../lib/theme'
 import { useToast } from '../../lib/useToast'
 import { updateShareBasicProgress } from '../../lib/data/profiles'
 import { getErrorMessage } from '../../lib/errors'
+import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
 import { reportFormUrl } from '../../lib/report'
 
 export function Profile() {
@@ -39,6 +40,8 @@ export function Profile() {
     [userId],
   )
 
+  const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
+
   if (!profile) return null
 
   const level = computeLevel(profile.xp ?? 0)
@@ -49,6 +52,7 @@ export function Profile() {
     perfectWeek: weekly.data ? isPerfectWeek(weekly.data.dateKeys, today) : false,
     daysPlayedThisWeek: weekly.data?.dateKeys.length ?? 0,
     weeklyCount: weekly.data?.weeklyCount ?? 0,
+    awardedCounts: countAwards(awards.data ?? []),
   })
   const skins = computeUnlockedSkins(level.level)
 
@@ -144,7 +148,9 @@ export function Profile() {
                   </div>
                   <div className="text-[11px] leading-snug text-text-muted">{badge.description}</div>
                   <div className="text-[11px] font-semibold mt-0.5 text-text-muted">
-                    {badge.unlocked ? '✓ Získáno' : badge.progressLabel}
+                    {badge.unlocked
+                      ? `✓ Získáno${badge.count && badge.count > 1 ? ` ×${badge.count}` : ''}`
+                      : badge.progressLabel}
                   </div>
                 </div>
               </li>
