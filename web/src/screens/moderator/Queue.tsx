@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
-import { AudioPlayer } from '../../components/audio/AudioPlayer'
+import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import { SearchBar } from '../../components/ui/SearchBar'
@@ -187,7 +187,7 @@ export function Queue() {
                     )}
                   </div>
                   {report.description && <p className="text-sm text-text-muted">{report.description}</p>}
-                  {log && <AudioPlayer src={log.audio_url} />}
+                  {log && <RecordingAudio src={log.audio_url} />}
                   <div className="flex gap-2.5">
                     <Button
                       variant="ghost"
@@ -306,7 +306,7 @@ function RecordingsSection() {
         {logs.data?.map((log) => (
           <div key={log.id} className="rounded-2xl bg-bg-card shadow-clay-sm p-4 space-y-2.5">
             <div className="text-xs text-text-muted">{new Date(log.created_at).toLocaleString('cs-CZ')}</div>
-            <AudioPlayer src={log.audio_url} />
+            <RecordingAudio src={log.audio_url} />
             <Button
               variant="destructive"
               className="w-full !py-1.5 text-xs"

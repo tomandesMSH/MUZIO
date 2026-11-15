@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AppShell } from '../../components/layout/AppShell'
-import { AudioPlayer } from '../../components/audio/AudioPlayer'
+import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
 import { ReportModal } from '../../components/moderation/ReportModal'
@@ -76,7 +76,7 @@ export function Feedback() {
                   )}
                 </div>
 
-                <AudioPlayer src={log.audio_url} />
+                <RecordingAudio src={log.audio_url} />
 
                 {graded && (
                   <div className="space-y-2 text-sm">

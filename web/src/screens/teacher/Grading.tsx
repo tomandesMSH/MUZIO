@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { AudioPlayer } from '../../components/audio/AudioPlayer'
+import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Button } from '../../components/ui/Button'
 import { Toast } from '../../components/ui/Toast'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
@@ -190,7 +190,7 @@ export function Grading() {
           <h1 className="text-xl">Hodnocení nahrávky</h1>
           <p className="text-text-muted text-sm">{nameFor(selectedLog.user_id)}</p>
         </div>
-        <AudioPlayer src={selectedLog.audio_url} />
+        <RecordingAudio src={selectedLog.audio_url} />
         <div>
           <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
             <span aria-hidden>✅</span> Co se povedlo

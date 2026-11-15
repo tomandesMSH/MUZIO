@@ -115,8 +115,8 @@ export async function uploadRecording(
 // object shouldn't block removing the row) and its practice_logs row.
 export async function deletePracticeLog(log: PracticeLog): Promise<void> {
   const marker = `/${RECORDINGS_BUCKET}/`
-  const markerIndex = log.audio_url.indexOf(marker)
-  if (markerIndex !== -1) {
+  const markerIndex = log.audio_url?.indexOf(marker) ?? -1
+  if (log.audio_url && markerIndex !== -1) {
     await supabase.storage.from(RECORDINGS_BUCKET).remove([log.audio_url.slice(markerIndex + marker.length)])
   }
   if (log.feedback_images?.length) {
