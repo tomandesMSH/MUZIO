@@ -12,7 +12,7 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, fetchAllUsers, setTeacherVerified } from '../../lib/data/profiles'
 import { reinstateAccount, suspendAccount } from '../../lib/data/moderation'
-import { setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
+import { deleteAccount, setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
 import { adjustStudentStars } from '../../lib/data/practiceLogs'
 import { computeLevel } from '../../lib/game-logic'
 import { EditAccountModal } from '../../components/admin/EditAccountModal'
@@ -114,6 +114,22 @@ export function UsersSection() {
       confirmLabel: grant ? 'Dát práva' : 'Odebrat práva',
       run: () => setUserAdmin(user.id, grant),
       success: grant ? `„${user.full_name}“ je teď Učitel + Admin` : `„${user.full_name}“ už není admin`,
+    }
+  }
+
+  function deleteChange(user: Profile): PendingChange {
+    return {
+      user,
+      title: 'Smazat účet natrvalo?',
+      message:
+        `„${user.full_name}“ se smaže úplně: přihlášení, nahrávky, hodnocení, XP, hvězdy, odznaky a členství ve třídách. ` +
+        (user.role === 'teacher'
+          ? 'Učitel, který má třídy, smazat nejde – nejdřív je předej nebo smaž v záložce Třídy. Hodnocení a odznaky, které dal žákům, zůstanou. '
+          : '') +
+        'Nejde to vrátit.',
+      confirmLabel: 'Smazat natrvalo',
+      run: () => deleteAccount(user.id),
+      success: `Účet „${user.full_name}“ byl smazán`,
     }
   }
 
@@ -348,6 +364,16 @@ export function UsersSection() {
                       ⭐ +
                     </Button>
                   </span>
+                )}
+                {!isProtected(user) && (
+                  <Button
+                    variant="destructive"
+                    className="!px-3 !py-1.5 text-xs"
+                    disabled={busy === user.id}
+                    onClick={() => requestChange(deleteChange(user))}
+                  >
+                    Smazat účet
+                  </Button>
                 )}
                 {canChangeRole(user) && user.role === 'teacher' && (user.is_verified || user.is_moderator) && (
                   <Button

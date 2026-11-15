@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { UsersSection } from './UsersSection'
-import { setUserAdmin, setUserRole, updateAccount } from '../../lib/data/adminUsers'
+import { deleteAccount, setUserAdmin, setUserRole, updateAccount } from '../../lib/data/adminUsers'
 import { adjustStudentStars } from '../../lib/data/practiceLogs'
 import type { Profile } from '../../lib/data/types'
 
@@ -26,6 +26,7 @@ vi.mock('../../lib/data/adminUsers', () => ({
   setUserRole: vi.fn(async () => {}),
   setUserAdmin: vi.fn(async () => {}),
   updateAccount: vi.fn(async () => {}),
+  deleteAccount: vi.fn(async () => {}),
 }))
 vi.mock('../../lib/data/practiceLogs', () => ({ adjustStudentStars: vi.fn(async () => 1) }))
 vi.mock('../../lib/reauth', () => ({ isReauthed: () => true }))
@@ -84,5 +85,16 @@ describe('UsersSection - roles and admin rights', () => {
     expect(within(pupil).getByRole('button', { name: 'Odebrat hvězdu: Pavla Žákyně' })).toBeDisabled()
     fireEvent.click(within(pupil).getByRole('button', { name: 'Přidat hvězdu: Pavla Žákyně' }))
     await waitFor(() => expect(adjustStudentStars).toHaveBeenCalledWith('p1', 1))
+  })
+})
+
+describe('UsersSection - deleting accounts', () => {
+  it('deletes a pupil after confirming, but offers no delete for admins', async () => {
+    render(<UsersSection />)
+    expect(within(await card('Tereza Učitelka')).queryByRole('button', { name: 'Smazat účet' })).toBeNull()
+    fireEvent.click(within(await card('Pavla Žákyně')).getByRole('button', { name: 'Smazat účet' }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('Nejde to vrátit.')
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Smazat natrvalo' }))
+    await waitFor(() => expect(deleteAccount).toHaveBeenCalledWith('p1'))
   })
 })
