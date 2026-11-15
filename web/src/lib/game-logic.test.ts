@@ -1,32 +1,60 @@
 import { describe, expect, it } from 'vitest'
 import * as KHGame from './game-logic'
 
+describe('xpForLog', () => {
+  it('is 0 until the teacher grades the recording', () => {
+    expect(KHGame.xpForLog(null, 40)).toBe(0)
+    expect(KHGame.xpForLog(0, 300)).toBe(0)
+  })
+
+  it('multiplies minutes (rounded up) by the rating', () => {
+    expect(KHGame.xpForLog(5, 40)).toBe(5)
+    expect(KHGame.xpForLog(5, 60)).toBe(5)
+    expect(KHGame.xpForLog(5, 61)).toBe(10)
+    expect(KHGame.xpForLog(4, 180)).toBe(12)
+  })
+
+  it('caps the length at 5 minutes', () => {
+    expect(KHGame.xpForLog(3, 720)).toBe(15)
+  })
+
+  it('counts a recording with no known length as 1 minute', () => {
+    expect(KHGame.xpForLog(2, null)).toBe(2)
+    expect(KHGame.xpForLog(2, undefined)).toBe(2)
+  })
+})
+
 describe('computeLevel', () => {
-  it('0 recordings is level 1 Nováček', () => {
+  it('0 XP is level 1 Nováček', () => {
     const result = KHGame.computeLevel(0)
     expect(result.level).toBe(1)
     expect(result.title).toBe('Nováček')
-    expect(result.recordingsInLevel).toBe(0)
-    expect(result.recordingsToNext).toBe(10)
+    expect(result.xpInLevel).toBe(0)
+    expect(result.xpToNext).toBe(25)
     expect(result.progress).toBe(0)
   })
 
-  it('25 recordings is level 3, mid-progress', () => {
-    const result = KHGame.computeLevel(25)
+  it('levels up exactly at 25 XP', () => {
+    expect(KHGame.computeLevel(24).level).toBe(1)
+    expect(KHGame.computeLevel(25).level).toBe(2)
+  })
+
+  it('60 XP is level 3, mid-progress', () => {
+    const result = KHGame.computeLevel(60)
     expect(result.level).toBe(3)
     expect(result.title).toBe('Talent')
-    expect(result.recordingsInLevel).toBe(5)
-    expect(result.recordingsToNext).toBe(5)
-    expect(result.progress).toBe(0.5)
+    expect(result.xpInLevel).toBe(10)
+    expect(result.xpToNext).toBe(15)
+    expect(result.progress).toBe(0.4)
   })
 
   it('beyond named levels appends +N', () => {
-    const result = KHGame.computeLevel(75) // level 8, only 7 named titles
+    const result = KHGame.computeLevel(175) // level 8, only 7 named titles
     expect(result.level).toBe(8)
     expect(result.title).toBe('Legenda +1')
   })
 
-  it('negative/undefined recordings treated as 0', () => {
+  it('negative/undefined XP treated as 0', () => {
     expect(KHGame.computeLevel(-5).level).toBe(1)
     expect(KHGame.computeLevel(undefined).level).toBe(1)
   })

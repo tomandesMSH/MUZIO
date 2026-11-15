@@ -10,34 +10,49 @@ export const LEVEL_TITLES = [
   'Legenda',
 ] as const
 
-// A level is earned by sending recordings, not by stars: stars are the
-// teacher's to give and adjust, and changing them shouldn't move a pupil's
-// level (issue #3).
-export const RECORDINGS_PER_LEVEL = 10
+// XP for one recording: minutes (rounded up, 1 to 5) x the teacher's rating
+// (1-5), 0 until it's graded; no known length counts as 1 minute. The real
+// number is computed in the database (xp_for_log, migration 0024) - this copy
+// only previews it, so keep the two in sync.
+export const XP_MAX_MINUTES = 5
+
+export function xpMinutes(durationSeconds: number | null | undefined): number {
+  const seconds = durationSeconds ?? 60
+  return Math.min(Math.max(Math.ceil(seconds / 60), 1), XP_MAX_MINUTES)
+}
+
+export function xpForLog(rating: number | null | undefined, durationSeconds: number | null | undefined): number {
+  if (!rating || rating < 1) return 0
+  return xpMinutes(durationSeconds) * Math.min(rating, 5)
+}
+
+// The level comes from XP, i.e. from practice the teacher has graded. Stars
+// are a separate award from the teacher and don't move it.
+export const XP_PER_LEVEL = 25
 
 export interface LevelInfo {
   level: number
   title: string
-  recordingsInLevel: number
-  recordingsToNext: number
+  xpInLevel: number
+  xpToNext: number
   progress: number
 }
 
-export function computeLevel(recordings: number | undefined): LevelInfo {
-  const safeCount = Math.max(0, recordings || 0)
-  const level = 1 + Math.floor(safeCount / RECORDINGS_PER_LEVEL)
+export function computeLevel(xp: number | undefined): LevelInfo {
+  const safeCount = Math.max(0, xp || 0)
+  const level = 1 + Math.floor(safeCount / XP_PER_LEVEL)
   const titleIndex = Math.min(level - 1, LEVEL_TITLES.length - 1)
   let title: string = LEVEL_TITLES[titleIndex]
   if (level > LEVEL_TITLES.length) {
     title = `${LEVEL_TITLES[LEVEL_TITLES.length - 1]} +${level - LEVEL_TITLES.length}`
   }
-  const recordingsInLevel = safeCount % RECORDINGS_PER_LEVEL
+  const xpInLevel = safeCount % XP_PER_LEVEL
   return {
     level,
     title,
-    recordingsInLevel,
-    recordingsToNext: RECORDINGS_PER_LEVEL - recordingsInLevel,
-    progress: recordingsInLevel / RECORDINGS_PER_LEVEL,
+    xpInLevel,
+    xpToNext: XP_PER_LEVEL - xpInLevel,
+    progress: xpInLevel / XP_PER_LEVEL,
   }
 }
 
@@ -220,8 +235,8 @@ export function computeQuests(ctx: QuestContext): QuestResult[] {
     },
     {
       id: 'weekly-stars',
-      label: `Získej ${WEEKLY_QUEST_TARGET}x hvězdičku tento týden`,
-      icon: '⭐',
+      label: `Pošli ${WEEKLY_QUEST_TARGET} nahrávek tento týden`,
+      icon: '🎙️',
       current: Math.min(weeklyCount, WEEKLY_QUEST_TARGET),
       target: WEEKLY_QUEST_TARGET,
       completed: weeklyCount >= WEEKLY_QUEST_TARGET,

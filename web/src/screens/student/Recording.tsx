@@ -35,12 +35,16 @@ export function Recording() {
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
 
-  async function handleRecorded(blob: Blob, format?: { extension: string; contentType: string }) {
+  async function handleRecorded(
+    blob: Blob,
+    durationSeconds: number | null,
+    format?: { extension: string; contentType: string },
+  ) {
     if (!profile || uploading) return
     setUploading(true)
     try {
       const audioUrl = await uploadRecording(profile.id, blob, format)
-      await insertPracticeLog(profile.id, audioUrl, assignmentId)
+      await insertPracticeLog(profile.id, audioUrl, assignmentId, durationSeconds)
       const session = await recordPracticeSession(profile.id)
       show('Nahrávka odeslána ke kontrole')
 
@@ -49,7 +53,7 @@ export function Recording() {
         fetchOwnLogsCount(profile.id),
         fetchWeeklyStats(profile.id, today),
       ])
-      const result = detectNewUnlocks(profile.id, logsCount, {
+      const result = detectNewUnlocks(profile.id, profile.xp ?? 0, {
         stars: session.stars,
         streak: session.streak,
         totalRecordings: logsCount,
@@ -84,10 +88,12 @@ export function Recording() {
           <AttachmentLink assignment={{ attachment_path: attachmentPath, attachment_name: attachmentName ?? null }} />
         </div>
       )}
-      <RecordingUI onRecorded={handleRecorded} />
+      <RecordingUI onRecorded={(blob, seconds) => handleRecorded(blob, seconds)} />
       <AudioFilePicker
         disabled={uploading}
-        onSend={({ file, extension, contentType }) => handleRecorded(file, { extension, contentType })}
+        onSend={({ file, extension, contentType, durationSeconds }) =>
+          handleRecorded(file, durationSeconds, { extension, contentType })
+        }
       />
       {uploading && <p className="text-center text-text-muted text-sm">Nahrávám…</p>}
     </div>

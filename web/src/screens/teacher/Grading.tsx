@@ -13,6 +13,8 @@ import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
 import { getErrorMessage } from '../../lib/errors'
 import type { PracticeLog } from '../../lib/data/types'
+import { xpForLog, xpMinutes } from '../../lib/game-logic'
+import { RatingNotes } from '../../components/gamification/RatingNotes'
 
 interface LocationState {
   studentId?: string
@@ -141,16 +143,16 @@ export function Grading() {
           />
         </div>
         <div>
-          <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>⭐</span> Hodnocení
-          </label>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => setRating(n)} aria-label={`${n} hvězdiček`} className="text-2xl">
-                <span className={n <= rating ? 'text-coral' : 'text-bg-card'}>★</span>
-              </button>
-            ))}
+          <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
+            <span aria-hidden>🎵</span> Hodnocení
           </div>
+          <RatingNotes rating={rating} onChange={setRating} />
+          <p className="text-xs text-text-muted mt-1.5">
+            {rating > 0
+              ? `Za tuhle nahrávku: ${xpMinutes(selectedLog.duration_seconds)} min × ${rating} = ${xpForLog(rating, selectedLog.duration_seconds)} XP`
+              : 'Vyber 1–5 not. XP žák dostane až po ohodnocení.'}
+            {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
+          </p>
         </div>
         <Button className="w-full" disabled={submitting} onClick={handleSubmit}>
           Odeslat hodnocení

@@ -10,6 +10,7 @@ import { ResetPasswordModal } from '../../components/ui/ResetPasswordModal'
 import { AppShell } from '../../components/layout/AppShell'
 import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, deleteStudent, fetchStudents } from '../../lib/data/profiles'
+import { adjustStudentStars } from '../../lib/data/practiceLogs'
 import { useToast } from '../../lib/useToast'
 import { isReauthed } from '../../lib/reauth'
 import { getErrorMessage } from '../../lib/errors'
@@ -24,6 +25,7 @@ export function Students() {
   const [reauthOpen, setReauthOpen] = useState(false)
   const [confirmTarget, setConfirmTarget] = useState<Profile>()
   const [resetTarget, setResetTarget] = useState<Profile>()
+  const [starring, setStarring] = useState<string>()
   const { message, show } = useToast()
 
   const query = search.trim().toLowerCase()
@@ -42,6 +44,19 @@ export function Students() {
       show(getErrorMessage(err, 'Schválení se nepovedlo, zkus to znovu.'))
     } finally {
       setApproving(undefined)
+    }
+  }
+
+  async function handleStars(student: Profile, delta: 1 | -1) {
+    setStarring(student.id)
+    try {
+      await adjustStudentStars(student.id, delta)
+      show(delta > 0 ? `⭐ Hvězda pro ${student.full_name}` : 'Hvězda odebrána')
+      students.refetch()
+    } catch (err) {
+      show(getErrorMessage(err, 'Změna hvězd se nepovedla, zkus to znovu.'))
+    } finally {
+      setStarring(undefined)
     }
   }
 
@@ -170,10 +185,8 @@ export function Students() {
           </h2>
           <div className="space-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
             {approved.map((student) => (
-              <div
-                key={student.id}
-                className="w-full flex items-center justify-between gap-2.5 rounded-2xl bg-bg-card shadow-clay-sm p-3.5"
-              >
+              <div key={student.id} className="w-full rounded-2xl bg-bg-card shadow-clay-sm p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between gap-2.5">
                 <button
                   className="flex items-center gap-2.5 min-w-0 text-left"
                   onClick={() => navigate('/teacher/grading', { state: { studentId: student.id } })}
@@ -182,7 +195,7 @@ export function Students() {
                   <div className="min-w-0">
                     <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
                     <div className="text-text-muted text-xs">
-                      Streak {student.streak} dní · {student.stars} XP
+                      🔥 {student.streak} · ✨ {student.xp ?? 0} XP
                     </div>
                   </div>
                 </button>
@@ -190,6 +203,31 @@ export function Students() {
                   {renderResetButton(student)}
                   {renderDeleteButton(student)}
                 </div>
+              </div>
+              <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
+                <span className="text-xs text-text-muted">Hvězdy za vystoupení</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    className="!px-2.5 !py-1 text-xs"
+                    aria-label={`Odebrat hvězdu: ${student.full_name}`}
+                    disabled={starring === student.id || student.stars <= 0}
+                    onClick={() => handleStars(student, -1)}
+                  >
+                    −
+                  </Button>
+                  <span className="text-sm font-heading font-semibold min-w-10 text-center">⭐ {student.stars}</span>
+                  <Button
+                    variant="secondary"
+                    className="!px-2.5 !py-1 text-xs"
+                    aria-label={`Přidat hvězdu: ${student.full_name}`}
+                    disabled={starring === student.id}
+                    onClick={() => handleStars(student, 1)}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
               </div>
             ))}
           </div>

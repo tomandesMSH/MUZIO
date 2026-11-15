@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../ui/Button'
-import { AUDIO_FILE_ACCEPT, checkAudioFile, formatFileSize } from '../../lib/audio/audioFile'
+import { AUDIO_FILE_ACCEPT, checkAudioFile, formatFileSize, readAudioDuration } from '../../lib/audio/audioFile'
 
 export interface PickedAudio {
   file: File
   extension: string
   contentType: string
+  // Seconds, null if the browser can't read it (then it counts as 1 minute).
+  durationSeconds: number | null
 }
 
 interface AudioFilePickerProps {
@@ -38,7 +40,7 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
     [],
   )
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     // Let the same file be picked again after Zrušit.
     e.target.value = ''
@@ -50,7 +52,8 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
       return
     }
     setError(undefined)
-    setPicked({ file, extension: check.extension, contentType: check.contentType })
+    const durationSeconds = await readAudioDuration(file)
+    setPicked({ file, extension: check.extension, contentType: check.contentType, durationSeconds })
   }
 
   return (

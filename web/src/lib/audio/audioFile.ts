@@ -45,6 +45,31 @@ export function checkAudioFile(file: { name: string; type: string; size: number 
   return { ok: true, extension: knownType ? extension : 'audio', contentType }
 }
 
+// Length of a picked file in seconds, read by the browser's own decoder. null
+// when it can't tell (unknown format, broken file) - the recording is still
+// sent and simply counts as one minute for XP.
+export function readAudioDuration(file: Blob, timeoutMs = 5000): Promise<number | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const audio = document.createElement('audio')
+    let settled = false
+    const finish = (value: number | null) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      audio.removeAttribute('src')
+      URL.revokeObjectURL(url)
+      resolve(value)
+    }
+    const timer = setTimeout(() => finish(null), timeoutMs)
+    audio.preload = 'metadata'
+    audio.onloadedmetadata = () =>
+      finish(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : null)
+    audio.onerror = () => finish(null)
+    audio.src = url
+  })
+}
+
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} kB`
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`

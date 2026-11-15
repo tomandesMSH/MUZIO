@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import { Waveform } from './Waveform'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
 
-const MAX_SECONDS = 60
+// Up to 5 minutes - the longest a recording can count for in XP (game-logic.ts).
+const MAX_SECONDS = 300
 
 function formatTime(seconds: number): string {
   const m = String(Math.floor(seconds / 60)).padStart(2, '0')
@@ -11,7 +12,7 @@ function formatTime(seconds: number): string {
 }
 
 interface RecordingUIProps {
-  onRecorded?: (blob: Blob) => void
+  onRecorded?: (blob: Blob, durationSeconds: number) => void
 }
 
 export function RecordingUI({ onRecorded }: RecordingUIProps) {
@@ -21,8 +22,11 @@ export function RecordingUI({ onRecorded }: RecordingUIProps) {
   // parent on every render doesn't re-fire this effect for the same blob.
   const onRecordedRef = useRef(onRecorded)
   onRecordedRef.current = onRecorded
+  // elapsedSeconds is final by the time the blob arrives (the timer stops
+  // first), and must not re-fire this for the same blob - so only [blob].
   useEffect(() => {
-    if (blob) onRecordedRef.current?.(blob)
+    if (blob) onRecordedRef.current?.(blob, elapsedSeconds)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blob])
 
   return (

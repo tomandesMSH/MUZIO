@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { checkAudioFile, formatFileSize, MAX_AUDIO_FILE_MB } from './audioFile'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { checkAudioFile, formatFileSize, MAX_AUDIO_FILE_MB, readAudioDuration } from './audioFile'
 
 const MB = 1024 * 1024
 
@@ -45,5 +45,47 @@ describe('formatFileSize', () => {
     expect(formatFileSize(300)).toBe('1 kB')
     expect(formatFileSize(512 * 1024)).toBe('512 kB')
     expect(formatFileSize(3.25 * MB)).toBe('3,3 MB')
+  })
+})
+
+describe('readAudioDuration', () => {
+  // A stand-in <audio> that fires the event a real decoder would.
+  function fakeAudio(event: 'loadedmetadata' | 'error' | null, duration = 0) {
+    const el = {
+      preload: '',
+      duration,
+      onloadedmetadata: null as null | (() => void),
+      onerror: null as null | (() => void),
+      removeAttribute: vi.fn(),
+      set src(_value: string) {
+        if (event === 'loadedmetadata') queueMicrotask(() => el.onloadedmetadata?.())
+        if (event === 'error') queueMicrotask(() => el.onerror?.())
+      },
+    }
+    vi.spyOn(document, 'createElement').mockReturnValue(el as unknown as HTMLElement)
+  }
+
+  URL.createObjectURL = vi.fn(() => 'blob:x')
+  URL.revokeObjectURL = vi.fn()
+  afterEach(() => vi.restoreAllMocks())
+
+  it('returns the length the browser reads', async () => {
+    fakeAudio('loadedmetadata', 187.4)
+    expect(await readAudioDuration(new Blob(['x']))).toBe(187.4)
+  })
+
+  it('returns null for a file the browser cannot decode', async () => {
+    fakeAudio('error')
+    expect(await readAudioDuration(new Blob(['x']))).toBeNull()
+  })
+
+  it('returns null for a stream without a finite length', async () => {
+    fakeAudio('loadedmetadata', Infinity)
+    expect(await readAudioDuration(new Blob(['x']))).toBeNull()
+  })
+
+  it('gives up after the timeout', async () => {
+    fakeAudio(null)
+    expect(await readAudioDuration(new Blob(['x']), 10)).toBeNull()
   })
 })

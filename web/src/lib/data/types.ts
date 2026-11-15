@@ -4,8 +4,12 @@ export interface Profile {
   id: string
   full_name: string
   username: string | null
+  // Given by hand by the teacher (concerts, challenges) - see migration 0024.
   stars: number
   streak: number
+  // Earned from graded recordings, drives the level. Kept up to date by a
+  // trigger (migration 0024); absent before it is applied.
+  xp?: number
   role: UserRole
   // Student registration requires teacher approval; other roles ignore this.
   is_approved: boolean
@@ -68,6 +72,8 @@ export interface PracticeLog {
   assignment_id?: string | null
   // Absent until migration 0011 is applied; null for anything graded before it.
   graded_by?: string | null
+  // Length measured by the app on upload (migration 0024); null for older ones.
+  duration_seconds?: number | null
 }
 
 export interface ReportedContent {

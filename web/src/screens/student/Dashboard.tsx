@@ -4,6 +4,7 @@ import { Card } from '../../components/ui/Card'
 import { Toast } from '../../components/ui/Toast'
 import { Streak } from '../../components/gamification/Streak'
 import { XPDisplay } from '../../components/gamification/XPDisplay'
+import { StarsDisplay } from '../../components/gamification/StarsDisplay'
 import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { DailyReminderBanner } from '../../components/gamification/DailyReminderBanner'
 import { Confetti } from '../../components/gamification/Confetti'
@@ -51,7 +52,7 @@ export function StudentDashboard() {
     celebratedRef.current = true
 
     const dateKeys = weekly.data.dateKeys
-    const result = detectNewUnlocks(userId, logsCount.data, {
+    const result = detectNewUnlocks(userId, profile.xp ?? 0, {
       stars: profile.stars,
       streak: profile.streak,
       totalRecordings: logsCount.data,
@@ -98,7 +99,8 @@ export function StudentDashboard() {
           <h1 className="text-xl">Ahoj, {firstName}! 👋</h1>
           <div className="flex items-center gap-2">
             <Streak count={profile.streak} freezesAvailable={profile.streak_freezes_available} />
-            <XPDisplay xp={profile.stars} />
+            <XPDisplay xp={profile.xp ?? 0} />
+            <StarsDisplay stars={profile.stars} />
           </div>
         </div>
         <DailyReminderBanner playedToday={playedToday} onStart={() => navigate('/student/recording')} />
@@ -133,7 +135,7 @@ export function StudentDashboard() {
         </div>
 
         <Card>
-          <LevelProgress recordings={logsCount.data ?? 0} />
+          <LevelProgress xp={profile.xp ?? 0} />
         </Card>
 
         <Quests quests={quests} />

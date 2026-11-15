@@ -120,11 +120,26 @@ export async function deletePracticeLog(log: PracticeLog): Promise<void> {
   if (error) throw error
 }
 
-export async function insertPracticeLog(userId: string, audioUrl: string, assignmentId?: string): Promise<void> {
-  const { error } = await supabase
-    .from('practice_logs')
-    .insert([{ user_id: userId, audio_url: audioUrl, assignment_id: assignmentId ?? null }])
+export async function insertPracticeLog(
+  userId: string,
+  audioUrl: string,
+  assignmentId?: string,
+  durationSeconds?: number | null,
+): Promise<void> {
+  const row: Record<string, unknown> = { user_id: userId, audio_url: audioUrl, assignment_id: assignmentId ?? null }
+  // Only sent when known, so a database without migration 0024 still accepts the row.
+  if (durationSeconds != null) row.duration_seconds = Math.round(durationSeconds)
+  const { error } = await supabase.from('practice_logs').insert([row])
   if (error) throw error
+}
+
+// The teacher gives (+1) or takes back (-1) one star. The permission check
+// (moderator, or the pupil's own verified teacher) lives in the
+// teacher_adjust_stars SQL function (migration 0024). Returns the new count.
+export async function adjustStudentStars(studentId: string, delta: 1 | -1): Promise<number> {
+  const { data, error } = await supabase.rpc('teacher_adjust_stars', { p_student_id: studentId, p_delta: delta })
+  if (error) throw error
+  return data as number
 }
 
 export interface PracticeSessionResult {

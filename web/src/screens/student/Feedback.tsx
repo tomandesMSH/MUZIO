@@ -11,6 +11,8 @@ import { reportContent } from '../../lib/data/moderation'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { PracticeLog } from '../../lib/data/types'
+import { xpForLog } from '../../lib/game-logic'
+import { RatingNotes } from '../../components/gamification/RatingNotes'
 
 export function Feedback() {
   const { profile } = useAuth()
@@ -64,7 +66,7 @@ export function Feedback() {
                     {new Date(log.created_at).toLocaleString('cs-CZ')}
                   </span>
                   {graded ? (
-                    <Badge tone="success">Ohodnoceno</Badge>
+                    <Badge tone="success">+{xpForLog(log.rating, log.duration_seconds)} XP</Badge>
                   ) : (
                     <Badge tone="pending">Čeká na hodnocení</Badge>
                   )}
@@ -74,13 +76,7 @@ export function Feedback() {
 
                 {graded && (
                   <div className="space-y-2 text-sm">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <span key={n} className={n <= (log.rating ?? 0) ? 'text-coral' : 'text-bg-card-alt'}>
-                          ★
-                        </span>
-                      ))}
-                    </div>
+                    <RatingNotes rating={log.rating ?? 0} />
                     {log.feedback_good && (
                       <div>
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">

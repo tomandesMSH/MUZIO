@@ -2,6 +2,12 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { AudioFilePicker } from './AudioFilePicker'
 
+// jsdom can't decode audio; the length reading has its own test in audioFile.test.ts.
+vi.mock('../../lib/audio/audioFile', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/audio/audioFile')>()),
+  readAudioDuration: vi.fn(async () => 95),
+}))
+
 beforeAll(() => {
   // jsdom has no object URLs.
   URL.createObjectURL = vi.fn(() => 'blob:preview')
@@ -13,16 +19,16 @@ function pick(file: File) {
 }
 
 describe('AudioFilePicker', () => {
-  it('shows the picked recording and sends it only after Odeslat', () => {
+  it('shows the picked recording and sends it only after Odeslat', async () => {
     const onSend = vi.fn()
     render(<AudioFilePicker onSend={onSend} />)
     pick(new File(['abc'], 'Nový záznam.m4a', { type: '' }))
 
-    expect(screen.getByText('Nový záznam.m4a')).toBeInTheDocument()
+    expect(await screen.findByText('Nový záznam.m4a')).toBeInTheDocument()
     expect(onSend).not.toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
-    expect(onSend).toHaveBeenCalledWith(expect.objectContaining({ extension: 'm4a', contentType: 'audio/mp4' }))
+    expect(onSend).toHaveBeenCalledWith(expect.objectContaining({ extension: 'm4a', contentType: 'audio/mp4', durationSeconds: 95 }))
     expect(screen.queryByText('Nový záznam.m4a')).not.toBeInTheDocument()
   })
 
@@ -35,10 +41,10 @@ describe('AudioFilePicker', () => {
     expect(screen.queryByRole('button', { name: 'Odeslat' })).not.toBeInTheDocument()
   })
 
-  it('goes back to the button on Zrušit', () => {
+  it('goes back to the button on Zrušit', async () => {
     render(<AudioFilePicker onSend={() => {}} />)
     pick(new File(['abc'], 'etuda.mp3', { type: 'audio/mpeg' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Zrušit' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Zrušit' }))
     expect(screen.getByRole('button', { name: /Odeslat nahrávku ze souboru/ })).toBeInTheDocument()
   })
 })

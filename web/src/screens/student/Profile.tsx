@@ -40,7 +40,7 @@ export function Profile() {
 
   if (!profile) return null
 
-  const level = computeLevel(logsCount.data ?? 0)
+  const level = computeLevel(profile.xp ?? 0)
   const badges = computeBadges({
     stars: profile.stars,
     streak: profile.streak,
@@ -95,16 +95,16 @@ export function Profile() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
           <StatCard
-            value={`${profile.streak} dní`}
+            value={`🔥 ${profile.streak} dní`}
             label={
               profile.streak_freezes_available
                 ? `Aktuální streak · 🧊${profile.streak_freezes_available}`
                 : 'Aktuální streak'
             }
           />
-          <StatCard value={String(profile.stars)} label="Celkem XP" />
-          <StatCard value={String(logsCount.data ?? '-')} label="Dokončené nahrávky" />
-          <StatCard value={String(weekly.data?.weeklyCount ?? '-')} label="Tento týden" />
+          <StatCard value={`✨ ${profile.xp ?? 0}`} label="XP za ohodnocené nahrávky" />
+          <StatCard value={`⭐ ${profile.stars}`} label="Hvězdy od učitele" />
+          <StatCard value={`🎙️ ${logsCount.data ?? '-'}`} label="Odeslané nahrávky" />
         </div>
 
         <div>
