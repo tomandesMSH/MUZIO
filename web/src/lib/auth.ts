@@ -92,6 +92,14 @@ export function generateTempPassword(length = 8): string {
   return Array.from(bytes, (b) => TEMP_PASSWORD_ALPHABET[b % TEMP_PASSWORD_ALPHABET.length]).join('')
 }
 
+// The signed-in user changes their own password, e.g. to replace the
+// temporary one a teacher or moderator handed them. Callers re-check the
+// current password with reauthenticate() first.
+export async function changeOwnPassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) throw error
+}
+
 // Re-checks the current user's own password before a destructive action -
 // signing in again against the same account throws if the password is
 // wrong, and just refreshes the (identical) session if it's right.

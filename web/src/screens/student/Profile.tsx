@@ -6,6 +6,7 @@ import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
+import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -24,6 +25,7 @@ export function Profile() {
   const [today] = useState(() => new Date())
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
   const [pairingOpen, setPairingOpen] = useState(false)
+  const [passwordOpen, setPasswordOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
   const { message, show } = useToast()
 
@@ -138,6 +140,7 @@ export function Profile() {
           <SettingsRow label="Tmavý režim" right={<Switch checked={darkMode} onChange={toggleDarkMode} />} />
           <SettingsRow label="Notifikace" onClick={notReady} />
           <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
+          <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <SettingsRow label="Nahlásit problém nebo nápad" onClick={openReportForm} />
         </div>
 
@@ -172,6 +175,15 @@ export function Profile() {
         </Button>
       </div>
       <JoinClassroomModal open={pairingOpen} onClose={() => setPairingOpen(false)} />
+      {passwordOpen && (
+        <ChangePasswordModal
+          onClose={() => setPasswordOpen(false)}
+          onChanged={() => {
+            setPasswordOpen(false)
+            show('Heslo je změněné.')
+          }}
+        />
+      )}
     </AppShell>
   )
 }

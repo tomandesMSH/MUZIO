@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { useAuth } from '../lib/AuthProvider'
 import { signIn, signUpStudent, signUpTeacher } from '../lib/auth'
 import { applyTheme, getStoredTheme } from '../lib/theme'
@@ -158,8 +159,8 @@ export function Login() {
             </li>
           </ul>
           <p className="text-xs text-text-muted">
-            Pověz jim své uživatelské jméno. Nové heslo ti předají osobně a po přihlášení už s ním můžeš normálně
-            pracovat.
+            Pověz jim své uživatelské jméno. Nové heslo ti předají osobně. Po přihlášení si ho můžeš změnit na
+            vlastní v Profilu, v řádku Změnit heslo.
           </p>
           <Button type="button" className="w-full" onClick={() => setMode('login')}>
             Zpět na přihlášení
@@ -196,8 +197,7 @@ export function Login() {
         )}
         <div>
           <div className="text-xs font-semibold text-text-muted mb-1.5">Heslo</div>
-          <Input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}

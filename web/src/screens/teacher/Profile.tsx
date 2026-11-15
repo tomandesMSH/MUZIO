@@ -5,6 +5,7 @@ import { Switch } from '../../components/ui/Switch'
 import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
+import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
 import { AppShell } from '../../components/layout/AppShell'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
@@ -15,6 +16,7 @@ export function Profile() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
+  const [passwordOpen, setPasswordOpen] = useState(false)
   const { message, show } = useToast()
 
   if (!profile) return null
@@ -55,6 +57,7 @@ export function Profile() {
               )
             }
           />
+          <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <SettingsRow label="Notifikace" onClick={notReady} />
         </div>
 
@@ -69,6 +72,15 @@ export function Profile() {
           Odhlásit se
         </Button>
       </div>
+      {passwordOpen && (
+        <ChangePasswordModal
+          onClose={() => setPasswordOpen(false)}
+          onChanged={() => {
+            setPasswordOpen(false)
+            show('Heslo je změněné.')
+          }}
+        />
+      )}
     </AppShell>
   )
 }
