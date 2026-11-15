@@ -306,6 +306,21 @@ export function Login() {
           <img src="/zus-mk-logo.png" alt="ZUŠ Moravský Krumlov" className="h-11 w-11 object-contain" />
         </a>
         <a
+          href="https://tomandes.eu/Muzio-Docs/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-14 h-14 bg-white rounded-lg shadow-clay-sm opacity-90 hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5"
+          aria-label="Dokumentace Muzio"
+          title="Dokumentace – návody pro žáky a učitele"
+        >
+          <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="#181717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="M8 13h8M8 17h5" />
+          </svg>
+          <span className="text-[9px] font-heading font-bold leading-none tracking-wider text-[#181717]">DOCS</span>
+        </a>
+        <a
           href="https://github.com/tomandesMSH/"
           target="_blank"
           rel="noopener noreferrer"
