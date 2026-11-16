@@ -17,6 +17,7 @@ import { isReauthed } from '../../lib/reauth'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import { UsersSection } from './UsersSection'
+import { SlidingTabs } from '../../components/ui/SlidingTabs'
 import { HistorySection } from './HistorySection'
 import { ClassroomsSection } from './ClassroomsSection'
 import { UsageSection } from './UsageSection'
@@ -141,21 +142,7 @@ export function Queue() {
         </Button>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto rounded-xl bg-bg-card-alt shadow-clay-press p-1" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            className={`flex-1 shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-heading font-semibold ${
-              tab === t.id ? 'bg-bg-card shadow-clay-sm' : 'text-text-muted'
-            }`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs tabs={TABS} value={tab} onChange={setTab} label="Sekce admina" />
 
       {tab === 'reports' && (
         <>
