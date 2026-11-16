@@ -57,6 +57,8 @@ export interface Assignment {
   // storage key and its original file name. Absent until migration 0023.
   attachment_path?: string | null
   attachment_name?: string | null
+  // Deadline, a day ("YYYY-MM-DD"), or none. Absent until migration 0036.
+  due_date?: string | null
 }
 
 export interface PracticeLog {

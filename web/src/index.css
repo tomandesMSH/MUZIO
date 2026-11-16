@@ -35,6 +35,8 @@
    properties at runtime, so overriding them here re-themes the whole app
    without touching individual components. */
 .dark {
+  /* Native controls (date picker, scrollbars) in dark too. */
+  color-scheme: dark;
   --color-bg: #17181b;
   --color-bg-card: #212327;
   --color-bg-card-alt: #26282c;

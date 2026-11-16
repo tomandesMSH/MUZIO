@@ -116,6 +116,8 @@ export interface CreateAssignmentInput {
   recipientIds?: string[]
   // Optional score for Keyboard Utils (already checked with validateAttachment).
   attachment?: File | null
+  // "YYYY-MM-DD"; empty or omitted = no deadline (and no need for migration 0036).
+  dueDate?: string
 }
 
 export async function createAssignment(input: CreateAssignmentInput): Promise<void> {
@@ -127,6 +129,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<vo
         teacher_id: input.teacherId,
         title: input.title,
         description: input.description || null,
+        ...(input.dueDate ? { due_date: input.dueDate } : {}),
       },
     ])
     .select()

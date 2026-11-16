@@ -56,6 +56,12 @@ export interface ReminderCandidate {
   last_practice_date: string | null
 }
 
+// An assignment due tomorrow and the pupils who haven't sent it yet.
+export interface DueSoon {
+  assignment: AssignmentRow
+  missing: string[]
+}
+
 export interface Db {
   getLog(id: string): Promise<LogRow | null>
   getAssignment(id: string): Promise<AssignmentRow | null>
@@ -70,6 +76,8 @@ export interface Db {
   deleteSubscription(endpoint: string): Promise<void>
   // Pupils who have at least one subscription.
   reminderCandidates(): Promise<ReminderCandidate[]>
+  // Assignments due on that day (YYYY-MM-DD) with who still owes a recording.
+  dueOn(day: string): Promise<DueSoon[]>
   // True the first time (kind, ref) is claimed - the "sent already" guard.
   claim(kind: string, ref: string): Promise<boolean>
 }
@@ -107,6 +115,26 @@ export function xpFor(rating: number, durationSeconds: number | null): number {
 export function pragueHour(now: Date): number {
   const hour = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Prague', hour: 'numeric', hourCycle: 'h23' }).format(now)
   return Number(hour)
+}
+
+// Today's date in Czech time, YYYY-MM-DD (deadlines are Czech days).
+export function pragueDay(now: Date): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Prague' }).format(now)
+}
+
+export function nextDay(day: string): string {
+  const date = new Date(`${day}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + 1)
+  return date.toISOString().slice(0, 10)
+}
+
+export function dueMessage(assignment: AssignmentRow): Message {
+  return {
+    title: 'Zítra je termín ⏰',
+    body: `${assignment.title} – ještě ti chybí nahrávka.`,
+    url: '/student/lessons',
+    tag: `due-${assignment.id}`,
+  }
 }
 
 // The day a streak counts (record_practice_session uses the UTC date).
@@ -206,6 +234,18 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
       if (!s.reminder || s.reminder_hour !== hour || candidate.last_practice_date === today) continue
       if (!(await deps.db.claim('reminder', `${candidate.user_id}:${today}`))) continue
       sent += await deliver(deps, [candidate.user_id], (x) => x.reminder, reminderMessage(candidate))
+    }
+
+    // The evening before a deadline, at the pupil's reminder hour.
+    const due = await deps.db.dueOn(nextDay(pragueDay(deps.now)))
+    const dueSettings = await deps.db.settings([...new Set(due.flatMap((d) => d.missing))])
+    for (const { assignment, missing } of due) {
+      for (const pupil of missing) {
+        const s = dueSettings.get(pupil) ?? DEFAULT_SETTINGS
+        if (!s.assignments || s.reminder_hour !== hour) continue
+        if (!(await deps.db.claim('due', `${assignment.id}:${pupil}`))) continue
+        sent += await deliver(deps, [pupil], (x) => x.assignments, dueMessage(assignment))
+      }
     }
     return { status: 200, body: { sent } }
   }

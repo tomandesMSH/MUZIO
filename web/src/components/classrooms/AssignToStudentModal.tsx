@@ -7,6 +7,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import { createAssignment, fetchStudentClassroomsForTeacher } from '../../lib/data/classrooms'
 import { getErrorMessage } from '../../lib/errors'
 import { AttachmentField } from './AttachmentField'
+import { DueDateField } from './DueDateField'
 
 interface AssignToStudentModalProps {
   open: boolean
@@ -27,6 +28,7 @@ export function AssignToStudentModal({ open, studentId, studentName, onClose, on
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [attachment, setAttachment] = useState<File | null>(null)
+  const [dueDate, setDueDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -45,10 +47,12 @@ export function AssignToStudentModal({ open, studentId, studentName, onClose, on
         description,
         recipientIds: [studentId],
         attachment,
+        dueDate,
       })
       setTitle('')
       setDescription('')
       setAttachment(null)
+      setDueDate('')
       setClassroomId(undefined)
       onAssigned?.()
       onClose()
@@ -111,6 +115,7 @@ export function AssignToStudentModal({ open, studentId, studentName, onClose, on
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+            <DueDateField value={dueDate} onChange={setDueDate} />
             <AttachmentField file={attachment} onChange={setAttachment} />
             {error && <p className="text-sm text-coral-dark">{error}</p>}
             <div className="flex gap-2.5">

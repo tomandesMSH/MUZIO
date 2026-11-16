@@ -79,6 +79,24 @@ function supabaseDb(url: string, serviceKey: string) {
         .eq('is_banned', false)
       return (data ?? []).map((p) => ({ user_id: p.id, streak: p.streak ?? 0, last_practice_date: p.last_practice_date }))
     },
+    async dueOn(day) {
+      const { data: assignments } = await sb
+        .from('assignments')
+        .select('id, teacher_id, classroom_id, title')
+        .eq('due_date', day)
+      const result = []
+      for (const assignment of assignments ?? []) {
+        const [{ data: chosen }, { data: members }, { data: logs }] = await Promise.all([
+          sb.from('assignment_recipients').select('student_id').eq('assignment_id', assignment.id),
+          sb.from('classroom_members').select('student_id').eq('classroom_id', assignment.classroom_id),
+          sb.from('practice_logs').select('user_id').eq('assignment_id', assignment.id),
+        ])
+        const pupils = (chosen ?? []).length > 0 ? ids(chosen, 'student_id') : ids(members, 'student_id')
+        const sent = new Set(ids(logs, 'user_id'))
+        result.push({ assignment, missing: pupils.filter((p) => !sent.has(p)) })
+      }
+      return result
+    },
     async claim(kind, ref) {
       const { error } = await sb.from('push_sent').insert({ kind, ref })
       // 23505 = already there: sent before.
