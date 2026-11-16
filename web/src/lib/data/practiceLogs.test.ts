@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { adjustStudentStars, insertPracticeLog } from './practiceLogs'
 
 const db = vi.hoisted(() => ({
-  insert: vi.fn(async (_rows: unknown) => ({ error: null as unknown })),
+  insert: vi.fn((_rows: unknown) => ({
+    select: () => ({ single: async () => ({ data: { id: 41 }, error: null as unknown }) }),
+  })),
   rpc: vi.fn(async (_name: string, _args: unknown) => ({ data: 3 as unknown, error: null as unknown })),
 }))
 
@@ -17,7 +19,7 @@ describe('insertPracticeLog', () => {
   beforeEach(() => db.insert.mockClear())
 
   it('stores the length in whole seconds', async () => {
-    await insertPracticeLog('u1', 'https://x/a.wav', 'as1', 94.6)
+    expect(await insertPracticeLog('u1', 'https://x/a.wav', 'as1', 94.6)).toBe('41')
     expect(db.insert).toHaveBeenCalledWith([
       { user_id: 'u1', audio_url: 'https://x/a.wav', assignment_id: 'as1', duration_seconds: 95 },
     ])

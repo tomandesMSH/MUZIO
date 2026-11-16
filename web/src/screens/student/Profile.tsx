@@ -8,6 +8,7 @@ import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
+import { NotificationsModal } from '../../components/ui/NotificationsModal'
 import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
@@ -29,6 +30,7 @@ export function Profile() {
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
   const [pairingOpen, setPairingOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
   const { message, show } = useToast()
 
@@ -64,10 +66,6 @@ export function Profile() {
 
   function openReportForm() {
     window.open(reportFormUrl({ pupil: true }), '_blank', 'noopener,noreferrer')
-  }
-
-  function notReady() {
-    show('Tahle funkce se ještě připravuje.')
   }
 
   async function toggleShareBasicProgress(next: boolean) {
@@ -137,7 +135,7 @@ export function Profile() {
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nastavení</h2>
           <SettingsRow label="Tmavý režim" right={<Switch checked={darkMode} onChange={toggleDarkMode} />} />
-          <SettingsRow label="Notifikace" onClick={notReady} />
+          <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
           <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
@@ -183,6 +181,9 @@ export function Profile() {
             show('Heslo je změněné.')
           }}
         />
+      )}
+      {notificationsOpen && (
+        <NotificationsModal role="student" userId={profile.id} onClose={() => setNotificationsOpen(false)} />
       )}
     </AppShell>
   )

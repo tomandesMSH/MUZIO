@@ -12,6 +12,14 @@ npm install
 cp .env.example .env.local   # fill in your Supabase project URL + anon key
 ```
 
+## Push notifications
+
+`api/notify.ts` (a Vercel function) sends them with `web-push`; `public/sw.js` shows them. The app
+calls it after grading, a new recording and a new assignment; Supabase `pg_cron` calls it hourly for
+the evening reminders (migration `0035_push_notifications.sql`). Vercel needs `VITE_VAPID_PUBLIC_KEY`,
+`VAPID_PRIVATE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` and `CRON_SECRET` (the same value as the Vault
+secret `muzio_cron_secret`). New keys: `npx web-push generate-vapid-keys`.
+
 ## Scripts
 
 ```bash

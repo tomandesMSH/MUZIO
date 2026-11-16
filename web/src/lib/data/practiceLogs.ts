@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { notifyPush } from '../push'
 import { toDateKey } from '../game-logic'
 import type { PracticeLog } from './types'
 import { FEEDBACK_IMAGES_BUCKET } from '../feedbackImages'
@@ -91,6 +92,7 @@ export async function submitGrading(logId: string, input: GradingInput, gradedBy
     })
     .eq('id', logId)
   if (error) throw error
+  notifyPush({ type: 'graded', logId })
 }
 
 const RECORDINGS_BUCKET = 'recordings'
@@ -132,12 +134,15 @@ export async function insertPracticeLog(
   audioUrl: string,
   assignmentId?: string,
   durationSeconds?: number | null,
-): Promise<void> {
+): Promise<string> {
   const row: Record<string, unknown> = { user_id: userId, audio_url: audioUrl, assignment_id: assignmentId ?? null }
   // Only sent when known, so a database without migration 0024 still accepts the row.
   if (durationSeconds != null) row.duration_seconds = Math.round(durationSeconds)
-  const { error } = await supabase.from('practice_logs').insert([row])
+  const { data, error } = await supabase.from('practice_logs').insert([row]).select('id').single()
   if (error) throw error
+  const logId = String(data.id)
+  notifyPush({ type: 'recording', logId })
+  return logId
 }
 
 // The teacher gives (+1) or takes back (-1) one star. The permission check

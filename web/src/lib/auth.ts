@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { disablePush } from './push'
 
 // The app has no real email addresses - usernames are shimmed into an
 // internal fake domain, same convention the previous vanilla app used.
@@ -67,6 +68,9 @@ export async function signUpTeacher(username: string, fullName: string, password
 }
 
 export async function signOut() {
+  // This device stops getting the account's notifications (a shared school
+  // computer, a sibling's phone...). Best effort - never blocks signing out.
+  await disablePush().catch(() => {})
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }

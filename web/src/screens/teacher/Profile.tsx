@@ -6,6 +6,7 @@ import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
+import { NotificationsModal } from '../../components/ui/NotificationsModal'
 import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { AppShell } from '../../components/layout/AppShell'
 import { useAuth } from '../../lib/AuthProvider'
@@ -18,6 +19,7 @@ export function Profile() {
   const { profile } = useAuth()
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
   const [passwordOpen, setPasswordOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const { message, show } = useToast()
 
   if (!profile) return null
@@ -25,10 +27,6 @@ export function Profile() {
   function toggleDarkMode(next: boolean) {
     setDarkMode(next)
     applyTheme(next ? 'dark' : 'light')
-  }
-
-  function notReady() {
-    show('Tahle funkce se ještě připravuje.')
   }
 
   async function handleLogout() {
@@ -60,7 +58,7 @@ export function Profile() {
           />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
-          <SettingsRow label="Notifikace" onClick={notReady} />
+          <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
         </div>
 
         {profile.is_moderator && (
@@ -82,6 +80,9 @@ export function Profile() {
             show('Heslo je změněné.')
           }}
         />
+      )}
+      {notificationsOpen && (
+        <NotificationsModal role="teacher" userId={profile.id} onClose={() => setNotificationsOpen(false)} />
       )}
     </AppShell>
   )

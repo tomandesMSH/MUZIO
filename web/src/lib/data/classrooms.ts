@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { notifyPush } from '../push'
 import { ASSIGNMENT_FILES_BUCKET, attachmentContentType, attachmentPath } from '../attachments'
 import type { Assignment, Classroom } from './types'
 
@@ -149,6 +150,8 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<vo
       throw err
     }
   }
+
+  notifyPush({ type: 'assignment', assignmentId: String(data.id) })
 }
 
 async function attachToAssignment(assignmentId: string, file: File): Promise<void> {
