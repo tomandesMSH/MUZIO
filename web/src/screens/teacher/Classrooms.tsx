@@ -28,6 +28,7 @@ import {
   removeClassroomMember,
 } from '../../lib/data/classrooms'
 import { fetchProfilesByIds } from '../../lib/data/profiles'
+import { ClassAnnouncements } from '../../components/classrooms/ClassAnnouncements'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment, Classroom } from '../../lib/data/types'
@@ -274,6 +275,10 @@ function ClassroomDetail({
             </Button>
           )}
         </div>
+
+        {profile && profile.id === classroom.teacher_id && (
+          <ClassAnnouncements classroomId={classroom.id} teacherId={profile.id} />
+        )}
 
         <div>
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Žáci ({members.data?.length ?? 0})</h2>

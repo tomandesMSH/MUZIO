@@ -150,7 +150,7 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
             {role === 'student' ? (
               <>
                 {row('Ohodnocená nahrávka', 'Když učitel ohodnotí tvou nahrávku.', settings.graded, (v) => update({ graded: v }))}
-                {row('Nový úkol', 'Když ti učitel zadá úkol.', settings.assignments, (v) => update({ assignments: v }))}
+                {row('Nový úkol a oznámení', 'Když ti učitel zadá úkol nebo napíše třídě oznámení.', settings.assignments, (v) => update({ assignments: v }))}
                 {row('Připomínka cvičení', 'Večer, když jsi ten den ještě necvičil(a).', settings.reminder, (v) =>
                   update({ reminder: v }),
                 )}

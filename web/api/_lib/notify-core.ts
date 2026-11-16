@@ -6,6 +6,8 @@ export type NotifyRequest =
   | { type: 'graded'; logId: string }
   | { type: 'recording'; logId: string }
   | { type: 'assignment'; assignmentId: string }
+  // A class announcement (migration 0041): to the pupils of the class.
+  | { type: 'announcement'; announcementId: string }
   | { type: 'reminders' }
   // "Poslat zkušební" in the settings: to the caller's own devices.
   | { type: 'test' }
@@ -24,6 +26,13 @@ export interface AssignmentRow {
   teacher_id: string
   classroom_id: string
   title: string
+}
+
+export interface AnnouncementRow {
+  id: string
+  classroom_id: string
+  teacher_id: string
+  body: string
 }
 
 export interface Settings {
@@ -68,6 +77,7 @@ export interface DueSoon {
 export interface Db {
   getLog(id: string): Promise<LogRow | null>
   getAssignment(id: string): Promise<AssignmentRow | null>
+  getAnnouncement(id: string): Promise<AnnouncementRow | null>
   getName(userId: string): Promise<string | null>
   // Explicit recipients, or [] = the whole classroom.
   assignmentRecipients(assignmentId: string): Promise<string[]>
@@ -181,6 +191,17 @@ export function assignmentMessage(assignment: AssignmentRow, teacherName: string
   }
 }
 
+// The body shortened for the notification (the whole text is in the app).
+export function announcementMessage(announcement: AnnouncementRow, teacherName: string | null): Message {
+  const text = announcement.body.trim().replace(/\s+/g, ' ')
+  return {
+    title: teacherName ? `📢 Oznámení od ${teacherName}` : '📢 Oznámení',
+    body: text.length > 140 ? `${text.slice(0, 139)}…` : text,
+    url: '/student',
+    tag: `announcement-${announcement.id}`,
+  }
+}
+
 export function recordingMessage(log: LogRow, pupilName: string | null): Message {
   return {
     title: 'Nová nahrávka 🎧',
@@ -212,6 +233,9 @@ export function parseRequest(body: unknown): NotifyRequest | null {
   const id = (v: unknown) => typeof v === 'string' && v.length > 0 && v.length <= 64
   if ((b.type === 'graded' || b.type === 'recording') && id(b.logId)) return { type: b.type, logId: b.logId as string }
   if (b.type === 'assignment' && id(b.assignmentId)) return { type: 'assignment', assignmentId: b.assignmentId as string }
+  if (b.type === 'announcement' && id(b.announcementId)) {
+    return { type: 'announcement', announcementId: b.announcementId as string }
+  }
   if (b.type === 'reminders') return { type: 'reminders' }
   if (b.type === 'test') return { type: 'test' }
   return null
@@ -316,6 +340,16 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
       status: 200,
       body: { sent: await deliver(deps, teachers, (s) => s.recordings && !s.recordings_digest, message) },
     }
+  }
+
+  if (request.type === 'announcement') {
+    const announcement = await deps.db.getAnnouncement(request.announcementId)
+    if (!announcement || announcement.teacher_id !== caller) return forbidden
+    if (!(await deps.db.claim('announcement', announcement.id))) return { status: 200, body: { sent: 0 } }
+    const pupils = await deps.db.classroomMembers(announcement.classroom_id)
+    const message = announcementMessage(announcement, await deps.db.getName(announcement.teacher_id))
+    // Same setting as new assignments ("Nový úkol a oznámení").
+    return { status: 200, body: { sent: await deliver(deps, pupils, (s) => s.assignments, message) } }
   }
 
   const assignment = await deps.db.getAssignment(request.assignmentId)

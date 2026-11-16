@@ -30,7 +30,7 @@ describe('NotificationsModal', () => {
     db.row = { reminder_hour: 19 }
     render(<NotificationsModal role="student" userId="u1" onClose={() => {}} />)
     expect(screen.getByText('Ohodnocená nahrávka')).toBeInTheDocument()
-    expect(screen.getByText('Nový úkol')).toBeInTheDocument()
+    expect(screen.getByText('Nový úkol a oznámení')).toBeInTheDocument()
     expect(await screen.findByRole('radio', { name: '19:00' })).toHaveAttribute('aria-checked', 'true')
 
     fireEvent.click(screen.getByRole('radio', { name: '20:00' }))

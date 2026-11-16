@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_SETTINGS,
+  announcementMessage,
   handleNotify,
   parseRequest,
   nextDay,
   pragueDay,
   pragueHour,
   xpFor,
+  type AnnouncementRow,
   type AssignmentRow,
   type Db,
   type Deps,
@@ -27,6 +29,7 @@ const sub = (user_id: string, endpoint = `https://push.example/${user_id}`): Sub
 function setup(opts: {
   logs?: LogRow[]
   assignments?: AssignmentRow[]
+  announcements?: AnnouncementRow[]
   recipients?: Record<string, string[]>
   members?: Record<string, string[]>
   teachers?: Record<string, string[]>
@@ -46,6 +49,7 @@ function setup(opts: {
   const db: Db = {
     getLog: async (id) => opts.logs?.find((l) => l.id === id) ?? null,
     getAssignment: async (id) => opts.assignments?.find((a) => a.id === id) ?? null,
+    getAnnouncement: async (id) => opts.announcements?.find((a) => a.id === id) ?? null,
     getName: async (id) => ({ p1: 'Pavel', t1: 'Jana Nováková' })[id] ?? null,
     assignmentRecipients: async (id) => opts.recipients?.[id] ?? [],
     classroomMembers: async (id) => opts.members?.[id] ?? [],
@@ -166,6 +170,37 @@ describe('notify', () => {
     sent.length = 0
     await handleNotify({ type: 'assignment', assignmentId: 'A2' }, 'jwt', deps)
     expect(sent.map((s) => s.to)).toEqual(['p1', 'p2'])
+  })
+
+  it('announcement: to the pupils of the class, only from its teacher, once', async () => {
+    const n1 = { id: 'N1', teacher_id: 't1', classroom_id: 'C1', body: '  V pátek\n koncert v 17:00  ' }
+    const { deps, sent } = setup({
+      announcements: [n1],
+      members: { C1: ['p1', 'p2'] },
+      settings: { p2: { assignments: false } },
+      subs: [sub('p1'), sub('p2')],
+      caller: 't2',
+    })
+    expect((await handleNotify({ type: 'announcement', announcementId: 'N1' }, 'jwt', deps)).status).toBe(403)
+    const { deps: own, sent: ownSent } = setup({
+      announcements: [n1],
+      members: { C1: ['p1', 'p2'] },
+      settings: { p2: { assignments: false } },
+      subs: [sub('p1'), sub('p2')],
+      caller: 't1',
+    })
+    await handleNotify({ type: 'announcement', announcementId: 'N1' }, 'jwt', own)
+    expect(sent).toHaveLength(0)
+    expect(ownSent.map((s) => s.to)).toEqual(['p1'])
+    expect(ownSent[0].message).toMatchObject({ title: '📢 Oznámení od Jana Nováková', body: 'V pátek koncert v 17:00', url: '/student' })
+    await handleNotify({ type: 'announcement', announcementId: 'N1' }, 'jwt', own)
+    expect(ownSent).toHaveLength(1)
+  })
+
+  it('a long announcement is shortened', () => {
+    const msg = announcementMessage({ id: 'x', teacher_id: 't', classroom_id: 'c', body: 'a'.repeat(300) }, null)
+    expect(msg.body).toHaveLength(140)
+    expect(msg.title).toBe('📢 Oznámení')
   })
 
   it('drops subscriptions the browser no longer has', async () => {

@@ -94,6 +94,7 @@ export type NotifyEvent =
   | { type: 'graded'; logId: string }
   | { type: 'recording'; logId: string }
   | { type: 'assignment'; assignmentId: string }
+  | { type: 'announcement'; announcementId: string }
   | { type: 'test' }
 
 // Asks the server to send the notification for something that just happened.
