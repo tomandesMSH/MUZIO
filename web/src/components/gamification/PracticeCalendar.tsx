@@ -9,10 +9,11 @@ const LEVEL_CLASS: Record<CalendarDay['level'], string> = {
   4: 'bg-coral',
 }
 
-// Squares the size of GitHub's: 10 px with a 3 px gap.
+// Squares at least the size of GitHub's (10 px, 3 px apart). The weeks that
+// fit are shown (a year at most) and the squares grow to fill the width.
 const CELL = 10
 const GAP = 3
-const LABEL_COLUMN = 22
+const LABEL_COLUMN = 26
 const MIN_WEEKS = 8
 const MAX_WEEKS = 53 // a year, like GitHub
 
@@ -39,7 +40,7 @@ function dayInfo(day: CalendarDay): { what: string; when: string } {
   return { what, when }
 }
 
-// As many weeks as fit the width (a year at most), so the squares stay small.
+// As many weeks as fit the width with the smallest squares (a year at most).
 function weeksFor(width: number): number {
   return Math.max(MIN_WEEKS, Math.min(MAX_WEEKS, Math.floor((width - LABEL_COLUMN + GAP) / (CELL + GAP))))
 }
@@ -86,7 +87,7 @@ export function PracticeCalendar({ logs, today = new Date() }: { logs: CalendarL
   const cal = buildPracticeCalendar(logs, today, weekCount)
   const todayKey = cal.weeks.flat().find((d) => d.date.toDateString() === today.toDateString())?.key
   const byKey = new Map(cal.weeks.flat().map((d) => [d.key, d]))
-  const columns = { gridTemplateColumns: `${LABEL_COLUMN - GAP}px repeat(${cal.weeks.length}, ${CELL}px)`, gap: GAP }
+  const columns = { gridTemplateColumns: `${LABEL_COLUMN - GAP}px repeat(${cal.weeks.length}, minmax(0, 1fr))`, gap: GAP }
 
   function show(target: EventTarget | null) {
     const el = (target as HTMLElement | null)?.closest<HTMLElement>('[data-day]')
@@ -132,7 +133,7 @@ export function PracticeCalendar({ logs, today = new Date() }: { logs: CalendarL
           if (e.pointerType !== 'mouse' && !show(e.target)) setShown(undefined)
         }}
       >
-        <div className="grid text-[9px] leading-none text-text-muted mb-[3px]" style={columns} aria-hidden="true">
+        <div className="grid text-[11px] leading-none text-text-muted mb-1.5" style={columns} aria-hidden="true">
           <span />
           {cal.weeks.map((_, w) => (
             <span key={w} className="whitespace-nowrap overflow-visible">
@@ -142,7 +143,7 @@ export function PracticeCalendar({ logs, today = new Date() }: { logs: CalendarL
         </div>
         {DAY_LABELS.map((label, d) => (
           <div key={d} className="grid" style={{ ...columns, marginBottom: d < 6 ? GAP : 0 }}>
-            <span className="text-[9px] leading-none text-text-muted self-center" aria-hidden="true">
+            <span className="text-[11px] leading-none text-text-muted self-center" aria-hidden="true">
               {label}
             </span>
             {cal.weeks.map((week) => {
@@ -152,10 +153,9 @@ export function PracticeCalendar({ logs, today = new Date() }: { logs: CalendarL
                 <span
                   key={day.key}
                   data-day={day.key}
-                  className={`rounded-[2px] ${day.future ? 'opacity-0' : LEVEL_CLASS[day.level]} ${
+                  className={`aspect-square rounded-[3px] ${day.future ? 'opacity-0' : LEVEL_CLASS[day.level]} ${
                     active ? 'ring-1 ring-text-primary' : day.key === todayKey ? 'ring-1 ring-text-muted' : ''
                   }`}
-                  style={{ width: CELL, height: CELL }}
                 />
               )
             })}
@@ -185,7 +185,7 @@ export function PracticeCalendar({ logs, today = new Date() }: { logs: CalendarL
         <span className="flex items-center gap-1" aria-hidden="true">
           méně
           {([0, 1, 2, 3, 4] as const).map((l) => (
-            <span key={l} className={`rounded-[2px] ${LEVEL_CLASS[l]}`} style={{ width: CELL, height: CELL }} />
+            <span key={l} className={`rounded-[3px] ${LEVEL_CLASS[l]}`} style={{ width: CELL + 1, height: CELL + 1 }} />
           ))}
           více
         </span>
