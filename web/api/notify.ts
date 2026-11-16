@@ -97,6 +97,32 @@ function supabaseDb(url: string, serviceKey: string) {
       }
       return result
     },
+    async digestTeachers() {
+      const { data: subs } = await sb.from('push_subscriptions').select('user_id')
+      const userIds = [...new Set(ids(subs, 'user_id'))]
+      if (userIds.length === 0) return []
+      const { data } = await sb
+        .from('notification_settings')
+        .select('user_id')
+        .in('user_id', userIds)
+        .eq('recordings_digest', true)
+      return ids(data, 'user_id')
+    },
+    async waitingSince(teacherId, sinceIso) {
+      const { data: classes } = await sb.from('classrooms').select('id').eq('teacher_id', teacherId)
+      const classIds = ids(classes, 'id')
+      if (classIds.length === 0) return []
+      const { data: members } = await sb.from('classroom_members').select('student_id').in('classroom_id', classIds)
+      const pupils = [...new Set(ids(members, 'student_id'))]
+      if (pupils.length === 0) return []
+      const { data } = await sb
+        .from('practice_logs')
+        .select('user_id')
+        .in('user_id', pupils)
+        .is('teacher_comment', null)
+        .gte('created_at', sinceIso)
+      return (data ?? []) as { user_id: string }[]
+    },
     async claim(kind, ref) {
       const { error } = await sb.from('push_sent').insert({ kind, ref })
       // 23505 = already there: sent before.

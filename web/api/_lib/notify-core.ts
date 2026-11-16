@@ -32,6 +32,8 @@ export interface Settings {
   reminder: boolean
   reminder_hour: number
   recordings: boolean
+  // One summary a day instead of a notification per recording (migration 0038).
+  recordings_digest: boolean
 }
 
 // Same defaults as the notification_settings table (migration 0035).
@@ -41,6 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reminder: true,
   reminder_hour: 18,
   recordings: true,
+  recordings_digest: false,
 }
 
 export interface Subscription {
@@ -78,6 +81,10 @@ export interface Db {
   reminderCandidates(): Promise<ReminderCandidate[]>
   // Assignments due on that day (YYYY-MM-DD) with who still owes a recording.
   dueOn(day: string): Promise<DueSoon[]>
+  // Teachers who have a subscription and want the daily summary.
+  digestTeachers(): Promise<string[]>
+  // Ungraded recordings of this teacher's pupils sent since then.
+  waitingSince(teacherId: string, sinceIso: string): Promise<{ user_id: string }[]>
   // True the first time (kind, ref) is claimed - the "sent already" guard.
   claim(kind: string, ref: string): Promise<boolean>
 }
@@ -126,6 +133,19 @@ export function nextDay(day: string): string {
   const date = new Date(`${day}T12:00:00Z`)
   date.setUTCDate(date.getUTCDate() + 1)
   return date.toISOString().slice(0, 10)
+}
+
+function czechPlural(n: number, one: string, few: string, many: string): string {
+  return n === 1 ? one : n >= 2 && n <= 4 ? few : many
+}
+
+export function digestMessage(recordings: number, pupils: number): Message {
+  return {
+    title: 'Nahrávky ke kontrole 🎧',
+    body: `Za poslední den ${recordings} ${czechPlural(recordings, 'nová nahrávka', 'nové nahrávky', 'nových nahrávek')} od ${pupils} ${czechPlural(pupils, 'žáka', 'žáků', 'žáků')}.`,
+    url: '/teacher',
+    tag: 'digest',
+  }
 }
 
 export function dueMessage(assignment: AssignmentRow): Message {
@@ -247,6 +267,20 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
         sent += await deliver(deps, [pupil], (x) => x.assignments, dueMessage(assignment))
       }
     }
+
+    // Teachers' daily summary of new recordings, at their hour.
+    const teachers = await deps.db.digestTeachers()
+    const teacherSettings = await deps.db.settings(teachers)
+    const since = new Date(deps.now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+    for (const teacher of teachers) {
+      const s = teacherSettings.get(teacher) ?? DEFAULT_SETTINGS
+      if (!s.recordings || !s.recordings_digest || s.reminder_hour !== hour) continue
+      const waiting = await deps.db.waitingSince(teacher, since)
+      if (waiting.length === 0) continue
+      if (!(await deps.db.claim('digest', `${teacher}:${pragueDay(deps.now)}`))) continue
+      const pupils = new Set(waiting.map((w) => w.user_id)).size
+      sent += await deliver(deps, [teacher], () => true, digestMessage(waiting.length, pupils))
+    }
     return { status: 200, body: { sent } }
   }
 
@@ -277,7 +311,11 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
     const assignment = log.assignment_id ? await deps.db.getAssignment(log.assignment_id) : null
     const teachers = assignment ? [assignment.teacher_id] : await deps.db.teachersOf(log.user_id)
     const message = recordingMessage(log, await deps.db.getName(log.user_id))
-    return { status: 200, body: { sent: await deliver(deps, teachers, (s) => s.recordings, message) } }
+    // Teachers on the daily summary hear about it in the evening instead.
+    return {
+      status: 200,
+      body: { sent: await deliver(deps, teachers, (s) => s.recordings && !s.recordings_digest, message) },
+    }
   }
 
   const assignment = await deps.db.getAssignment(request.assignmentId)

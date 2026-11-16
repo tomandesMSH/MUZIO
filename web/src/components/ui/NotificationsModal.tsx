@@ -103,6 +103,28 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
     </div>
   )
 
+  const hourPicker = (label: string) => (
+    <div className="py-2">
+      <div className="text-xs text-text-muted mb-1.5">V kolik hodin</div>
+      <div className="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label={label}>
+        {REMINDER_HOURS.map((hour) => (
+          <button
+            key={hour}
+            type="button"
+            role="radio"
+            aria-checked={settings.reminder_hour === hour}
+            onClick={() => update({ reminder_hour: hour })}
+            className={`rounded-lg px-2.5 py-1 text-xs font-heading font-semibold transition ${
+              settings.reminder_hour === hour ? 'bg-coral text-white shadow-clay-sm' : 'bg-bg-card-alt text-text-muted hover:text-text-primary'
+            }`}
+          >
+            {hour}:00
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <Modal open onClose={onClose}>
       <div className="space-y-4">
@@ -132,34 +154,40 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
                 {row('Připomínka cvičení', 'Večer, když jsi ten den ještě necvičil(a).', settings.reminder, (v) =>
                   update({ reminder: v }),
                 )}
-                {settings.reminder && (
-                  <div className="py-2">
-                    <div className="text-xs text-text-muted mb-1.5">V kolik hodin</div>
-                    <div className="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Čas připomínky">
-                      {REMINDER_HOURS.map((hour) => (
+                {settings.reminder && hourPicker('Čas připomínky')}
+              </>
+            ) : (
+              <>
+                {row('Nové nahrávky', 'Když ti žáci pošlou nahrávky k ohodnocení.', settings.recordings, (v) =>
+                  update({ recordings: v }),
+                )}
+                {settings.recordings && (
+                  <div className="py-2 space-y-2">
+                    <div className="flex gap-1 rounded-xl bg-bg-card-alt p-1 shadow-clay-press" role="radiogroup" aria-label="Jak často">
+                      {[
+                        { digest: false, label: 'Hned, každou' },
+                        { digest: true, label: 'Souhrn jednou denně' },
+                      ].map((o) => (
                         <button
-                          key={hour}
+                          key={o.label}
                           type="button"
                           role="radio"
-                          aria-checked={settings.reminder_hour === hour}
-                          onClick={() => update({ reminder_hour: hour })}
-                          className={`rounded-lg px-2.5 py-1 text-xs font-heading font-semibold transition ${
-                            settings.reminder_hour === hour
-                              ? 'bg-coral text-white shadow-clay-sm'
-                              : 'bg-bg-card-alt text-text-muted hover:text-text-primary'
+                          aria-checked={settings.recordings_digest === o.digest}
+                          onClick={() => update({ recordings_digest: o.digest })}
+                          className={`flex-1 rounded-lg px-2.5 py-1.5 text-xs font-heading font-semibold transition ${
+                            settings.recordings_digest === o.digest
+                              ? 'bg-bg-card text-text-primary shadow-clay-sm'
+                              : 'text-text-muted hover:text-text-primary'
                           }`}
                         >
-                          {hour}:00
+                          {o.label}
                         </button>
                       ))}
                     </div>
+                    {settings.recordings_digest && hourPicker('Čas souhrnu')}
                   </div>
                 )}
               </>
-            ) : (
-              row('Nová nahrávka', 'Když ti žák pošle nahrávku k ohodnocení.', settings.recordings, (v) =>
-                update({ recordings: v }),
-              )
             )}
           </div>
         </div>

@@ -34,6 +34,8 @@ function setup(opts: {
   subs?: Subscription[]
   candidates?: ReminderCandidate[]
   due?: Record<string, { assignment: AssignmentRow; missing: string[] }[]>
+  digest?: string[]
+  waiting?: Record<string, { user_id: string }[]>
   caller?: string | null
   now?: Date
   gone?: string[]
@@ -54,6 +56,8 @@ function setup(opts: {
     deleteSubscription: async (endpoint) => void deleted.push(endpoint),
     reminderCandidates: async () => opts.candidates ?? [],
     dueOn: async (day) => opts.due?.[day] ?? [],
+    digestTeachers: async () => opts.digest ?? [],
+    waitingSince: async (teacher) => opts.waiting?.[teacher] ?? [],
     claim: async (kind, ref) => {
       const key = `${kind}:${ref}`
       if (claimed.has(key)) return false
@@ -228,5 +232,26 @@ describe('notify', () => {
   it('Czech date around midnight', () => {
     expect(pragueDay(new Date('2026-11-16T23:30:00Z'))).toBe('2026-11-17')
     expect(nextDay('2026-12-31')).toBe('2027-01-01')
+  })
+
+  it('daily summary: once a day at the teacher hour, instead of one per recording', async () => {
+    const { deps, sent } = setup({
+      now: new Date('2026-11-16T17:10:00Z'), // 18:10 in Prague
+      logs: [log()],
+      teachers: { p1: ['t1', 't2'] },
+      digest: ['t1', 't3'],
+      settings: { t1: { recordings_digest: true }, t3: { recordings_digest: true, reminder_hour: 20 } },
+      waiting: { t1: [{ user_id: 'p1' }, { user_id: 'p1' }, { user_id: 'p2' }], t3: [{ user_id: 'p9' }] },
+      subs: [sub('t1'), sub('t2'), sub('t3')],
+    })
+    // A new recording: only t2 (no summary) hears about it right away.
+    await handleNotify({ type: 'recording', logId: 'L1' }, 'jwt', deps)
+    expect(sent.map((s) => s.to)).toEqual(['t2'])
+    sent.length = 0
+    await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
+    expect(sent).toHaveLength(1)
+    expect(sent[0]).toMatchObject({ to: 't1', message: { body: 'Za poslední den 3 nové nahrávky od 2 žáků.' } })
+    await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
+    expect(sent).toHaveLength(1)
   })
 })

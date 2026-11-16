@@ -47,10 +47,17 @@ describe('NotificationsModal', () => {
     expect(screen.queryByRole('radio', { name: '18:00' })).toBeNull()
   })
 
-  it('teacher: only new recordings', () => {
+  it('teacher: new recordings, right away or as a daily summary at a chosen hour', async () => {
     render(<NotificationsModal role="teacher" userId="t1" onClose={() => {}} />)
-    expect(screen.getByText('Nová nahrávka')).toBeInTheDocument()
+    expect(screen.getByText('Nové nahrávky')).toBeInTheDocument()
     expect(screen.queryByText('Připomínka cvičení')).toBeNull()
+    expect(screen.queryByRole('radiogroup', { name: 'Čas souhrnu' })).toBeNull()
+    fireEvent.click(screen.getByRole('radio', { name: 'Souhrn jednou denně' }))
+    await waitFor(() => expect(db.saved).toHaveLength(1))
+    expect(db.saved[0]).toMatchObject({ recordings: true, recordings_digest: true })
+    fireEvent.click(screen.getByRole('radio', { name: '19:00' }))
+    await waitFor(() => expect(db.saved).toHaveLength(2))
+    expect(db.saved[1]).toMatchObject({ recordings_digest: true, reminder_hour: 19 })
   })
 
   it('says so when the browser has no push', () => {
