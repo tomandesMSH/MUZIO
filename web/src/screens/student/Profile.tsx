@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { BadgeTile } from '../../components/gamification/BadgeTile'
+import { PracticeCalendar } from '../../components/gamification/PracticeCalendar'
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Switch } from '../../components/ui/Switch'
@@ -12,7 +13,7 @@ import { NotificationsModal } from '../../components/ui/NotificationsModal'
 import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { fetchOwnLogsCount, fetchPracticeHistory, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { computeBadges, computeLevel, computeUnlockedSkins, isPerfectWeek } from '../../lib/game-logic'
 import { signOut } from '../../lib/auth'
 import { applyTheme, getStoredTheme } from '../../lib/theme'
@@ -34,6 +35,7 @@ export function Profile() {
   const [savingShare, setSavingShare] = useState(false)
   const { message, show } = useToast()
 
+  const history = useQuery(() => (userId ? fetchPracticeHistory(userId) : Promise.resolve([])), [userId])
   const logsCount = useQuery(
     () => (userId ? fetchOwnLogsCount(userId) : Promise.resolve(0)),
     [userId],
@@ -109,6 +111,11 @@ export function Profile() {
           <StatCard value={`✨ ${profile.xp ?? 0}`} label="XP za ohodnocené nahrávky" />
           <StatCard value={`⭐ ${profile.stars}`} label="Hvězdy od učitele" />
           <StatCard value={`🎙️ ${logsCount.data ?? '-'}`} label="Odeslané nahrávky" />
+        </div>
+
+        <div>
+          <h2 className="text-sm font-heading font-semibold mb-2">Kalendář cvičení</h2>
+          <PracticeCalendar logs={history.data ?? []} />
         </div>
 
         <div>

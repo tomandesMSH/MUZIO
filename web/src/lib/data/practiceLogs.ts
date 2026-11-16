@@ -42,6 +42,21 @@ export async function fetchWeeklyStats(userId: string, today: Date): Promise<Wee
   return { dateKeys: Array.from(new Set(dateKeys)), weeklyCount: data?.length ?? 0 }
 }
 
+// When and how long the pupil practised - all of it, for the calendar and
+// the longest streak (a few hundred rows at most per pupil).
+export async function fetchPracticeHistory(userId: string): Promise<{ created_at: string; duration_seconds: number | null }[]> {
+  const { data, error } = await supabase
+    .from('practice_logs')
+    .select('created_at, duration_seconds')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    created_at: row.created_at as string,
+    duration_seconds: (row.duration_seconds as number | null | undefined) ?? null,
+  }))
+}
+
 export async function fetchPendingReview(): Promise<PracticeLog[]> {
   const { data, error } = await supabase
     .from('practice_logs')
