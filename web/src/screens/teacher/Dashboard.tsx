@@ -9,17 +9,22 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchPendingReview } from '../../lib/data/practiceLogs'
 import { fetchStudents } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
+import { INACTIVE_AFTER_DAYS, inactivePupils, inactivityText } from '../../lib/inactivity'
 
 export function TeacherDashboard() {
   const navigate = useNavigate()
   const pending = useQuery(() => fetchPendingReview(), [])
   const students = useQuery(() => fetchStudents(), [])
   const [search, setSearch] = useState('')
+  const [showAllInactive, setShowAllInactive] = useState(false)
   const { message } = useToast()
 
   function nameFor(userId: string): string {
     return students.data?.find((s) => s.id === userId)?.full_name ?? 'Žák'
   }
+
+  const inactive = inactivePupils(students.data ?? [], new Date())
+  const shownInactive = showAllInactive ? inactive : inactive.slice(0, 5)
 
   const query = search.trim().toLowerCase()
   const filteredPending = query ? pending.data?.filter((log) => nameFor(log.user_id).toLowerCase().includes(query)) : pending.data
@@ -61,6 +66,45 @@ export function TeacherDashboard() {
             ))}
           </div>
         </div>
+
+        {!query && inactive.length > 0 && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">
+              Dlouho necvičili ({inactive.length})
+            </h2>
+            <p className="text-xs text-text-muted -mt-1 mb-2">
+              Bez nahrávky {INACTIVE_AFTER_DAYS} a více dní. Klepni a zadej jim úkol, ať se zase rozehrají.
+            </p>
+            <div className="space-y-2">
+              {shownInactive.map(({ pupil, days }) => (
+                <button
+                  key={pupil.id}
+                  className="w-full flex items-center justify-between gap-2 rounded-2xl bg-bg-card shadow-clay-sm p-3.5 text-left"
+                  onClick={() => navigate('/teacher/grading', { state: { studentId: pupil.id } })}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={pupil.full_name} size={38} />
+                    <div className="min-w-0">
+                      <div className="font-heading font-semibold text-sm truncate">{pupil.full_name}</div>
+                      <div className={`text-xs ${days === null || days >= 14 ? 'text-coral-dark' : 'text-text-muted'}`}>
+                        {inactivityText(days)}
+                      </div>
+                    </div>
+                  </div>
+                  <span aria-hidden className="text-text-muted text-sm">›</span>
+                </button>
+              ))}
+            </div>
+            {inactive.length > 5 && (
+              <button
+                className="mt-2 text-xs text-text-muted underline underline-offset-2 hover:text-text-primary"
+                onClick={() => setShowAllInactive(!showAllInactive)}
+              >
+                {showAllInactive ? 'Méně' : `Zobrazit všech ${inactive.length}`}
+              </button>
+            )}
+          </div>
+        )}
 
         <div>
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Ostatní žáci</h2>
