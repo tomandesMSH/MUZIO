@@ -8,6 +8,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { NewAssignmentModal } from '../../components/classrooms/NewAssignmentModal'
 import { AssignmentProgress } from '../../components/classrooms/AssignmentProgress'
 import { EditAssignmentModal } from '../../components/classrooms/EditAssignmentModal'
+import { CopyAssignmentModal, type CopyAssignmentInput } from '../../components/classrooms/CopyAssignmentModal'
 import { fetchAssignmentProgress } from '../../lib/data/practiceLogs'
 import { daysUntil } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -58,6 +59,7 @@ export function Classrooms() {
     return (
       <ClassroomDetail
         classroom={selected}
+        allClassrooms={classrooms.data ?? [selected]}
         onBack={() => setSelected(undefined)}
         onDeleted={() => {
           setSelected(undefined)
@@ -103,10 +105,12 @@ export function Classrooms() {
 
 function ClassroomDetail({
   classroom,
+  allClassrooms,
   onBack,
   onDeleted,
 }: {
   classroom: Classroom
+  allClassrooms: Classroom[]
   onBack: () => void
   onDeleted: () => void
 }) {
@@ -128,6 +132,9 @@ function ClassroomDetail({
   const [assignmentError, setAssignmentError] = useState<string>()
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [editing, setEditing] = useState<Assignment>()
+  const [copying, setCopying] = useState<Assignment>()
+  const [copySubmitting, setCopySubmitting] = useState(false)
+  const [copyError, setCopyError] = useState<string>()
   const [editSubmitting, setEditSubmitting] = useState(false)
   const [editError, setEditError] = useState<string>()
   const [deleting, setDeleting] = useState(false)
@@ -143,6 +150,32 @@ function ClassroomDetail({
     } catch (err) {
       show(getErrorMessage(err, 'Smazání třídy se nepovedlo.'))
       setDeleting(false)
+    }
+  }
+
+  async function handleCopyAssignment(input: CopyAssignmentInput) {
+    if (!copying || !profile) return
+    setCopySubmitting(true)
+    setCopyError(undefined)
+    try {
+      await createAssignment({
+        classroomId: input.classroomId,
+        teacherId: profile.id,
+        title: input.title.trim(),
+        description: input.description,
+        dueDate: input.dueDate,
+        copyAttachmentFrom:
+          input.withAttachment && copying.attachment_path && copying.attachment_name
+            ? { path: copying.attachment_path, name: copying.attachment_name }
+            : undefined,
+      })
+      setCopying(undefined)
+      if (input.classroomId === classroom.id) assignments.refetch()
+      show(`Zadáno třídě ${allClassrooms.find((c) => c.id === input.classroomId)?.name ?? ''}`.trim())
+    } catch (err) {
+      setCopyError(getErrorMessage(err, 'Zadání se nepovedlo.'))
+    } finally {
+      setCopySubmitting(false)
     }
   }
 
@@ -291,6 +324,16 @@ function ClassroomDetail({
                   >
                     Upravit
                   </button>
+                  <button
+                    type="button"
+                    className="text-text-muted underline underline-offset-2 hover:text-text-primary"
+                    onClick={() => {
+                      setCopyError(undefined)
+                      setCopying(assignment)
+                    }}
+                  >
+                    Zadat znovu
+                  </button>
                 </div>
                 {progress.data && members.data && (
                   <AssignmentProgress
@@ -308,6 +351,16 @@ function ClassroomDetail({
         </div>
       </div>
 
+      {copying && (
+        <CopyAssignmentModal
+          assignment={copying}
+          classrooms={allClassrooms}
+          submitting={copySubmitting}
+          error={copyError}
+          onClose={() => setCopying(undefined)}
+          onSubmit={(input) => void handleCopyAssignment(input)}
+        />
+      )}
       {editing && (
         <EditAssignmentModal
           assignment={editing}

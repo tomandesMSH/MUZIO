@@ -64,4 +64,11 @@ describe('updateAssignment', () => {
     expect(calls.updates[1]).toMatchObject({ attachment_name: 'Nova.mid' })
     expect(calls.removed).toEqual([['a1/stara.mid']])
   })
+
+  it('a new file with the same name: the old one goes first (no overwrite in storage)', async () => {
+    const same = { ...assignment, attachment_path: 'a1/nova.mid', attachment_name: 'nova.mid' }
+    await updateAssignment(same, { title: 'X', description: '', dueDate: '', attachment: { kind: 'replace', file: new File(['x'], 'nova.mid') } })
+    expect(calls.removed).toEqual([['a1/nova.mid']])
+    expect(calls.uploaded).toEqual(['a1/nova.mid'])
+  })
 })

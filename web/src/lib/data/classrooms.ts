@@ -118,6 +118,8 @@ export interface CreateAssignmentInput {
   attachment?: File | null
   // "YYYY-MM-DD"; empty or omitted = no deadline (and no need for migration 0036).
   dueDate?: string
+  // "Zadat znovu": the score of an existing assignment, copied in storage.
+  copyAttachmentFrom?: { path: string; name: string }
 }
 
 export async function createAssignment(input: CreateAssignmentInput): Promise<void> {
@@ -141,6 +143,15 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<vo
       .from('assignment_recipients')
       .insert(input.recipientIds.map((studentId) => ({ assignment_id: data.id, student_id: studentId })))
     if (recipientsError) throw recipientsError
+  }
+
+  if (input.copyAttachmentFrom && !input.attachment) {
+    try {
+      await copyAttachment(data.id as string, input.copyAttachmentFrom)
+    } catch (err) {
+      await supabase.from('assignments').delete().eq('id', data.id)
+      throw err
+    }
   }
 
   if (input.attachment) {
@@ -181,8 +192,11 @@ export async function updateAssignment(assignment: Assignment, update: Assignmen
 
   const oldPath = assignment.attachment_path
   if (update.attachment.kind === 'replace') {
-    await attachToAssignment(assignment.id, update.attachment.file)
     const newPath = attachmentPath(assignment.id, update.attachment.file.name)
+    // Storage has no update policy (0023), so a file of the same name can't be
+    // overwritten: remove it first.
+    if (oldPath === newPath) await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([oldPath])
+    await attachToAssignment(assignment.id, update.attachment.file)
     if (oldPath && oldPath !== newPath) await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([oldPath])
   } else if (update.attachment.kind === 'remove' && oldPath) {
     const { error: clearError } = await supabase
@@ -192,6 +206,20 @@ export async function updateAssignment(assignment: Assignment, update: Assignmen
     if (clearError) throw clearError
     // Best effort: an orphaned file is harmless, nothing points at it.
     await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([oldPath])
+  }
+}
+
+async function copyAttachment(assignmentId: string, from: { path: string; name: string }): Promise<void> {
+  const path = attachmentPath(assignmentId, from.name)
+  const { error: copyError } = await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).copy(from.path, path)
+  if (copyError) throw copyError
+  const { error } = await supabase
+    .from('assignments')
+    .update({ attachment_path: path, attachment_name: from.name })
+    .eq('id', assignmentId)
+  if (error) {
+    await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([path])
+    throw error
   }
 }
 
