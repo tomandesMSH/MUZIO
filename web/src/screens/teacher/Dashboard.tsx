@@ -158,7 +158,7 @@ export function TeacherDashboard() {
                 <button
                   key={pupil.id}
                   className="w-full flex items-center justify-between gap-2 rounded-2xl bg-bg-card shadow-clay-sm p-3.5 text-left"
-                  onClick={() => navigate('/teacher/grading', { state: { studentId: pupil.id } })}
+                  onClick={() => navigate(`/teacher/students/${pupil.id}`)}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Avatar name={pupil.full_name} size={38} />
@@ -191,7 +191,7 @@ export function TeacherDashboard() {
               <button
                 key={student.id}
                 className="w-full flex items-center justify-between rounded-2xl bg-bg-card shadow-clay-sm p-3.5 text-left"
-                onClick={() => navigate('/teacher/grading', { state: { studentId: student.id } })}
+                onClick={() => navigate(`/teacher/students/${student.id}`)}
               >
                 <div className="flex items-center gap-2.5">
                   <Avatar name={student.full_name} size={38} />

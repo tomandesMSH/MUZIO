@@ -212,7 +212,7 @@ export function Students() {
               <div className="flex items-center justify-between gap-2.5">
                 <button
                   className="flex items-center gap-2.5 min-w-0 text-left"
-                  onClick={() => navigate('/teacher/grading', { state: { studentId: student.id } })}
+                  onClick={() => navigate(`/teacher/students/${student.id}`)}
                 >
                   <Avatar name={student.full_name} size={38} />
                   <div className="min-w-0">

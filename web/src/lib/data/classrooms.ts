@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { notifyPush } from '../push'
 import { ASSIGNMENT_FILES_BUCKET, attachmentContentType, attachmentPath } from '../attachments'
+import { fetchAssignmentProgress } from './practiceLogs'
 import type { Assignment, Classroom } from './types'
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no ambiguous chars (0/O, 1/I)
@@ -55,6 +56,32 @@ export async function fetchReviewContext(
   }
   const titles = new Map(((titlesRes.data ?? []) as { id: string; title: string }[]).map((a) => [a.id, a.title]))
   return { classrooms, membersOf, titles }
+}
+
+// The teacher's assignments meant for one pupil (whole-class ones of the
+// pupil's classes, and those given to the pupil by name), newest first, and
+// whether the pupil has sent a recording for each (pupil card).
+export async function fetchPupilAssignments(
+  teacherId: string,
+  studentId: string,
+): Promise<{ assignment: Assignment; classroomName: string; done: boolean }[]> {
+  const classrooms = await fetchStudentClassroomsForTeacher(teacherId, studentId)
+  if (classrooms.length === 0) return []
+  const lists = await Promise.all(classrooms.map((c) => fetchClassroomAssignments(c.id)))
+  const all = lists.flat()
+  const { recipients, submitted } = await fetchAssignmentProgress(all.map((a) => a.id))
+  const names = new Map(classrooms.map((c) => [c.id, c.name]))
+  return all
+    .filter((a) => {
+      const to = recipients.get(a.id)
+      return !to || to.length === 0 || to.includes(studentId)
+    })
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((assignment) => ({
+      assignment,
+      classroomName: names.get(assignment.classroom_id) ?? '',
+      done: submitted.get(assignment.id)?.has(studentId) ?? false,
+    }))
 }
 
 export async function deleteClassroom(classroomId: string): Promise<void> {

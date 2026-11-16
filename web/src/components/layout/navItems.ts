@@ -42,7 +42,7 @@ export const TEACHER_NAV_ITEMS: NavItem[] = [
     badge: { key: 'pending-review', label: 'nahrávek ke kontrole' },
     isActive: (p) => p === '/teacher',
   },
-  { to: '/teacher/students', label: 'Žáci', icon: 'students', isActive: (p) => p === '/teacher/students' },
+  { to: '/teacher/students', label: 'Žáci', icon: 'students', isActive: (p) => p.startsWith('/teacher/students') },
   { to: '/teacher/classrooms', label: 'Učebny', icon: 'classrooms', isActive: (p) => p === '/teacher/classrooms' },
   { to: '/teacher/profile', label: 'Profil', icon: 'profile', isActive: (p) => p === '/teacher/profile' },
   { to: '/teacher/settings', label: 'Nastavení', icon: 'settings', isActive: (p) => p === '/teacher/settings' },
