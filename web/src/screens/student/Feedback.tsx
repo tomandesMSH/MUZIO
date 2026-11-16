@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { AppShell } from '../../components/layout/AppShell'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
+import type { AudioPlayerHandle } from '../../components/audio/AudioPlayer'
+import { TimedText } from '../../components/feedback/TimedText'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
 import { ReportModal } from '../../components/moderation/ReportModal'
@@ -28,6 +30,9 @@ export function Feedback() {
   const [reporting, setReporting] = useState(false)
   const [reportError, setReportError] = useState<string>()
   const { message, show } = useToast()
+  // Each recording's player, so a time in the comment ("0:42") can jump in it.
+  const players = useRef(new Map<string, AudioPlayerHandle>())
+  const seekIn = (logId: string) => (seconds: number) => players.current.get(logId)?.seek(seconds)
   // Grades that were new when the page opened: marked "Nové" for this visit,
   // and seen from now on (the number in the menu goes away).
   const [newIds, setNewIds] = useState<Set<string>>(new Set())
@@ -99,7 +104,13 @@ export function Feedback() {
                   )}
                 </div>
 
-                <RecordingAudio src={log.audio_url} />
+                <RecordingAudio
+                  src={log.audio_url}
+                  ref={(player) => {
+                    if (player) players.current.set(String(log.id), player)
+                    else players.current.delete(String(log.id))
+                  }}
+                />
 
                 {graded && (
                   <div className="space-y-2 text-sm">
@@ -120,7 +131,9 @@ export function Feedback() {
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">
                           <span aria-hidden>✅</span> Co se povedlo
                         </div>
-                        <p className="text-text-muted">{log.feedback_good}</p>
+                        <p className="text-text-muted whitespace-pre-wrap break-words">
+                          <TimedText text={log.feedback_good} onSeek={log.audio_url ? seekIn(String(log.id)) : undefined} />
+                        </p>
                       </div>
                     )}
                     {log.feedback_audio && (
@@ -139,7 +152,12 @@ export function Feedback() {
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">
                           <span aria-hidden>🎯</span> Co zlepšit
                         </div>
-                        <p className="text-text-muted">{log.feedback_improve}</p>
+                        <p className="text-text-muted whitespace-pre-wrap break-words">
+                          <TimedText
+                            text={log.feedback_improve}
+                            onSeek={log.audio_url ? seekIn(String(log.id)) : undefined}
+                          />
+                        </p>
                       </div>
                     )}
                     <button

@@ -32,6 +32,9 @@ import {
   type CommentSnippet,
   type SnippetKind,
 } from '../../lib/data/commentSnippets'
+import { formatTime, hasTimestamps, insertAt } from '../../lib/timestamps'
+import { TimedText } from '../../components/feedback/TimedText'
+import type { AudioPlayerHandle } from '../../components/audio/AudioPlayer'
 import { pickNextToGrade } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
@@ -53,6 +56,21 @@ interface LocationState {
   studentId?: string
   // Open this recording straight away (from the dashboard's "Ke kontrole").
   logId?: string
+}
+
+// "⏱ Vložit čas 0:42": the player's position into the comment, so the pupil
+// can jump straight to that spot.
+function TimeButton({ time, onClick }: { time: number; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Vloží do komentáře čas, kde je přehrávání. Žák na něj klepne a nahrávka se tam přetočí."
+      className="rounded-full bg-bg-card-alt px-2.5 py-1 text-[11px] font-heading font-semibold text-text-muted shadow-clay-sm hover:text-coral-dark tabular-nums"
+    >
+      ⏱ Vložit čas {formatTime(time)}
+    </button>
+  )
 }
 
 export function Grading() {
@@ -86,6 +104,11 @@ export function Grading() {
   const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
   const [voice, setVoice] = useState<VoiceCommentState>({ kind: 'none' })
+  // The player and where it is, for "⏱ Vložit čas" in the comments.
+  const player = useRef<AudioPlayerHandle>(null)
+  const [playerTime, setPlayerTime] = useState(0)
+  const goodRef = useRef<HTMLTextAreaElement>(null)
+  const improveRef = useRef<HTMLTextAreaElement>(null)
   // Recordings still waiting, besides the open one (for "zbývá" and Přeskočit).
   const [waiting, setWaiting] = useState<PracticeLog[]>([])
   const { message, show } = useToast()
@@ -119,8 +142,20 @@ export function Grading() {
     return students.data?.find((s) => s.id === userId)?.full_name ?? 'Žák'
   }
 
+  // Puts the player's time where the cursor is in a comment.
+  function insertTime(field: HTMLTextAreaElement | null, value: string, set: (v: string) => void) {
+    const at = field?.selectionStart ?? value.length
+    const next = insertAt(value, at, formatTime(player.current?.currentTime() ?? playerTime))
+    set(next.text)
+    requestAnimationFrame(() => {
+      field?.focus()
+      field?.setSelectionRange(next.cursor, next.cursor)
+    })
+  }
+
   function selectLog(log: PracticeLog) {
     setSelectedLog(log)
+    setPlayerTime(0)
     // Fresh list of what's waiting, for "Přeskočit" and the count.
     fetchPendingReview()
       .then((all) => setWaiting(all.filter((l) => l.id !== log.id)))
@@ -346,18 +381,29 @@ export function Grading() {
           </div>
         )}
         <div data-grading-audio>
-          <RecordingAudio src={selectedLog.audio_url} />
+          <RecordingAudio src={selectedLog.audio_url} ref={player} onTime={setPlayerTime} />
         </div>
         <div>
-          <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>✅</span> Co se povedlo
-          </label>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
+              <span aria-hidden>✅</span> Co se povedlo
+            </label>
+            {selectedLog.audio_url && (
+              <TimeButton time={playerTime} onClick={() => insertTime(goodRef.current, feedbackGood, setFeedbackGood)} />
+            )}
+          </div>
           <textarea
+            ref={goodRef}
             className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
             value={feedbackGood}
             onChange={(e) => setFeedbackGood(e.target.value)}
             rows={2}
           />
+          {hasTimestamps(feedbackGood) && selectedLog.audio_url && (
+            <p className="mt-1 text-xs text-text-muted">
+              <TimedText text={feedbackGood} onSeek={(t) => player.current?.seek(t)} />
+            </p>
+          )}
           <QuickPhrases
             kind="good"
             saved={snippets.data ?? []}
@@ -368,15 +414,26 @@ export function Grading() {
           />
         </div>
         <div>
-          <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>🎯</span> Co zlepšit
-          </label>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
+              <span aria-hidden>🎯</span> Co zlepšit
+            </label>
+            {selectedLog.audio_url && (
+              <TimeButton time={playerTime} onClick={() => insertTime(improveRef.current, feedbackImprove, setFeedbackImprove)} />
+            )}
+          </div>
           <textarea
+            ref={improveRef}
             className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
             value={feedbackImprove}
             onChange={(e) => setFeedbackImprove(e.target.value)}
             rows={2}
           />
+          {hasTimestamps(feedbackImprove) && selectedLog.audio_url && (
+            <p className="mt-1 text-xs text-text-muted">
+              <TimedText text={feedbackImprove} onSeek={(t) => player.current?.seek(t)} />
+            </p>
+          )}
           <QuickPhrases
             kind="improve"
             saved={snippets.data ?? []}
