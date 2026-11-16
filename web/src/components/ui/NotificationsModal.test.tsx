@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NotificationsModal } from './NotificationsModal'
-import { base64UrlToBytes } from '../../lib/push'
+import { base64UrlToBytes, pushErrorText } from '../../lib/push'
 
 const db = vi.hoisted(() => ({
   saved: [] as unknown[],
@@ -64,5 +64,13 @@ describe('base64UrlToBytes', () => {
   it('decodes the URL-safe alphabet without padding', () => {
     expect([...base64UrlToBytes('-_8')]).toEqual([0xfb, 0xff])
     expect([...base64UrlToBytes('AQID')]).toEqual([1, 2, 3])
+  })
+})
+
+describe('pushErrorText', () => {
+  it('explains the browser push service failure in Czech', () => {
+    const err = new DOMException('Registration failed - push service error', 'AbortError')
+    expect(pushErrorText(err)).toMatch(/službou pro notifikace/)
+    expect(pushErrorText(new Error('boom'))).toBe('boom')
   })
 })

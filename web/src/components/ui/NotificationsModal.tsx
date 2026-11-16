@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Switch } from './Switch'
-import { disablePush, enablePush, isPushEnabled, notifyPush, pushSupport } from '../../lib/push'
+import { disablePush, enablePush, isPushEnabled, notifyPush, pushErrorText, pushSupport } from '../../lib/push'
 import {
   DEFAULT_NOTIFICATION_SETTINGS,
   REMINDER_HOURS,
@@ -68,7 +68,7 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
         setEnabled(false)
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Nepovedlo se to, zkus to znovu.'))
+      setError(pushErrorText(err))
     } finally {
       setBusy(false)
     }

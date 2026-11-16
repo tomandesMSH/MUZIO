@@ -4,6 +4,7 @@
 // (migration 0035, lib/data/notificationSettings.ts).
 import { supabase } from './supabase'
 import { isRunningInstalled } from './install'
+import { getErrorMessage } from './errors'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 
@@ -114,4 +115,15 @@ export function notifyPush(event: NotifyEvent): void {
       // Offline, or the function isn't deployed (local dev): no notification.
     }
   })()
+}
+
+// "Registration failed - push service error" (AbortError): the browser
+// couldn't reach its own push service (Google's for Chrome, Microsoft's for
+// Edge) - nothing Muzio can fix, but the user can.
+export function pushErrorText(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err)
+  if ((err instanceof DOMException && err.name === 'AbortError') || /push service/i.test(message)) {
+    return 'Prohlížeč se nespojil se svou službou pro notifikace. V Brave zapni Nastavení → Soukromí a zabezpečení → „Použít služby Google pro zasílání push zpráv“ a restartuj ho. Jinak to může blokovat VPN, firewall nebo blokátor reklam – nebo zkus Chrome či Edge.'
+  }
+  return getErrorMessage(err, 'Nepovedlo se to, zkus to znovu.')
 }
