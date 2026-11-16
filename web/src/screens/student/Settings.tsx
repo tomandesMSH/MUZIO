@@ -25,6 +25,8 @@ export function Settings() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
+  // "12/40" while the files download; undefined when idle.
+  const [exporting, setExporting] = useState<string>()
   const { message, show } = useToast()
 
   if (!profile) return null
@@ -39,6 +41,29 @@ export function Settings() {
       show(getErrorMessage(err, 'Uložení se nepovedlo, zkus to znovu.'))
     } finally {
       setSavingShare(false)
+    }
+  }
+
+  // Everything Muzio keeps about the pupil, as a ZIP (lib/exportMyData.ts).
+  async function downloadData() {
+    if (!profile) return
+    setExporting('data')
+    try {
+      const { exportMyData } = await import('../../lib/data/myData')
+      const zip = await exportMyData(profile, (done, total) => setExporting(`${done}/${total}`))
+      const url = URL.createObjectURL(zip)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `muzio-moje-data-${new Date().toISOString().slice(0, 10)}.zip`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 5000)
+      show('Data jsou stažená ✓')
+    } catch (err) {
+      show(getErrorMessage(err, 'Stažení dat se nepovedlo, zkus to znovu.'))
+    } finally {
+      setExporting(undefined)
     }
   }
 
@@ -94,6 +119,11 @@ export function Settings() {
                   : 'Chybí'}
               </span>
             }
+          />
+          <SettingsRow
+            label={exporting ? `Stahuji ${exporting}…` : 'Stáhnout moje data'}
+            right={<span className="text-xs text-text-muted">{exporting ? '⏳' : 'ZIP'}</span>}
+            onClick={exporting ? undefined : () => void downloadData()}
           />
           <SettingsRow
             label="Smazání osobních údajů"
