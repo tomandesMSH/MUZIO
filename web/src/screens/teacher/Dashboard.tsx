@@ -15,6 +15,7 @@ import { PickerMenu } from '../../components/ui/PickerMenu'
 import { fetchReviewContext } from '../../lib/data/classrooms'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { NO_ASSIGNMENT, assignmentsWaiting, filterReview, type ReviewFilter } from '../../lib/reviewFilter'
+import { WeeklyOverview } from '../../components/teacher/WeeklyOverview'
 import { INACTIVE_AFTER_DAYS, inactivePupils, inactivityText } from '../../lib/inactivity'
 
 export function TeacherDashboard() {
@@ -144,6 +145,8 @@ export function TeacherDashboard() {
             ))}
           </div>
         </div>
+
+        {!query && <WeeklyOverview />}
 
         {!query && inactive.length > 0 && (
           <div>
