@@ -17,6 +17,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import {
   createAssignment,
   updateAssignment,
+  deleteAssignment,
   type AssignmentUpdate,
   createClassroom,
   deleteClassroom,
@@ -133,6 +134,7 @@ function ClassroomDetail({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [editing, setEditing] = useState<Assignment>()
   const [copying, setCopying] = useState<Assignment>()
+  const [removing, setRemoving] = useState<Assignment>()
   const [copySubmitting, setCopySubmitting] = useState(false)
   const [copyError, setCopyError] = useState<string>()
   const [editSubmitting, setEditSubmitting] = useState(false)
@@ -176,6 +178,19 @@ function ClassroomDetail({
       setCopyError(getErrorMessage(err, 'Zadání se nepovedlo.'))
     } finally {
       setCopySubmitting(false)
+    }
+  }
+
+  async function handleDeleteAssignment() {
+    const assignment = removing
+    setRemoving(undefined)
+    if (!assignment) return
+    try {
+      await deleteAssignment(assignment)
+      assignments.refetch()
+      show('Úkol smazán')
+    } catch (err) {
+      show(getErrorMessage(err, 'Úkol se nepodařilo smazat.'))
     }
   }
 
@@ -334,6 +349,13 @@ function ClassroomDetail({
                   >
                     Zadat znovu
                   </button>
+                  <button
+                    type="button"
+                    className="ml-auto text-coral-dark underline underline-offset-2"
+                    onClick={() => setRemoving(assignment)}
+                  >
+                    Smazat
+                  </button>
                 </div>
                 {progress.data && members.data && (
                   <AssignmentProgress
@@ -351,6 +373,14 @@ function ClassroomDetail({
         </div>
       </div>
 
+      <ConfirmDialog
+        open={!!removing}
+        title={`Smazat úkol „${removing?.title ?? ''}“?`}
+        message="Žáci ho přestanou vidět. Nahrávky, které k němu poslali, jim zůstanou i s hodnocením."
+        confirmLabel="Smazat úkol"
+        onConfirm={() => void handleDeleteAssignment()}
+        onCancel={() => setRemoving(undefined)}
+      />
       {copying && (
         <CopyAssignmentModal
           assignment={copying}

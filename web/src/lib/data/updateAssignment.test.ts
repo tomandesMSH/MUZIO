@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { updateAssignment } from './classrooms'
+import { deleteAssignment, updateAssignment } from './classrooms'
 
 const calls = vi.hoisted(() => ({ updates: [] as unknown[], removed: [] as string[][], uploaded: [] as string[] }))
 
 vi.mock('../supabase', () => ({
   supabase: {
     from: () => ({
+      delete: () => ({ eq: async () => ({ error: null }) }),
       update: (row: unknown) => {
         calls.updates.push(row)
         return { eq: async () => ({ error: null }) }
@@ -70,5 +71,10 @@ describe('updateAssignment', () => {
     await updateAssignment(same, { title: 'X', description: '', dueDate: '', attachment: { kind: 'replace', file: new File(['x'], 'nova.mid') } })
     expect(calls.removed).toEqual([['a1/nova.mid']])
     expect(calls.uploaded).toEqual(['a1/nova.mid'])
+  })
+
+  it('deleting removes the score too', async () => {
+    await deleteAssignment(assignment)
+    expect(calls.removed).toEqual([['a1/stara.mid']])
   })
 })

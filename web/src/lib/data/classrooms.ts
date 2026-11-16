@@ -209,6 +209,17 @@ export async function updateAssignment(assignment: Assignment, update: Assignmen
   }
 }
 
+// Deletes an assignment. The recordings made for it stay with the pupils (no
+// longer tied to it - migration 0037); its score is removed from storage.
+export async function deleteAssignment(assignment: Pick<Assignment, 'id' | 'attachment_path'>): Promise<void> {
+  const { error } = await supabase.from('assignments').delete().eq('id', assignment.id)
+  if (error) throw error
+  if (assignment.attachment_path) {
+    // Best effort: nothing points at the file any more.
+    await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([assignment.attachment_path])
+  }
+}
+
 async function copyAttachment(assignmentId: string, from: { path: string; name: string }): Promise<void> {
   const path = attachmentPath(assignmentId, from.name)
   const { error: copyError } = await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).copy(from.path, path)
