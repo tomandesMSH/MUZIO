@@ -33,8 +33,8 @@ export function LessonCard({ icon, title, meta, badge, teacherName, onClick, foo
         </div>
         <Badge tone={badge.tone}>{badge.label}</Badge>
       </button>
-      {/* Lined up with the title, past the icon. */}
-      {footer && <div className="px-3.5 pb-3 -mt-1 pl-[4.25rem]">{footer}</div>}
+      {/* Its own strip under a divider, the full width of the card. */}
+      {footer && <div className="mx-3.5 border-t border-border py-2.5">{footer}</div>}
     </div>
   )
 }
