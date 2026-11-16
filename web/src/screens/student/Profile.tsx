@@ -1,7 +1,9 @@
 import { BadgeTile } from '../../components/gamification/BadgeTile'
 import { PracticeCalendar } from '../../components/gamification/PracticeCalendar'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
+import { NavIcon } from '../../components/layout/NavIcon'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchOwnLogsCount, fetchPracticeHistory, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -9,6 +11,7 @@ import { computeBadges, computeLevel, computeUnlockedSkins, isPerfectWeek } from
 import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
 
 export function Profile() {
+  const navigate = useNavigate()
   const { profile } = useAuth()
   const userId = profile?.id
   const [today] = useState(() => new Date())
@@ -42,7 +45,17 @@ export function Profile() {
   return (
     <AppShell role="student">
       <div className="space-y-6 flex-1">
-        <div className="text-center">
+        <div className="relative text-center">
+          {/* On a phone the bottom bar has no Settings - the gear is here. */}
+          <button
+            type="button"
+            aria-label="Nastavení"
+            title="Nastavení"
+            onClick={() => navigate('/student/settings')}
+            className="md:hidden absolute right-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-bg-card shadow-clay-sm text-text-muted hover:text-text-primary"
+          >
+            <NavIcon name="settings" className="w-5 h-5" />
+          </button>
           <h1 className="text-xl">{profile.full_name}</h1>
           <p className="text-text-muted text-sm">
             Level {level.level} · {level.title}

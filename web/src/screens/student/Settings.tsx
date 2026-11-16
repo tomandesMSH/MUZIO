@@ -5,7 +5,6 @@ import { Switch } from '../../components/ui/Switch'
 import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
-import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
 import { NotificationsModal } from '../../components/ui/NotificationsModal'
 import { InstallAppRow } from '../../components/ui/InstallAppRow'
@@ -22,7 +21,6 @@ import { getErrorMessage } from '../../lib/errors'
 export function Settings() {
   const navigate = useNavigate()
   const { profile, refreshProfile } = useAuth()
-  const [pairingOpen, setPairingOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
@@ -53,7 +51,17 @@ export function Settings() {
     <AppShell role="student">
       {message && <Toast message={message} />}
       <div className="space-y-6 flex-1">
-        <h1 className="text-xl">Nastavení</h1>
+        <div>
+          {/* On a phone Settings is reached from Profile (no room in the bottom bar). */}
+          <button
+            type="button"
+            className="md:hidden mb-1 text-sm text-text-muted"
+            onClick={() => navigate('/student/profile')}
+          >
+            ← Profil
+          </button>
+          <h1 className="text-xl">Nastavení</h1>
+        </div>
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Aplikace</h2>
@@ -64,7 +72,6 @@ export function Settings() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Účet</h2>
-          <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
         </div>
 
@@ -107,7 +114,6 @@ export function Settings() {
           Odhlásit se
         </Button>
       </div>
-      <JoinClassroomModal open={pairingOpen} onClose={() => setPairingOpen(false)} />
       {passwordOpen && (
         <ChangePasswordModal
           onClose={() => setPasswordOpen(false)}

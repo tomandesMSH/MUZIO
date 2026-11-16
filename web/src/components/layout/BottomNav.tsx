@@ -9,7 +9,7 @@ import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 export function BottomNav({ role }: { role: 'student' | 'teacher' }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const items = navItemsFor(role)
+  const items = navItemsFor(role).filter((item) => !item.desktopOnly)
   const activeTab = new URLSearchParams(location.search).get('tab')
   const badges = useNavBadges(items.flatMap((i) => (i.badge ? [i.badge.key] : [])) as NavBadgeKey[])
 

@@ -117,6 +117,14 @@ export async function fetchStudentClassrooms(studentId: string): Promise<Classro
   return (data ?? []) as Classroom[]
 }
 
+// The names of the pupil's teachers (id + full name only, migration 0022).
+// Empty when that isn't available.
+export async function fetchMyTeacherNames(): Promise<Map<string, string>> {
+  const { data, error } = await supabase.rpc('my_classroom_teacher_names')
+  if (error) return new Map()
+  return new Map(((data ?? []) as { teacher_id: string; full_name: string }[]).map((t) => [t.teacher_id, t.full_name]))
+}
+
 export async function joinClassroom(code: string): Promise<string> {
   const { data, error } = await supabase.rpc('join_classroom', { p_code: code.trim().toUpperCase() })
   if (error) throw error

@@ -8,6 +8,9 @@ export interface NavItem {
   // A number on the icon, and what it counts (for screen readers).
   badge?: { key: NavBadgeKey; label: string }
   isActive: (pathname: string, tab: string | null) => boolean
+  // Only in the sidebar: on a phone the bottom bar has no room (it's reached
+  // from the Profile page instead).
+  desktopOnly?: boolean
 }
 
 export const STUDENT_NAV_ITEMS: NavItem[] = [
@@ -20,8 +23,15 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     badge: { key: 'new-feedback', label: 'nových hodnocení' },
     isActive: (p) => p === '/student/feedback',
   },
+  { to: '/student/classes', label: 'Třídy', icon: 'classrooms', isActive: (p) => p === '/student/classes' },
   { to: '/student/profile', label: 'Profil', icon: 'profile', isActive: (p) => p === '/student/profile' },
-  { to: '/student/settings', label: 'Nastavení', icon: 'settings', isActive: (p) => p === '/student/settings' },
+  {
+    to: '/student/settings',
+    label: 'Nastavení',
+    icon: 'settings',
+    isActive: (p) => p === '/student/settings',
+    desktopOnly: true,
+  },
 ]
 
 export const TEACHER_NAV_ITEMS: NavItem[] = [
