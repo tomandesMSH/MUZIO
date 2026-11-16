@@ -4,6 +4,7 @@
 // something changed them (refreshNavBadges).
 import { useEffect, useSyncExternalStore } from 'react'
 import { countPendingReview, countUnseenFeedback } from './data/practiceLogs'
+import { onAppResume } from './appResume'
 
 export type NavBadgeKey = 'pending-review' | 'new-feedback'
 
@@ -39,6 +40,9 @@ function load(key: NavBadgeKey, force = false) {
     })
     .finally(() => inFlight.delete(key))
 }
+
+// Coming back to the app: fresh numbers.
+onAppResume(() => refreshNavBadges())
 
 // After grading (or anything else that changes a count).
 export function refreshNavBadges() {
