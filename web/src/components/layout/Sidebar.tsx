@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useLocation, useNavigate } from 'react-router-dom'
 import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
+import { NavBadge } from './NavBadge'
+import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 interface Box {
   top: number
@@ -21,6 +23,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
   const location = useLocation()
   const items = navItemsFor(role)
   const activeTab = new URLSearchParams(location.search).get('tab')
+  const badges = useNavBadges(items.flatMap((i) => (i.badge ? [i.badge.key] : [])) as NavBadgeKey[])
   const activeIndex = items.findIndex((item) => item.isActive(location.pathname, activeTab))
 
   const listRef = useRef<HTMLDivElement>(null)
@@ -98,7 +101,10 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
               onBlur={() => setHovered(undefined)}
               onClick={() => navigate(item.to)}
             >
-              <NavIcon name={item.icon} className="w-5 h-5 shrink-0" />
+              <span className="relative shrink-0">
+                <NavIcon name={item.icon} className="w-5 h-5" />
+                {item.badge && <NavBadge count={badges[item.badge.key]} label={item.badge.label} />}
+              </span>
               {item.label}
             </button>
           )

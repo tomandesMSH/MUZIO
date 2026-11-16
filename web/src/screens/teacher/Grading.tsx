@@ -20,6 +20,8 @@ import { FeedbackImagesEditor, type FeedbackImageItem } from '../../components/f
 import { fetchFeedbackImageUrls, removeFeedbackImages, uploadFeedbackImage } from '../../lib/data/feedbackImages'
 import { BADGES, type TeacherBadgeId } from '../../lib/game-logic'
 import type { AwardedBadge } from '../../lib/data/types'
+import { pickNextToGrade } from '../../lib/grading'
+import { refreshNavBadges } from '../../lib/navBadges'
 
 // The badges a teacher gives by hand, with the reason shown on the toggle.
 const TEACHER_BADGE_HINTS: Record<TeacherBadgeId, string> = {
@@ -59,6 +61,8 @@ export function Grading() {
   const [awards, setAwards] = useState<AwardedBadge[]>([])
   const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
+  // Recordings still waiting, besides the open one (for "zbývá" and Přeskočit).
+  const [waiting, setWaiting] = useState<PracticeLog[]>([])
   const { message, show } = useToast()
 
   function nameFor(userId: string): string {
@@ -67,6 +71,10 @@ export function Grading() {
 
   function selectLog(log: PracticeLog) {
     setSelectedLog(log)
+    // Fresh list of what's waiting, for "Přeskočit" and the count.
+    fetchPendingReview()
+      .then((all) => setWaiting(all.filter((l) => l.id !== log.id)))
+      .catch(() => setWaiting([]))
     setRating(log.rating ?? 0)
     setFeedbackGood(log.feedback_good ?? '')
     setFeedbackImprove(log.feedback_improve ?? '')
@@ -149,9 +157,19 @@ export function Grading() {
       uploaded.length = 0
       await removeFeedbackImages(savedBefore.filter((path) => !finalPaths.includes(path)))
       await setLogAwards(selectedLog, awards, wantedBadges)
-      show('Hodnocení odesláno žákovi')
-      setSelectedLog(undefined)
+      refreshNavBadges()
       logs.refetch()
+      // A new grade goes straight on to the next waiting recording; changing
+      // an older grade goes back to the list.
+      const wasWaiting = !selectedLog.teacher_comment
+      const next = wasWaiting ? pickNextToGrade(await fetchPendingReview().catch(() => []), selectedLog) : undefined
+      if (next) {
+        show(`Odesláno ✓ Další nahrávka: ${nameFor(next.user_id)}`)
+        selectLog(next)
+      } else {
+        show(wasWaiting ? 'Vše ohodnoceno 🎉' : 'Hodnocení odesláno žákovi')
+        setSelectedLog(undefined)
+      }
     } catch (err) {
       // Pictures uploaded for a grade that didn't save would just lie around.
       await removeFeedbackImages(uploaded)
@@ -174,9 +192,22 @@ export function Grading() {
           onCancel={() => setDeleteConfirmOpen(false)}
         />
         <div className="flex items-center justify-between gap-2">
-          <button className="text-sm text-text-muted" onClick={() => setSelectedLog(undefined)}>
-            ← Zpět na seznam
-          </button>
+          <div className="flex items-center gap-3">
+            <button className="text-sm text-text-muted" onClick={() => setSelectedLog(undefined)}>
+              ← Zpět na seznam
+            </button>
+            {!selectedLog.teacher_comment && waiting.length > 0 && (
+              <button
+                className="text-sm text-text-muted underline underline-offset-2 hover:text-text-primary"
+                onClick={() => {
+                  const next = pickNextToGrade(waiting, selectedLog)
+                  if (next) selectLog(next)
+                }}
+              >
+                Přeskočit →
+              </button>
+            )}
+          </div>
           <Button
             variant="destructive"
             className="!px-3 !py-1.5 text-xs shrink-0"
@@ -188,7 +219,10 @@ export function Grading() {
         </div>
         <div>
           <h1 className="text-xl">Hodnocení nahrávky</h1>
-          <p className="text-text-muted text-sm">{nameFor(selectedLog.user_id)}</p>
+          <p className="text-text-muted text-sm">
+            {nameFor(selectedLog.user_id)} · {new Date(selectedLog.created_at).toLocaleString('cs-CZ')}
+            {!selectedLog.teacher_comment && ` · ke kontrole zbývá ${waiting.length + 1}`}
+          </p>
         </div>
         <RecordingAudio src={selectedLog.audio_url} />
         <div>

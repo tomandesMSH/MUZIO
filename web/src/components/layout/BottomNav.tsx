@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
+import { NavBadge } from './NavBadge'
+import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 // Phone navigation: pinned to the bottom of the screen (above the home
 // gesture bar), always visible. The current page gets a coral pill.
@@ -9,6 +11,7 @@ export function BottomNav({ role }: { role: 'student' | 'teacher' }) {
   const location = useLocation()
   const items = navItemsFor(role)
   const activeTab = new URLSearchParams(location.search).get('tab')
+  const badges = useNavBadges(items.flatMap((i) => (i.badge ? [i.badge.key] : [])) as NavBadgeKey[])
 
   return (
     <nav
@@ -30,11 +33,14 @@ export function BottomNav({ role }: { role: 'student' | 'teacher' }) {
               onClick={() => navigate(item.to)}
             >
               <span
-                className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200 motion-reduce:transition-none ${
+                className={`relative flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200 motion-reduce:transition-none ${
                   active ? 'bg-coral-tint' : ''
                 }`}
               >
-                <NavIcon name={item.icon} className="w-[22px] h-[22px]" />
+                <span className="relative">
+                  <NavIcon name={item.icon} className="w-[22px] h-[22px]" />
+                  {item.badge && <NavBadge count={badges[item.badge.key]} label={item.badge.label} />}
+                </span>
               </span>
               {item.label}
             </button>

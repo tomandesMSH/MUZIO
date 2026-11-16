@@ -13,9 +13,17 @@ Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
 })
 Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, get: () => 44 })
 
+vi.mock('../../lib/data/practiceLogs', () => ({ countPendingReview: vi.fn(async () => 5) }))
+
 vi.mock('./navItems', () => ({
   navItemsFor: () => [
-    { to: '/student', label: 'Dashboard', icon: '🏠', isActive: (p: string) => p === '/student' },
+    {
+      to: '/student',
+      label: 'Dashboard',
+      icon: 'home',
+      badge: { key: 'pending-review', label: 'nahrávek ke kontrole' },
+      isActive: (p: string) => p === '/student',
+    },
     { to: '/student/lessons', label: 'Lekce', icon: '📋', isActive: (p: string) => p === '/student/lessons' },
     { to: '/student/feedback', label: 'Nahrávky', icon: '🎧', isActive: (p: string) => p === '/student/feedback' },
   ],
@@ -64,5 +72,14 @@ describe('Sidebar', () => {
     )
     await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '100px' }))
     await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '0px' }))
+  })
+
+  it('shows how many recordings wait, on the item that has a badge', async () => {
+    render(
+      <MemoryRouter initialEntries={['/student']}>
+        <Sidebar role="student" />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole('status', { name: '5 nahrávek ke kontrole' })).toHaveTextContent('5')
   })
 })

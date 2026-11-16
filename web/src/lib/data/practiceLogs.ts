@@ -67,6 +67,16 @@ export async function fetchPendingReview(): Promise<PracticeLog[]> {
   return (data ?? []) as PracticeLog[]
 }
 
+// How many recordings wait for a grade (for the badge in the teacher's menu).
+export async function countPendingReview(): Promise<number> {
+  const { count, error } = await supabase
+    .from('practice_logs')
+    .select('id', { count: 'exact', head: true })
+    .is('teacher_comment', null)
+  if (error) throw error
+  return count ?? 0
+}
+
 export async function fetchLogsByIds(ids: string[]): Promise<PracticeLog[]> {
   if (ids.length === 0) return []
   const { data, error } = await supabase.from('practice_logs').select('*').in('id', ids)
