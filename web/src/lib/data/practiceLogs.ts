@@ -132,6 +132,30 @@ export async function fetchAttempts(log: Pick<PracticeLog, 'id' | 'user_id' | 'a
   return (data ?? []) as PracticeLog[]
 }
 
+// Every recording of these pupils in a time range (grade export). Asked in
+// groups of pupils and pages of 1000 rows, the most the database returns at once.
+export async function fetchLogsForExport(studentIds: string[], fromIso: string, toIso: string): Promise<PracticeLog[]> {
+  const all: PracticeLog[] = []
+  for (let i = 0; i < studentIds.length; i += 100) {
+    const group = studentIds.slice(i, i + 100)
+    for (let page = 0; ; page++) {
+      const { data, error } = await supabase
+        .from('practice_logs')
+        .select('*')
+        .in('user_id', group)
+        .gte('created_at', fromIso)
+        .lt('created_at', toIso)
+        .order('created_at')
+        .order('id')
+        .range(page * 1000, page * 1000 + 999)
+      if (error) throw error
+      all.push(...((data ?? []) as PracticeLog[]))
+      if (!data || data.length < 1000) break
+    }
+  }
+  return all
+}
+
 export interface GradingInput {
   rating: number
   feedback_good: string

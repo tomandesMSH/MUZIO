@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import { ResetPasswordModal } from '../../components/ui/ResetPasswordModal'
 import { AppShell } from '../../components/layout/AppShell'
+import { ExportGradesModal } from '../../components/teacher/ExportGradesModal'
 import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, deleteStudent, fetchStudents } from '../../lib/data/profiles'
 import { adjustStudentStars } from '../../lib/data/practiceLogs'
@@ -28,6 +29,7 @@ export function Students() {
   const [resetTarget, setResetTarget] = useState<Profile>()
   const [starring, setStarring] = useState<string>()
   const { message, show } = useToast()
+  const [exportOpen, setExportOpen] = useState(false)
 
   const query = search.trim().toLowerCase()
   const matches = (name: string) => name.toLowerCase().includes(query)
@@ -110,6 +112,7 @@ export function Students() {
 
   return (
     <AppShell role="teacher">
+      {exportOpen && <ExportGradesModal students={students.data ?? []} onClose={() => setExportOpen(false)} />}
       {message && <Toast message={message} />}
       <PasswordReauthModal
         open={reauthOpen}
@@ -141,7 +144,12 @@ export function Students() {
       />
 
       <div className="space-y-4 flex-1">
-        <h1 className="text-xl">Žáci</h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl">Žáci</h1>
+          <Button variant="ghost" className="!px-3 !py-1.5 text-xs shrink-0" onClick={() => setExportOpen(true)}>
+            ⬇ Export známek
+          </Button>
+        </div>
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
         {students.loading && !students.data && <Skeleton rows={4} height="h-20" />}
 
