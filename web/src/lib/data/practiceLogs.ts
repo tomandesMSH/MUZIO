@@ -67,6 +67,25 @@ export async function fetchPendingReview(): Promise<PracticeLog[]> {
   return (data ?? []) as PracticeLog[]
 }
 
+// Graded recordings the pupil hasn't opened yet (RLS: only their own).
+// Needs migration 0036; without it the query fails and no number is shown.
+export async function countUnseenFeedback(): Promise<number> {
+  const { count, error } = await supabase
+    .from('practice_logs')
+    .select('id', { count: 'exact', head: true })
+    .not('rating', 'is', null)
+    .is('feedback_seen_at', null)
+  if (error) throw error
+  return count ?? 0
+}
+
+// The pupil opened these grades (migration 0036's mark_feedback_seen).
+export async function markFeedbackSeen(ids: (string | number)[]): Promise<void> {
+  if (ids.length === 0) return
+  const { error } = await supabase.rpc('mark_feedback_seen', { p_ids: ids.map(Number) })
+  if (error) throw error
+}
+
 // How many recordings wait for a grade (for the badge in the teacher's menu).
 export async function countPendingReview(): Promise<number> {
   const { count, error } = await supabase

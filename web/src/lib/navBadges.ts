@@ -3,14 +3,15 @@
 // copy, so the counts live here, shared, fetched at most every 30 s unless
 // something changed them (refreshNavBadges).
 import { useEffect, useSyncExternalStore } from 'react'
-import { countPendingReview } from './data/practiceLogs'
+import { countPendingReview, countUnseenFeedback } from './data/practiceLogs'
 
-export type NavBadgeKey = 'pending-review'
+export type NavBadgeKey = 'pending-review' | 'new-feedback'
 
 type Counts = Partial<Record<NavBadgeKey, number>>
 
 const FETCHERS: Record<NavBadgeKey, () => Promise<number>> = {
   'pending-review': countPendingReview,
+  'new-feedback': countUnseenFeedback,
 }
 
 const MAX_AGE_MS = 30_000

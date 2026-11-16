@@ -82,6 +82,8 @@ export interface PracticeLog {
   feedback_images?: string[] | null
   // A note from the pupil sent with the recording (migration 0036).
   student_note?: string | null
+  // When the pupil opened the grade (migration 0036); null = new for them.
+  feedback_seen_at?: string | null
 }
 
 // A badge the teacher gave while grading a recording (migration 0025).
