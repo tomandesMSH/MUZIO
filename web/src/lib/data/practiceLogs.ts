@@ -114,6 +114,24 @@ export async function fetchStudentLogs(studentId: string): Promise<PracticeLog[]
   return (data ?? []) as PracticeLog[]
 }
 
+// A pupil's other recordings of the same assignment or own piece, newest first
+// (the teacher compares attempts while grading).
+export async function fetchAttempts(log: Pick<PracticeLog, 'id' | 'user_id' | 'assignment_id' | 'own_piece_id'>): Promise<PracticeLog[]> {
+  const column = log.assignment_id ? 'assignment_id' : log.own_piece_id ? 'own_piece_id' : undefined
+  const value = log.assignment_id ?? log.own_piece_id
+  if (!column || !value) return []
+  const { data, error } = await supabase
+    .from('practice_logs')
+    .select('*')
+    .eq('user_id', log.user_id)
+    .eq(column, value)
+    .neq('id', log.id)
+    .order('created_at', { ascending: false })
+    .limit(20)
+  if (error) throw error
+  return (data ?? []) as PracticeLog[]
+}
+
 export interface GradingInput {
   rating: number
   feedback_good: string

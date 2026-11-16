@@ -35,6 +35,7 @@ import {
 import { formatTime, hasTimestamps, insertAt } from '../../lib/timestamps'
 import { TimedText } from '../../components/feedback/TimedText'
 import type { AudioPlayerHandle } from '../../components/audio/AudioPlayer'
+import { PreviousAttempts } from '../../components/teacher/PreviousAttempts'
 import { pickNextToGrade } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
@@ -383,6 +384,7 @@ export function Grading() {
         <div data-grading-audio>
           <RecordingAudio src={selectedLog.audio_url} ref={player} onTime={setPlayerTime} />
         </div>
+        <PreviousAttempts key={selectedLog.id} log={selectedLog} />
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
