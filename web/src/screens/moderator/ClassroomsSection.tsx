@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
+import { Chevron, Collapse } from '../../components/ui/Collapse'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import { SearchBar } from '../../components/ui/SearchBar'
@@ -119,10 +120,11 @@ export function ClassroomsSection() {
           const isOpen = open === classroom.id
           const addable = pupils.filter((p) => !ids.includes(p.id))
           return (
-            <div key={classroom.id} className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5 space-y-2.5">
+            <div key={classroom.id} className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5">
               <button
                 className="w-full flex items-center justify-between gap-2 text-left"
                 aria-expanded={isOpen}
+                aria-controls={`trida-${classroom.id}`}
                 onClick={() => setOpen(isOpen ? undefined : classroom.id)}
               >
                 <div className="min-w-0">
@@ -132,11 +134,13 @@ export function ClassroomsSection() {
                     {ids.length} {ids.length === 1 ? 'žák' : ids.length >= 2 && ids.length <= 4 ? 'žáci' : 'žáků'}
                   </div>
                 </div>
-                <span className="text-text-muted text-xs shrink-0">{isOpen ? '▲' : '▼'}</span>
+                <span className="shrink-0">
+                  <Chevron open={isOpen} />
+                </span>
               </button>
 
-              {isOpen && (
-                <div className="space-y-3 border-t border-border pt-2.5">
+              <Collapse open={isOpen} id={`trida-${classroom.id}`}>
+                <div className="mt-2.5 space-y-3 border-t border-border pt-2.5">
                   <ul className="space-y-1.5">
                     {ids.map((studentId) => (
                       <li key={studentId} className="flex items-center justify-between gap-2 text-sm">
@@ -216,7 +220,7 @@ export function ClassroomsSection() {
                     </Button>
                   </div>
                 </div>
-              )}
+              </Collapse>
             </div>
           )
         })}
