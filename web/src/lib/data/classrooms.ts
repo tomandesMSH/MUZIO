@@ -32,6 +32,31 @@ export async function fetchTeacherClassrooms(teacherId: string): Promise<Classro
   return (data ?? []) as Classroom[]
 }
 
+// For filtering "Ke kontrole": the teacher's classes with their pupils, and
+// the titles of the given assignments.
+export async function fetchReviewContext(
+  teacherId: string,
+  assignmentIds: string[],
+): Promise<{ classrooms: Classroom[]; membersOf: Map<string, Set<string>>; titles: Map<string, string> }> {
+  const classrooms = await fetchTeacherClassrooms(teacherId)
+  const [membersRes, titlesRes] = await Promise.all([
+    classrooms.length
+      ? supabase.from('classroom_members').select('classroom_id, student_id').in('classroom_id', classrooms.map((c) => c.id))
+      : Promise.resolve({ data: [], error: null }),
+    assignmentIds.length
+      ? supabase.from('assignments').select('id, title').in('id', assignmentIds)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+  if (membersRes.error) throw membersRes.error
+  if (titlesRes.error) throw titlesRes.error
+  const membersOf = new Map<string, Set<string>>()
+  for (const row of (membersRes.data ?? []) as { classroom_id: string; student_id: string }[]) {
+    membersOf.set(row.classroom_id, (membersOf.get(row.classroom_id) ?? new Set()).add(row.student_id))
+  }
+  const titles = new Map(((titlesRes.data ?? []) as { id: string; title: string }[]).map((a) => [a.id, a.title]))
+  return { classrooms, membersOf, titles }
+}
+
 export async function deleteClassroom(classroomId: string): Promise<void> {
   // The assignments go with the classroom (on delete cascade), their files
   // don't: remove them first. Best-effort - a leftover file is only clutter.

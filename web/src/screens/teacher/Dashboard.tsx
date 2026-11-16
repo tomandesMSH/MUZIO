@@ -9,6 +9,10 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchPendingReview } from '../../lib/data/practiceLogs'
 import { fetchStudents } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
+import { useAuth } from '../../lib/AuthProvider'
+import { PickerMenu } from '../../components/ui/PickerMenu'
+import { fetchReviewContext } from '../../lib/data/classrooms'
+import { NO_ASSIGNMENT, assignmentsWaiting, filterReview, type ReviewFilter } from '../../lib/reviewFilter'
 import { INACTIVE_AFTER_DAYS, inactivePupils, inactivityText } from '../../lib/inactivity'
 
 export function TeacherDashboard() {
@@ -17,6 +21,13 @@ export function TeacherDashboard() {
   const students = useQuery(() => fetchStudents(), [])
   const [search, setSearch] = useState('')
   const [showAllInactive, setShowAllInactive] = useState(false)
+  const { profile } = useAuth()
+  const [filter, setFilter] = useState<ReviewFilter>({ sort: 'oldest' })
+  const waitingIds = [...new Set((pending.data ?? []).flatMap((l) => (l.assignment_id ? [l.assignment_id] : [])))]
+  const context = useQuery(
+    () => (profile ? fetchReviewContext(profile.id, waitingIds) : Promise.resolve(undefined)),
+    [profile?.id, waitingIds.join(',')],
+  )
   const { message } = useToast()
 
   function nameFor(userId: string): string {
@@ -27,7 +38,15 @@ export function TeacherDashboard() {
   const shownInactive = showAllInactive ? inactive : inactive.slice(0, 5)
 
   const query = search.trim().toLowerCase()
-  const filteredPending = query ? pending.data?.filter((log) => nameFor(log.user_id).toLowerCase().includes(query)) : pending.data
+  const byName = query ? pending.data?.filter((log) => nameFor(log.user_id).toLowerCase().includes(query)) : pending.data
+  const filteredPending = byName && filterReview(byName, filter, context.data?.membersOf ?? new Map())
+  const waitingPerAssignment = assignmentsWaiting(pending.data ?? [])
+  const classLabel = context.data?.classrooms.find((c) => c.id === filter.classroomId)?.name ?? 'Všechny třídy'
+  const assignmentLabel = !filter.assignmentId
+    ? 'Všechny úkoly'
+    : filter.assignmentId === NO_ASSIGNMENT
+      ? 'Bez úkolu'
+      : (context.data?.titles.get(filter.assignmentId) ?? 'Úkol')
   const filteredStudents = query
     ? (students.data ?? []).filter((s) => s.full_name.toLowerCase().includes(query))
     : students.data
@@ -43,6 +62,52 @@ export function TeacherDashboard() {
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">
             Ke kontrole ({filteredPending?.length ?? 0})
           </h2>
+          {(pending.data?.length ?? 0) > 1 && (
+            <div className="mb-2.5 flex flex-wrap items-center gap-2">
+              {(context.data?.classrooms.length ?? 0) > 1 && (
+                <PickerMenu
+                  label={classLabel}
+                  ariaLabel="Filtrovat podle třídy"
+                  options={[
+                    { value: '', label: 'Všechny třídy' },
+                    ...(context.data?.classrooms ?? []).map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                  onPick={(value) => setFilter((f) => ({ ...f, classroomId: value || undefined }))}
+                />
+              )}
+              {waitingPerAssignment.size > 1 && (
+                <PickerMenu
+                  label={assignmentLabel}
+                  ariaLabel="Filtrovat podle úkolu"
+                  options={[
+                    { value: '', label: 'Všechny úkoly' },
+                    ...[...waitingPerAssignment].map(([id, count]) => ({
+                      value: id,
+                      label: id === NO_ASSIGNMENT ? 'Bez úkolu' : (context.data?.titles.get(id) ?? 'Úkol'),
+                      hint: String(count),
+                    })),
+                  ]}
+                  onPick={(value) => setFilter((f) => ({ ...f, assignmentId: value || undefined }))}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => setFilter((f) => ({ ...f, sort: f.sort === 'oldest' ? 'newest' : 'oldest' }))}
+                className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs font-heading font-semibold text-text-primary hover:bg-bg-card-alt"
+              >
+                {filter.sort === 'oldest' ? '↑ Nejstarší první' : '↓ Nejnovější první'}
+              </button>
+              {(filter.classroomId || filter.assignmentId) && (
+                <button
+                  type="button"
+                  className="text-xs text-text-muted underline underline-offset-2"
+                  onClick={() => setFilter((f) => ({ sort: f.sort }))}
+                >
+                  Zrušit filtr
+                </button>
+              )}
+            </div>
+          )}
           {pending.loading && <p className="text-text-muted text-sm">Načítám…</p>}
           {filteredPending?.length === 0 && <p className="text-text-muted text-sm">Vše zkontrolováno 🎉</p>}
           <div className="space-y-2">
@@ -50,7 +115,7 @@ export function TeacherDashboard() {
               <button
                 key={log.id}
                 className="w-full flex items-center justify-between rounded-2xl bg-bg-card shadow-clay-sm p-3.5 text-left"
-                onClick={() => navigate('/teacher/grading', { state: { studentId: log.user_id } })}
+                onClick={() => navigate('/teacher/grading', { state: { studentId: log.user_id, logId: String(log.id) } })}
               >
                 <div className="flex items-center gap-2.5">
                   <Avatar name={nameFor(log.user_id)} size={38} />
@@ -58,6 +123,9 @@ export function TeacherDashboard() {
                     <div className="font-heading font-semibold text-sm">{nameFor(log.user_id)}</div>
                     <div className="text-text-muted text-xs">
                       {new Date(log.created_at).toLocaleDateString('cs-CZ')}
+                      {log.assignment_id && context.data?.titles.get(log.assignment_id)
+                        ? ` · ${context.data.titles.get(log.assignment_id)}`
+                        : ''}
                     </div>
                   </div>
                 </div>

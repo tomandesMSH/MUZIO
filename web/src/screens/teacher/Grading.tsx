@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Button } from '../../components/ui/Button'
@@ -48,6 +48,8 @@ const TEACHER_BADGES = BADGES.filter((b) => b.byTeacher).map((b) => ({
 
 interface LocationState {
   studentId?: string
+  // Open this recording straight away (from the dashboard's "Ke kontrole").
+  logId?: string
 }
 
 export function Grading() {
@@ -62,6 +64,7 @@ export function Grading() {
   )
 
   const [selectedLog, setSelectedLog] = useState<PracticeLog>()
+  const openedFromLink = useRef(false)
   const [rating, setRating] = useState(0)
   const [feedbackGood, setFeedbackGood] = useState('')
   const [feedbackImprove, setFeedbackImprove] = useState('')
@@ -140,6 +143,15 @@ export function Grading() {
         // Without migration 0025 (or offline) grading still works, just without badges.
       })
   }
+
+  // Came for one recording: open it once the list is there.
+  useEffect(() => {
+    if (openedFromLink.current || !state.logId || !logs.data) return
+    const log = logs.data.find((l) => String(l.id) === state.logId)
+    openedFromLink.current = true
+    if (log) selectLog(log)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs.data, state.logId])
 
   function toggleBadge(id: TeacherBadgeId) {
     setWantedBadges((prev) => {

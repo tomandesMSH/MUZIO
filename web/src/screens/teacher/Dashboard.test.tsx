@@ -5,7 +5,27 @@ import { TeacherDashboard } from './Dashboard'
 
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
-vi.mock('../../lib/data/practiceLogs', () => ({ fetchPendingReview: async () => [] }))
+vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 't1' } }) }))
+vi.mock('../../lib/data/practiceLogs', () => ({
+  fetchPendingReview: async () => [
+    { id: 11, user_id: '1', created_at: '2026-11-10T10:00:00Z', assignment_id: 'a1' },
+    { id: 12, user_id: '2', created_at: '2026-11-12T10:00:00Z', assignment_id: null },
+    { id: 13, user_id: '3', created_at: '2026-11-11T10:00:00Z', assignment_id: 'a1' },
+  ],
+}))
+vi.mock('../../lib/data/classrooms', () => ({
+  fetchReviewContext: async () => ({
+    classrooms: [
+      { id: '3A', name: '3.A' },
+      { id: '4B', name: '4.B' },
+    ],
+    membersOf: new Map([
+      ['3A', new Set(['1', '2'])],
+      ['4B', new Set(['3'])],
+    ]),
+    titles: new Map([['a1', 'Stupnice C dur']]),
+  }),
+}))
 
 const t = new Date()
 const ago = (n: number) => {
@@ -44,5 +64,22 @@ describe('TeacherDashboard', () => {
     await screen.findByText('Dlouho necvičili (3)')
     fireEvent.change(screen.getByPlaceholderText('Hledat žáka'), { target: { value: 'Pavel' } })
     expect(screen.queryByText(/Dlouho necvičili/)).toBeNull()
+  })
+
+  it('"Ke kontrole" filters by class and sorts', async () => {
+    render(
+      <MemoryRouter>
+        <TeacherDashboard />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Ke kontrole (3)')).toBeInTheDocument()
+    const names = () => screen.getAllByRole('button').map((b) => b.textContent).filter((t) => /Pavel|Jana|Eva/.test(t ?? '') && /2026|11\./.test(t ?? ''))
+    expect(names()[0]).toMatch(/Pavel/) // oldest first
+    fireEvent.click(screen.getByRole('button', { name: '↑ Nejstarší první' }))
+    expect(names()[0]).toMatch(/Jana/)
+    fireEvent.click(await screen.findByRole('button', { name: 'Filtrovat podle třídy' }))
+    fireEvent.click(screen.getByRole('option', { name: '4.B' }))
+    expect(screen.getByText('Ke kontrole (1)')).toBeInTheDocument()
+    expect(screen.getByText(/Stupnice C dur/)).toBeInTheDocument()
   })
 })
