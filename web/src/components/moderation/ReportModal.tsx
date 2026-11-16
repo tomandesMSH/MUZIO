@@ -30,7 +30,7 @@ export function ReportModal({ open, onClose, onSubmit, submitting, error }: Repo
           Nahlášení uvidí jen moderátor, ne učitel. Použij to, když ti něco přijde nevhodné.
         </p>
         <p className="text-xs text-coral-dark">
-          Zneužití nahlašování (např. ze srandy nebo aby se učiteli něco udělalo naschvál) se trestá.
+          Zneužití nahlašování (např. ze srandy nebo „naschvál“ proti učiteli) se trestá.
         </p>
         <div>
           <div className="text-xs font-semibold text-text-muted mb-1.5">Důvod</div>
