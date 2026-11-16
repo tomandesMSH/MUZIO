@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
+import { PickerMenu } from '../../components/ui/PickerMenu'
 import { Chevron, Collapse } from '../../components/ui/Collapse'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
@@ -19,8 +20,15 @@ import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Classroom } from '../../lib/data/types'
 
-const selectClass =
-  'rounded-lg bg-bg-card-alt shadow-clay-press px-2 py-1.5 text-xs text-text-primary outline-none focus:ring-2 focus:ring-coral max-w-full'
+const REMOVE = '__remove__'
+
+interface PendingAction {
+  title: string
+  message: string
+  confirmLabel: string
+  run: () => Promise<void>
+  success: string
+}
 
 // Every teacher's classes (migration 0031): who teaches it, its join code and
 // pupils; move a pupil, add one, hand the class over, delete it.
@@ -32,6 +40,7 @@ export function ClassroomsSection() {
   const [open, setOpen] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Classroom>()
+  const [confirm, setConfirm] = useState<PendingAction>()
   const [reauthOpen, setReauthOpen] = useState(false)
   const { message, show } = useToast()
 
@@ -47,6 +56,13 @@ export function ClassroomsSection() {
       .filter((m) => m.classroom_id === classroomId)
       .map((m) => m.student_id)
       .sort((a, b) => nameOf(a).localeCompare(nameOf(b), 'cs'))
+
+  // "3.A, 4.B" - shown next to a pupil you're about to add.
+  const classesOf = (studentId: string) =>
+    all
+      .filter((c) => (members.data ?? []).some((m) => m.classroom_id === c.id && m.student_id === studentId))
+      .map((c) => c.name)
+      .join(', ')
 
   const query = search.trim().toLowerCase()
   const visible = all.filter(
@@ -107,6 +123,19 @@ export function ClassroomsSection() {
         onCancel={() => setDeleteTarget(undefined)}
       />
 
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        message={confirm?.message}
+        confirmLabel={confirm?.confirmLabel}
+        onConfirm={() => {
+          const action = confirm
+          setConfirm(undefined)
+          if (action) void run(action.run, action.success)
+        }}
+        onCancel={() => setConfirm(undefined)}
+      />
+
       <SearchBar value={search} onChange={setSearch} placeholder="Hledat třídu, učitele nebo žáka" />
       {loading && <p className="text-text-muted text-sm">Načítám…</p>}
       {error && (
@@ -145,71 +174,70 @@ export function ClassroomsSection() {
                     {ids.map((studentId) => (
                       <li key={studentId} className="flex items-center justify-between gap-2 text-sm">
                         <span className="truncate">{nameOf(studentId)}</span>
-                        <select
-                          className={selectClass}
-                          aria-label={`Přesunout: ${nameOf(studentId)}`}
+                        <PickerMenu
+                          label="Přesunout"
+                          ariaLabel={`Přesunout: ${nameOf(studentId)}`}
                           disabled={busy}
-                          value=""
-                          onChange={(e) => {
-                            const to = e.target.value === 'remove' ? null : e.target.value
+                          options={[
+                            ...all
+                              .filter((c) => c.id !== classroom.id)
+                              .map((c) => ({ value: c.id, label: c.name, hint: nameOf(c.teacher_id) })),
+                            { value: REMOVE, label: 'Odebrat ze třídy', danger: true },
+                          ]}
+                          onPick={(value) => {
+                            const to = value === REMOVE ? null : value
                             const toName = all.find((c) => c.id === to)?.name
-                            void run(
-                              () => moveStudent(studentId, classroom.id, to),
-                              to ? `Přesunuto do „${toName}“` : 'Odebráno ze třídy',
-                            )
+                            setConfirm({
+                              title: to ? 'Přesunout žáka?' : 'Odebrat žáka ze třídy?',
+                              message: to
+                                ? `„${nameOf(studentId)}“ odejde ze třídy „${classroom.name}“ do „${toName}“.`
+                                : `„${nameOf(studentId)}“ odejde ze třídy „${classroom.name}“. Účet i nahrávky mu zůstanou.`,
+                              confirmLabel: to ? 'Přesunout' : 'Odebrat',
+                              run: () => moveStudent(studentId, classroom.id, to),
+                              success: to ? `Přesunuto do „${toName}“` : 'Odebráno ze třídy',
+                            })
                           }}
-                        >
-                          <option value="">Přesunout…</option>
-                          {all
-                            .filter((c) => c.id !== classroom.id)
-                            .map((c) => (
-                              <option key={c.id} value={c.id}>
-                                do {c.name} ({nameOf(c.teacher_id)})
-                              </option>
-                            ))}
-                          <option value="remove">Odebrat ze třídy</option>
-                        </select>
+                        />
                       </li>
                     ))}
                     {ids.length === 0 && <li className="text-text-muted text-xs">Ve třídě nikdo není.</li>}
                   </ul>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <select
-                      className={selectClass}
-                      aria-label={`Přidat žáka do ${classroom.name}`}
-                      disabled={busy || addable.length === 0}
-                      value=""
-                      onChange={(e) =>
-                        void run(() => moveStudent(e.target.value, null, classroom.id), 'Žák přidán do třídy')
-                      }
-                    >
-                      <option value="">+ Přidat žáka…</option>
-                      {addable.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.full_name}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className={selectClass}
-                      aria-label={`Předat třídu ${classroom.name}`}
+                    <PickerMenu
+                      label="+ Přidat žáka"
+                      ariaLabel={`Přidat žáka do ${classroom.name}`}
                       disabled={busy}
-                      value=""
-                      onChange={(e) => {
-                        const teacher = e.target.value
-                        void run(() => transferClassroom(classroom.id, teacher), `Třída předána: ${nameOf(teacher)}`)
-                      }}
-                    >
-                      <option value="">Předat učiteli…</option>
-                      {teachers
+                      emptyText="Všichni žáci už ve třídě jsou."
+                      searchPlaceholder="Hledat žáka…"
+                      options={addable.map((p) => ({
+                        value: p.id,
+                        label: p.full_name,
+                        hint: classesOf(p.id) || undefined,
+                      }))}
+                      onPick={(studentId) =>
+                        void run(() => moveStudent(studentId, null, classroom.id), `${nameOf(studentId)} přidán(a) do třídy`)
+                      }
+                    />
+                    <PickerMenu
+                      label="Předat učiteli"
+                      ariaLabel={`Předat třídu ${classroom.name}`}
+                      disabled={busy}
+                      emptyText="Žádný jiný ověřený učitel."
+                      searchPlaceholder="Hledat učitele…"
+                      options={teachers
                         .filter((t) => t.id !== classroom.teacher_id)
-                        .map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.full_name}
-                          </option>
-                        ))}
-                    </select>
+                        .map((t) => ({ value: t.id, label: t.full_name }))}
+                      onPick={(teacherId) =>
+                        setConfirm({
+                          title: 'Předat třídu?',
+                          message: `Třída „${classroom.name}“ i s úkoly přejde od „${nameOf(classroom.teacher_id)}“ k „${nameOf(teacherId)}“. Původní učitel ji už neuvidí.`,
+                          confirmLabel: 'Předat',
+                          run: () => transferClassroom(classroom.id, teacherId),
+                          success: `Třída předána: ${nameOf(teacherId)}`,
+                        })
+                      }
+                    />
                     <Button
                       variant="destructive"
                       className="!px-3 !py-1.5 text-xs"

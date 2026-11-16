@@ -43,19 +43,37 @@ describe('ClassroomsSection', () => {
     expect(screen.getByText(/Učitel Bořek · kód/)).toHaveTextContent('BBB222 · 0 žáků')
   })
 
-  it('moves a pupil to another class and adds one', async () => {
+  it('moves a pupil to another class after confirming, and adds one straight away', async () => {
     render(<ClassroomsSection />)
     const card = await openClass('3.A')
-    fireEvent.change(within(card).getByLabelText('Přesunout: Pavel'), { target: { value: 'c2' } })
+    fireEvent.click(within(card).getByRole('button', { name: 'Přesunout: Pavel' }))
+    fireEvent.click(screen.getByRole('option', { name: /4\.B/ }))
+    expect(moveStudent).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toHaveTextContent('„Pavel“ odejde ze třídy „3.A“ do „4.B“')
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Přesunout' }))
     await waitFor(() => expect(moveStudent).toHaveBeenCalledWith('p1', 'c1', 'c2'))
-    fireEvent.change(within(card).getByLabelText('Přidat žáka do 3.A'), { target: { value: 'p2' } })
+
+    fireEvent.click(within(card).getByRole('button', { name: 'Přidat žáka do 3.A' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Petra' }))
     await waitFor(() => expect(moveStudent).toHaveBeenCalledWith('p2', null, 'c1'))
   })
 
-  it('hands a class over and deletes one after confirming', async () => {
+  it('takes a pupil out of a class after confirming', async () => {
     render(<ClassroomsSection />)
     const card = await openClass('3.A')
-    fireEvent.change(within(card).getByLabelText('Předat třídu 3.A'), { target: { value: 't2' } })
+    fireEvent.click(within(card).getByRole('button', { name: 'Přesunout: Pavel' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Odebrat ze třídy' }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Odebrat' }))
+    await waitFor(() => expect(moveStudent).toHaveBeenCalledWith('p1', 'c1', null))
+  })
+
+  it('hands a class over and deletes one, each after confirming', async () => {
+    render(<ClassroomsSection />)
+    const card = await openClass('3.A')
+    fireEvent.click(within(card).getByRole('button', { name: 'Předat třídu 3.A' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Učitel Bořek' }))
+    expect(transferClassroom).not.toHaveBeenCalled()
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Předat' }))
     await waitFor(() => expect(transferClassroom).toHaveBeenCalledWith('c1', 't2'))
     fireEvent.click(within(card).getByRole('button', { name: 'Smazat třídu' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Smazat třídu' }))
