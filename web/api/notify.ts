@@ -33,6 +33,14 @@ function supabaseDb(url: string, serviceKey: string) {
       const { data } = await sb.from('assignments').select('id, teacher_id, classroom_id, title').eq('id', id).maybeSingle()
       return data
     },
+    async getAnnouncement(id) {
+      const { data } = await sb
+        .from('classroom_announcements')
+        .select('id, classroom_id, teacher_id, body')
+        .eq('id', id)
+        .maybeSingle()
+      return data
+    },
     async getName(userId) {
       const { data } = await sb.from('profiles').select('full_name').eq('id', userId).maybeSingle()
       return data?.full_name ?? null
