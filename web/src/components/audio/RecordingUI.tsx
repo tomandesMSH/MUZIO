@@ -3,6 +3,10 @@ import { Waveform } from './Waveform'
 import { Button } from '../ui/Button'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
 
+// Seconds counted down before recording starts - time to get the hands on
+// the keys, so the take doesn't open with silence and rustling.
+export const COUNTDOWN_FROM = 3
+
 // Up to 5 minutes - the longest a recording can count for in XP (game-logic.ts).
 const MAX_SECONDS = 300
 
@@ -27,6 +31,20 @@ interface RecordingUIProps {
 export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIProps) {
   const { status, elapsedSeconds, blob, levels, error, start, stop, reset } = useMediaRecorder(MAX_SECONDS)
   const [preview, setPreview] = useState<{ blob: Blob; url: string }>()
+  // 3, 2, 1 before recording; undefined when not counting.
+  const [count, setCount] = useState<number>()
+
+  useEffect(() => {
+    if (count === undefined) return
+    const timer = setTimeout(() => {
+      if (count > 1) setCount(count - 1)
+      else {
+        setCount(undefined)
+        void start()
+      }
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [count, start])
   const reviewing = status === 'stopped' && !!blob
   const previewUrl = preview && preview.blob === blob ? preview.url : undefined
 
@@ -74,18 +92,39 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
-      <Waveform levels={status === 'recording' ? levels : undefined} />
-      <div className="font-heading font-semibold text-sm text-text-muted">
-        {formatTime(elapsedSeconds)} / {formatTime(MAX_SECONDS)}
-      </div>
+      {count !== undefined ? (
+        <div className="flex h-[76px] flex-col items-center justify-center" aria-live="assertive">
+          <span
+            key={count}
+            className="font-heading text-6xl font-bold leading-none text-coral animate-[countdown-pop_1s_ease-out] motion-reduce:animate-none"
+          >
+            {count}
+          </span>
+        </div>
+      ) : (
+        <>
+          <Waveform levels={status === 'recording' ? levels : undefined} />
+          <div className="font-heading font-semibold text-sm text-text-muted">
+            {formatTime(elapsedSeconds)} / {formatTime(MAX_SECONDS)}
+          </div>
+        </>
+      )}
       <button
         className={`w-20 h-20 rounded-full bg-coral shadow-clay flex items-center justify-center ${
           status === 'recording' ? 'ring-8 ring-coral-tint animate-pulse motion-reduce:animate-none' : ''
         }`}
-        aria-label={status === 'recording' ? 'Zastavit nahrávání' : 'Spustit nahrávání'}
-        onClick={status === 'recording' ? stop : start}
+        aria-label={
+          status === 'recording' ? 'Zastavit nahrávání' : count !== undefined ? 'Zrušit odpočet' : 'Spustit nahrávání'
+        }
+        onClick={() => {
+          if (status === 'recording') stop()
+          else if (count !== undefined) setCount(undefined)
+          else setCount(COUNTDOWN_FROM)
+        }}
       >
-        <span className={`bg-cream ${status === 'recording' ? 'w-6 h-6 rounded' : 'w-6 h-6 rounded-full'}`} />
+        <span
+          className={`bg-cream ${status === 'recording' || count !== undefined ? 'w-6 h-6 rounded' : 'w-6 h-6 rounded-full'}`}
+        />
       </button>
       {error && (
         <p role="alert" className="text-sm text-coral-dark text-center">
@@ -93,7 +132,11 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
         </p>
       )}
       <p className="text-text-muted text-xs">
-        {status === 'recording' ? 'Klepnutím zastavíš nahrávání' : 'Klepnutím začneš nahrávat'}
+        {status === 'recording'
+          ? 'Klepnutím zastavíš nahrávání'
+          : count !== undefined
+            ? 'Připrav se… (klepnutím zrušíš)'
+            : 'Klepnutím začneš nahrávat'}
       </p>
     </div>
   )

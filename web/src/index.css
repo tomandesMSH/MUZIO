@@ -115,3 +115,15 @@
     transform: translateY(-4px) scale(0.98);
   }
 }
+
+/* Recording countdown 3-2-1 (components/audio/RecordingUI.tsx). */
+@keyframes countdown-pop {
+  from {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

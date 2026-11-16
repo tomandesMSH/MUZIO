@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RecordingUI } from './RecordingUI'
 
@@ -72,5 +72,33 @@ describe('RecordingUI', () => {
     finished()
     rerender(<RecordingUI onSend={vi.fn()} onReviewingChange={onReviewingChange} />)
     expect(onReviewingChange).toHaveBeenLastCalledWith(true)
+  })
+
+  it('counts 3-2-1 before recording starts', () => {
+    vi.useFakeTimers()
+    rec.start.mockClear()
+    render(<RecordingUI onSend={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Spustit nahrávání' }))
+    expect(screen.getByText('3')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByText('2')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(rec.start).not.toHaveBeenCalled()
+    act(() => vi.advanceTimersByTime(1000))
+    expect(rec.start).toHaveBeenCalledTimes(1)
+    vi.useRealTimers()
+  })
+
+  it('the countdown can be cancelled', () => {
+    vi.useFakeTimers()
+    rec.start.mockClear()
+    render(<RecordingUI onSend={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Spustit nahrávání' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Zrušit odpočet' }))
+    act(() => vi.advanceTimersByTime(5000))
+    expect(rec.start).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Spustit nahrávání' })).toBeInTheDocument()
+    vi.useRealTimers()
   })
 })
