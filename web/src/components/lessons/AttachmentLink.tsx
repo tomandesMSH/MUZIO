@@ -11,7 +11,11 @@ interface AttachmentLinkProps {
   forTeacher?: boolean
 }
 
-// The assignment's score, to download - with an "i" explaining what to do with it.
+const actionButton =
+  'inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-heading font-semibold transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none'
+
+// The assignment's score: its name with an "i" explaining what to do with it,
+// and two buttons under it - download, or open straight in Keyboard Utils.
 export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLinkProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
@@ -39,25 +43,12 @@ export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLin
   const openInApp = () => go((url) => keyboardUtilsOpenLink(url, fileName), 'Otevření se nepovedlo.')
 
   return (
-    <div className="text-xs">
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 font-semibold text-coral-dark hover:underline disabled:opacity-50 min-w-0"
-          disabled={busy}
-          onClick={download}
-        >
-          <span aria-hidden="true">🎼</span>
-          <span className="truncate">{assignment.attachment_name ?? 'Noty ke stažení'}</span>
-        </button>
-        <button
-          type="button"
-          className="shrink-0 rounded-full border border-coral/40 px-2 py-0.5 font-semibold text-coral-dark hover:bg-coral/10 disabled:opacity-50"
-          disabled={busy}
-          onClick={openInApp}
-        >
-          Otevřít v Keyboard Utils
-        </button>
+    <div className="text-xs space-y-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <span aria-hidden="true">🎼</span>
+        <span className="truncate font-semibold text-text-primary" title={fileName}>
+          {assignment.attachment_name ?? 'Noty k úkolu'}
+        </span>
         <InfoTip label="Co s tímhle souborem">
           {forTeacher ? (
             <span className="block">
@@ -91,7 +82,26 @@ export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLin
           )}
         </InfoTip>
       </div>
-      {error && <p className="text-coral-dark mt-1">{error}</p>}
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={`${actionButton} border-border text-text-primary hover:bg-bg-card-alt`}
+          disabled={busy}
+          onClick={download}
+          aria-label={`Stáhnout ${fileName}`}
+        >
+          <span aria-hidden="true">⬇</span> Stáhnout
+        </button>
+        <button
+          type="button"
+          className={`${actionButton} border-coral/40 text-coral-dark hover:bg-coral/10`}
+          disabled={busy}
+          onClick={openInApp}
+        >
+          <span aria-hidden="true">🎹</span> Otevřít v Keyboard Utils
+        </button>
+      </div>
+      {error && <p className="text-coral-dark">{error}</p>}
     </div>
   )
 }

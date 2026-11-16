@@ -82,7 +82,8 @@ describe('AttachmentLink', () => {
 
   it('offers the file and tells the student what to do with it', () => {
     render(<AttachmentLink assignment={{ attachment_path: 'a/oda.mid', attachment_name: 'Óda na radost.mid' }} />)
-    expect(screen.getByRole('button', { name: /Óda na radost\.mid/ })).toBeInTheDocument()
+    expect(screen.getByText('Óda na radost.mid')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Stáhnout Óda na radost.mid' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Co s tímhle souborem' }))
     expect(screen.getByText(/Učitel ti k úkolu přiložil noty/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Stáhnout Keyboard Utils' })).toHaveAttribute(
