@@ -10,6 +10,8 @@ export interface RecordingToSend {
   durationSeconds: number | null
   format?: { extension: string; contentType: string }
   assignmentId?: string
+  // The pupil's note for the teacher (optional).
+  note?: string
   // Set when an earlier attempt already uploaded the sound: not uploaded twice.
   audioUrl?: string
 }
@@ -31,7 +33,7 @@ export async function submitRecording(input: RecordingToSend): Promise<{ session
   let audioUrl = input.audioUrl
   try {
     if (!audioUrl) audioUrl = await uploadRecording(input.userId, input.blob, input.format)
-    await insertPracticeLog(input.userId, audioUrl, input.assignmentId, input.durationSeconds)
+    await insertPracticeLog(input.userId, audioUrl, input.assignmentId, input.durationSeconds, input.note)
   } catch (err) {
     throw new SubmitError(err, audioUrl)
   }

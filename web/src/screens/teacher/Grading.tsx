@@ -224,6 +224,12 @@ export function Grading() {
             {!selectedLog.teacher_comment && ` · ke kontrole zbývá ${waiting.length + 1}`}
           </p>
         </div>
+        {selectedLog.student_note && (
+          <div className="rounded-xl border-l-4 border-coral bg-bg-card-alt px-3 py-2">
+            <div className="text-xs font-semibold text-text-muted">💬 Vzkaz od žáka</div>
+            <p className="text-sm whitespace-pre-wrap break-words">{selectedLog.student_note}</p>
+          </div>
+        )}
         <RecordingAudio src={selectedLog.audio_url} />
         <div>
           <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
@@ -317,6 +323,7 @@ export function Grading() {
               <div className="text-text-muted text-xs">
                 {new Date(log.created_at).toLocaleString('cs-CZ')}
                 {log.teacher_comment ? ' · ohodnoceno' : ' · čeká na hodnocení'}
+                {log.student_note ? ' · 💬 vzkaz' : ''}
               </div>
             </button>
           ))}

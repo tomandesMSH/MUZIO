@@ -31,6 +31,19 @@ describe('insertPracticeLog', () => {
   })
 })
 
+describe('insertPracticeLog note', () => {
+  it('sends a trimmed note only when there is one', async () => {
+    db.insert.mockClear()
+    await insertPracticeLog('u1', 'https://x/a.wav', undefined, 60, '  takt 8 ')
+    expect(db.insert).toHaveBeenCalledWith([
+      { user_id: 'u1', audio_url: 'https://x/a.wav', assignment_id: null, duration_seconds: 60, student_note: 'takt 8' },
+    ])
+    db.insert.mockClear()
+    await insertPracticeLog('u1', 'https://x/a.wav', undefined, 60, '   ')
+    expect(db.insert).toHaveBeenCalledWith([{ user_id: 'u1', audio_url: 'https://x/a.wav', assignment_id: null, duration_seconds: 60 }])
+  })
+})
+
 describe('adjustStudentStars', () => {
   it('calls the teacher_adjust_stars function and returns the new count', async () => {
     expect(await adjustStudentStars('s1', 1)).toBe(3)
