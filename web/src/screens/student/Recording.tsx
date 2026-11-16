@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { RecordingUI } from '../../components/audio/RecordingUI'
+import { Metronome } from '../../components/practice/Metronome'
+import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { AudioFilePicker } from '../../components/audio/AudioFilePicker'
 import { Toast } from '../../components/ui/Toast'
 import { Confetti } from '../../components/gamification/Confetti'
@@ -31,6 +33,7 @@ export function Recording() {
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const [reviewing, setReviewing] = useState(false)
+  const [metronomeOpen, setMetronomeOpen] = useState(false)
   // A take that failed to send is kept under one id, however many retries.
   const pendingIds = useRef(new WeakMap<Blob, string>())
   // The sound already uploaded by a failed attempt: not uploaded again.
@@ -120,6 +123,25 @@ export function Recording() {
           <AttachmentLink assignment={{ attachment_path: attachmentPath, attachment_name: attachmentName ?? null }} />
         </div>
       )}
+      <div className="mb-1">
+        <button
+          type="button"
+          aria-expanded={metronomeOpen}
+          onClick={() => setMetronomeOpen(!metronomeOpen)}
+          className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-heading font-semibold"
+        >
+          <span>🥁 Metronom</span>
+          <Chevron open={metronomeOpen} />
+        </button>
+        <Collapse open={metronomeOpen}>
+          <div className="pb-2 space-y-1.5">
+            <Metronome />
+            <p className="text-[11px] text-text-muted px-1">
+              Tip: cvič s ním se sluchátky. Když hraje z reproduktoru a nahráváš, mikrofon ho nahraje taky.
+            </p>
+          </div>
+        </Collapse>
+      </div>
       <RecordingUI
         sending={uploading}
         onSend={(blob, seconds, note) => handleRecorded(blob, seconds, undefined, note)}
