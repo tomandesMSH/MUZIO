@@ -21,6 +21,7 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     isActive: (p) => p === '/student/feedback',
   },
   { to: '/student/profile', label: 'Profil', icon: 'profile', isActive: (p) => p === '/student/profile' },
+  { to: '/student/settings', label: 'Nastavení', icon: 'settings', isActive: (p) => p === '/student/settings' },
 ]
 
 export const TEACHER_NAV_ITEMS: NavItem[] = [
@@ -34,6 +35,7 @@ export const TEACHER_NAV_ITEMS: NavItem[] = [
   { to: '/teacher/students', label: 'Žáci', icon: 'students', isActive: (p) => p === '/teacher/students' },
   { to: '/teacher/classrooms', label: 'Učebny', icon: 'classrooms', isActive: (p) => p === '/teacher/classrooms' },
   { to: '/teacher/profile', label: 'Profil', icon: 'profile', isActive: (p) => p === '/teacher/profile' },
+  { to: '/teacher/settings', label: 'Nastavení', icon: 'settings', isActive: (p) => p === '/teacher/settings' },
 ]
 
 export function navItemsFor(role: 'student' | 'teacher'): NavItem[] {

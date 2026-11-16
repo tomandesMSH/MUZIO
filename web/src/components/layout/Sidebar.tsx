@@ -117,7 +117,9 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
         rel="noopener noreferrer"
         className="mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-heading font-semibold text-text-muted transition-colors duration-200 hover:bg-bg-card-alt hover:text-text-primary"
       >
-        <span aria-hidden className="w-5 text-center">📖</span>
+        <span className="relative shrink-0">
+          <NavIcon name="docs" className="w-5 h-5" />
+        </span>
         Dokumentace
       </a>
     </div>

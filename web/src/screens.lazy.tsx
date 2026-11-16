@@ -15,6 +15,8 @@ export const Students = lazy(() => import('./screens/teacher/Students').then((m)
 export const Grading = lazy(() => import('./screens/teacher/Grading').then((m) => ({ default: m.Grading })))
 export const Classrooms = lazy(() => import('./screens/teacher/Classrooms').then((m) => ({ default: m.Classrooms })))
 export const TeacherProfile = lazy(() => import('./screens/teacher/Profile').then((m) => ({ default: m.Profile })))
+export const Settings = lazy(() => import('./screens/student/Settings').then((m) => ({ default: m.Settings })))
+export const TeacherSettings = lazy(() => import('./screens/teacher/Settings').then((m) => ({ default: m.Settings })))
 export const Queue = lazy(() => import('./screens/moderator/Queue').then((m) => ({ default: m.Queue })))
 
 export function Screen({ children }: { children: ReactNode }) {

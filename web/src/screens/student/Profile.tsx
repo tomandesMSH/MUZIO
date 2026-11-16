@@ -1,39 +1,17 @@
-import { useNavigate } from 'react-router-dom'
 import { BadgeTile } from '../../components/gamification/BadgeTile'
 import { PracticeCalendar } from '../../components/gamification/PracticeCalendar'
 import { useState } from 'react'
-import { Button } from '../../components/ui/Button'
-import { Switch } from '../../components/ui/Switch'
-import { SettingsRow } from '../../components/ui/SettingsRow'
-import { openDocs } from '../../lib/links'
-import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
-import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
-import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
-import { NotificationsModal } from '../../components/ui/NotificationsModal'
-import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchOwnLogsCount, fetchPracticeHistory, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { computeBadges, computeLevel, computeUnlockedSkins, isPerfectWeek } from '../../lib/game-logic'
-import { signOut } from '../../lib/auth'
-import { ThemePicker } from '../../components/ui/ThemePicker'
-import { useToast } from '../../lib/useToast'
-import { updateShareBasicProgress } from '../../lib/data/profiles'
-import { getErrorMessage } from '../../lib/errors'
 import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
-import { reportFormUrl } from '../../lib/report'
 
 export function Profile() {
-  const navigate = useNavigate()
-  const { profile, refreshProfile } = useAuth()
+  const { profile } = useAuth()
   const userId = profile?.id
   const [today] = useState(() => new Date())
-  const [pairingOpen, setPairingOpen] = useState(false)
-  const [passwordOpen, setPasswordOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [savingShare, setSavingShare] = useState(false)
-  const { message, show } = useToast()
 
   const history = useQuery(() => (userId ? fetchPracticeHistory(userId) : Promise.resolve([])), [userId])
   const logsCount = useQuery(
@@ -61,31 +39,8 @@ export function Profile() {
   })
   const skins = computeUnlockedSkins(level.level)
 
-  function openReportForm() {
-    window.open(reportFormUrl({ pupil: true }), '_blank', 'noopener,noreferrer')
-  }
-
-  async function toggleShareBasicProgress(next: boolean) {
-    if (!userId) return
-    setSavingShare(true)
-    try {
-      await updateShareBasicProgress(userId, next)
-      refreshProfile()
-    } catch (err) {
-      show(getErrorMessage(err, 'Uložení se nepovedlo, zkus to znovu.'))
-    } finally {
-      setSavingShare(false)
-    }
-  }
-
-  async function handleLogout() {
-    await signOut()
-    navigate('/login', { replace: true })
-  }
-
   return (
     <AppShell role="student">
-      {message && <Toast message={message} />}
       <div className="space-y-6 flex-1">
         <div className="text-center">
           <h1 className="text-xl">{profile.full_name}</h1>
@@ -134,60 +89,7 @@ export function Profile() {
           </ul>
         </div>
 
-        <div>
-          <h2 className="text-sm font-heading font-semibold mb-1">Nastavení</h2>
-          <SettingsRow label="Vzhled" right={<ThemePicker />} />
-          <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
-          <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
-          <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
-          <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
-          <SettingsRow label="📖 Dokumentace" onClick={openDocs} />
-          <SettingsRow label="Nahlásit problém nebo nápad" onClick={openReportForm} />
-        </div>
-
-        <div>
-          <h2 className="text-sm font-heading font-semibold mb-1">Ochrana osobních údajů</h2>
-          <SettingsRow
-            label="Sdílet učiteli i samostatné procvičování"
-            right={
-              <Switch checked={!!profile.share_basic_progress} onChange={toggleShareBasicProgress} disabled={savingShare} />
-            }
-          />
-          <SettingsRow
-            label="Souhlas se zpracováním"
-            right={
-              <span className="text-xs text-text-muted">
-                {profile.consent_given
-                  ? profile.consent_guardian_name
-                    ? `Uděleno (${profile.consent_guardian_name})`
-                    : 'Uděleno'
-                  : 'Chybí'}
-              </span>
-            }
-          />
-          <SettingsRow
-            label="Smazání osobních údajů"
-            onClick={() => show('Pro smazání účtu a všech nahrávek požádej svého učitele.')}
-          />
-        </div>
-
-        <Button variant="ghost" className="w-full" onClick={handleLogout}>
-          Odhlásit se
-        </Button>
       </div>
-      <JoinClassroomModal open={pairingOpen} onClose={() => setPairingOpen(false)} />
-      {passwordOpen && (
-        <ChangePasswordModal
-          onClose={() => setPasswordOpen(false)}
-          onChanged={() => {
-            setPasswordOpen(false)
-            show('Heslo je změněné.')
-          }}
-        />
-      )}
-      {notificationsOpen && (
-        <NotificationsModal role="student" userId={profile.id} onClose={() => setNotificationsOpen(false)} />
-      )}
     </AppShell>
   )
 }

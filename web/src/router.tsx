@@ -3,7 +3,7 @@ import { Login } from './screens/Login'
 import { ChoosePanel } from './screens/ChoosePanel'
 import { RequireRole } from './components/routing/RequireRole'
 import { RequireModerator } from './components/routing/RequireModerator'
-import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Queue } from './screens.lazy'
+import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Queue } from './screens.lazy'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -50,6 +50,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/student/settings',
+    element: (
+      <RequireRole role="student">
+        <Screen><Settings /></Screen>
+      </RequireRole>
+    ),
+  },
+  {
     path: '/teacher',
     element: (
       <RequireRole role="teacher">
@@ -86,6 +94,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireRole role="teacher">
         <Screen><TeacherProfile /></Screen>
+      </RequireRole>
+    ),
+  },
+  {
+    path: '/teacher/settings',
+    element: (
+      <RequireRole role="teacher">
+        <Screen><TeacherSettings /></Screen>
       </RequireRole>
     ),
   },

@@ -1,6 +1,6 @@
 // Line icons for the navigation (bottom bar and sidebar) - one stroke style,
 // they take the text colour, so active/inactive is just the colour change.
-export type NavIconName = 'home' | 'lessons' | 'recordings' | 'profile' | 'students' | 'classrooms'
+export type NavIconName = 'home' | 'lessons' | 'recordings' | 'profile' | 'students' | 'classrooms' | 'settings' | 'docs'
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
   home: (
@@ -45,6 +45,21 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M5 10.5V20h14v-9.5" />
       <path d="M3 20h18" />
       <path d="M10 20v-5h4v5" />
+    </>
+  ),
+  // A gear.
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </>
+  ),
+  // An open book.
+  docs: (
+    <>
+      <path d="M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.5.5 8 2" />
+      <path d="M12 6.5c1.5-1.5 4-2 8-2v14c-4 0-6.5.5-8 2" />
+      <path d="M12 6.5v14" />
     </>
   ),
 }

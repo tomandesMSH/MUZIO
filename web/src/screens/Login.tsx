@@ -155,7 +155,7 @@ export function Login() {
           </ul>
           <p className="text-xs text-text-muted">
             Pověz jim své uživatelské jméno. Nové heslo ti předají osobně. Po přihlášení si ho můžeš změnit na
-            vlastní v Profilu, v řádku Změnit heslo.
+            vlastní v Nastavení, v řádku Změnit heslo.
           </p>
           <Button type="button" className="w-full" onClick={() => setMode('login')}>
             Zpět na přihlášení
