@@ -36,6 +36,8 @@ import { formatTime, hasTimestamps, insertAt } from '../../lib/timestamps'
 import { TimedText } from '../../components/feedback/TimedText'
 import type { AudioPlayerHandle } from '../../components/audio/AudioPlayer'
 import { PreviousAttempts } from '../../components/teacher/PreviousAttempts'
+import { StudentNotes } from '../../components/teacher/StudentNotes'
+import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { pickNextToGrade } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
@@ -105,6 +107,7 @@ export function Grading() {
   const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
   const [voice, setVoice] = useState<VoiceCommentState>({ kind: 'none' })
+  const [notesOpen, setNotesOpen] = useState(false)
   // The player and where it is, for "⏱ Vložit čas" in the comments.
   const player = useRef<AudioPlayerHandle>(null)
   const [playerTime, setPlayerTime] = useState(0)
@@ -385,6 +388,22 @@ export function Grading() {
           <RecordingAudio src={selectedLog.audio_url} ref={player} onTime={setPlayerTime} />
         </div>
         <PreviousAttempts key={selectedLog.id} log={selectedLog} />
+        <div>
+          <button
+            type="button"
+            aria-expanded={notesOpen}
+            onClick={() => setNotesOpen(!notesOpen)}
+            className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-sm font-heading font-semibold"
+          >
+            <span>
+              📝 Moje poznámky k žákovi <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
+            </span>
+            <Chevron open={notesOpen} />
+          </button>
+          <Collapse open={notesOpen}>
+            <div className="pb-1">{notesOpen && <StudentNotes key={selectedLog.user_id} studentId={selectedLog.user_id} />}</div>
+          </Collapse>
+        </div>
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <label className="text-sm font-heading font-semibold flex items-center gap-1.5">

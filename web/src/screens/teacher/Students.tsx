@@ -10,6 +10,8 @@ import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import { ResetPasswordModal } from '../../components/ui/ResetPasswordModal'
 import { AppShell } from '../../components/layout/AppShell'
 import { ExportGradesModal } from '../../components/teacher/ExportGradesModal'
+import { StudentNotes } from '../../components/teacher/StudentNotes'
+import { Modal } from '../../components/ui/Modal'
 import { useQuery } from '../../lib/data/useQuery'
 import { approveStudent, deleteStudent, fetchStudents } from '../../lib/data/profiles'
 import { adjustStudentStars } from '../../lib/data/practiceLogs'
@@ -30,6 +32,7 @@ export function Students() {
   const [starring, setStarring] = useState<string>()
   const { message, show } = useToast()
   const [exportOpen, setExportOpen] = useState(false)
+  const [notesFor, setNotesFor] = useState<Profile>()
 
   const query = search.trim().toLowerCase()
   const matches = (name: string) => name.toLowerCase().includes(query)
@@ -112,6 +115,17 @@ export function Students() {
 
   return (
     <AppShell role="teacher">
+      {notesFor && (
+        <Modal open onClose={() => setNotesFor(undefined)}>
+          <div className="space-y-3">
+            <h2 className="font-heading font-semibold text-lg">📝 Poznámky – {notesFor.full_name}</h2>
+            <StudentNotes studentId={notesFor.id} autoFocus />
+            <Button variant="ghost" className="w-full" onClick={() => setNotesFor(undefined)}>
+              Hotovo
+            </Button>
+          </div>
+        </Modal>
+      )}
       {exportOpen && <ExportGradesModal students={students.data ?? []} onClose={() => setExportOpen(false)} />}
       {message && <Toast message={message} />}
       <PasswordReauthModal
@@ -209,6 +223,15 @@ export function Students() {
                   </div>
                 </button>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    variant="ghost"
+                    className="!px-2.5 !py-1.5 text-xs"
+                    aria-label={`Poznámky: ${student.full_name}`}
+                    title="Moje poznámky k žákovi"
+                    onClick={() => setNotesFor(student)}
+                  >
+                    📝
+                  </Button>
                   {renderResetButton(student)}
                   {renderDeleteButton(student)}
                 </div>
