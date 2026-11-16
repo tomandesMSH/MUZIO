@@ -19,6 +19,9 @@ vi.mock('../../lib/audio/useMediaRecorder', () => ({
   useMediaRecorder: () => ({ ...rec.state, start: rec.start, stop: rec.stop, reset: rec.reset }),
 }))
 
+const trim = vi.hoisted(() => ({ result: undefined as unknown }))
+vi.mock('../../lib/audio/trim', () => ({ trimSilence: async () => trim.result }))
+
 URL.createObjectURL = vi.fn(() => 'blob:take')
 URL.revokeObjectURL = vi.fn()
 
@@ -30,13 +33,14 @@ describe('RecordingUI', () => {
   beforeEach(() => {
     rec.state = { status: 'idle', elapsedSeconds: 0, blob: undefined, levels: [], error: undefined }
     rec.reset.mockClear()
+    trim.result = undefined
   })
 
-  it('does not send by itself: the finished take is played back first', () => {
+  it('does not send by itself: the finished take is played back first', async () => {
     finished()
     const onSend = vi.fn()
     render(<RecordingUI onSend={onSend} />)
-    expect(screen.getByTestId('take-preview')).toHaveAttribute('src', 'blob:take')
+    expect(await screen.findByTestId('take-preview')).toHaveAttribute('src', 'blob:take')
     expect(screen.getByText('00:42')).toBeInTheDocument()
     expect(onSend).not.toHaveBeenCalled()
   })
@@ -46,14 +50,32 @@ describe('RecordingUI', () => {
     const onSend = vi.fn(async () => true)
     render(<RecordingUI onSend={onSend} />)
     fireEvent.change(screen.getByLabelText('Vzkaz pro učitele (nepovinné)'), { target: { value: 'takt 8' } })
+    await screen.findByTestId('take-preview')
     fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
     expect(onSend).toHaveBeenCalledWith(rec.state.blob, 42, 'takt 8')
     await waitFor(() => expect(rec.reset).toHaveBeenCalled())
   })
 
+  it('sends the take without the silence, or whole when asked', async () => {
+    finished()
+    const short = new Blob(['y'])
+    trim.result = { blob: short, cutStart: 2.1, cutEnd: 0.8, duration: 10.3 }
+    const onSend = vi.fn(async () => false)
+    render(<RecordingUI onSend={onSend} />)
+    expect(await screen.findByText(/Ticho uříznuto: 2,1 s na začátku a 0,8 s na konci/)).toBeInTheDocument()
+    expect(screen.getByText('00:10')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
+    expect(onSend).toHaveBeenLastCalledWith(short, 10, '')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Odeslat' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Ponechat celou' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
+    expect(onSend).toHaveBeenLastCalledWith(rec.state.blob, 42, '')
+  })
+
   it('keeps the take when sending failed, so it can be sent again', async () => {
     finished()
     render(<RecordingUI onSend={async () => false} />)
+    await screen.findByTestId('take-preview')
     fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
     await new Promise((r) => setTimeout(r, 0))
     expect(rec.reset).not.toHaveBeenCalled()

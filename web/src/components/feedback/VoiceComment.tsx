@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
+import { trimSilence } from '../../lib/audio/trim'
 import { MAX_VOICE_SECONDS, fetchFeedbackAudioUrl } from '../../lib/data/feedbackAudio'
 
 // What the grade will have: nothing, the comment already saved, or a new one.
@@ -50,11 +51,24 @@ export function VoiceCommentEditor({ value, onChange }: { value: VoiceCommentSta
   const { status, elapsedSeconds, blob, error, start, stop, reset } = useMediaRecorder(MAX_VOICE_SECONDS)
   const newUrl = useObjectUrl(value.kind === 'new' ? value.blob : undefined)
 
-  // A finished recording becomes the comment.
+  // The comment as it is now, for the silence cut finishing later.
+  const latest = useRef(value)
+  useEffect(() => {
+    latest.current = value
+  })
+
+  // A finished recording becomes the comment; the silence around it is cut
+  // off a moment later (unless it has been replaced or removed meanwhile).
   useEffect(() => {
     if (status === 'stopped' && blob) {
       onChange({ kind: 'new', blob, seconds: elapsedSeconds })
       reset()
+      void trimSilence(blob).then((trimmed) => {
+        const now = latest.current
+        if (trimmed && now.kind === 'new' && now.blob === blob) {
+          onChange({ kind: 'new', blob: trimmed.blob, seconds: Math.max(1, Math.round(trimmed.duration)) })
+        }
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, blob])

@@ -4,6 +4,7 @@ import { Button } from '../ui/Button'
 import { NoteForTeacher } from './NoteForTeacher'
 import { MicCheck } from './MicCheck'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
+import { useSilenceTrim } from '../../lib/audio/useSilenceTrim'
 
 // Seconds counted down before recording starts - time to get the hands on
 // the keys, so the take doesn't open with silence and rustling.
@@ -16,6 +17,19 @@ function formatTime(seconds: number): string {
   const m = String(Math.floor(seconds / 60)).padStart(2, '0')
   const s = String(seconds % 60).padStart(2, '0')
   return `${m}:${s}`
+}
+
+function seconds(s: number): string {
+  return `${s.toLocaleString('cs-CZ', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} s`
+}
+
+// "2,1 s na začátku a 0,8 s na konci" - only the parts that were cut.
+function cutText(start: number, end: number): string {
+  const parts = [
+    ...(start >= 0.1 ? [`${seconds(start)} na začátku`] : []),
+    ...(end >= 0.1 ? [`${seconds(end)} na konci`] : []),
+  ]
+  return parts.join(' a ')
 }
 
 interface RecordingUIProps {
@@ -50,15 +64,22 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
     return () => clearTimeout(timer)
   }, [count, start])
   const reviewing = status === 'stopped' && !!blob
-  const previewUrl = preview && preview.blob === blob ? preview.url : undefined
+  // The silence around the playing is cut off (lib/audio/trim.ts) unless the
+  // pupil wants the whole take.
+  const trim = useSilenceTrim(reviewing ? blob : undefined)
+  const [keepWhole, setKeepWhole] = useState<Blob>()
+  const useTrimmed = !!trim.trimmed && keepWhole !== blob
+  const take = useTrimmed ? trim.trimmed?.blob : trim.pending ? undefined : (blob ?? undefined)
+  const takeSeconds = useTrimmed && trim.trimmed ? Math.max(1, Math.round(trim.trimmed.duration)) : elapsedSeconds
+  const previewUrl = preview && preview.blob === take ? preview.url : undefined
 
   // An object URL for the preview, freed when the take is replaced or gone.
   useEffect(() => {
-    if (!blob) return
-    const url = URL.createObjectURL(blob)
-    setPreview({ blob, url })
+    if (!take) return
+    const url = URL.createObjectURL(take)
+    setPreview({ blob: take, url })
     return () => URL.revokeObjectURL(url)
-  }, [blob])
+  }, [take])
 
   useEffect(() => {
     onReviewingChange?.(reviewing)
@@ -70,9 +91,26 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
         <div className="rounded-2xl bg-bg-card shadow-clay-sm p-4 space-y-3">
           <div className="flex items-baseline justify-between gap-2">
             <div className="font-heading font-semibold text-sm">Tvoje nahrávka</div>
-            <div className="text-xs text-text-muted">{formatTime(elapsedSeconds)}</div>
+            <div className="text-xs text-text-muted">{formatTime(takeSeconds)}</div>
           </div>
+          {trim.pending && <p className="text-xs text-text-muted">✂ Hledám ticho na začátku a na konci…</p>}
           {previewUrl && <audio controls src={previewUrl} className="w-full" data-testid="take-preview" />}
+          {trim.trimmed && (
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-text-muted">
+              <span>
+                {useTrimmed
+                  ? `✂ Ticho uříznuto: ${cutText(trim.trimmed.cutStart, trim.trimmed.cutEnd)}`
+                  : '✂ Posíláš celou nahrávku i s tichem.'}
+              </span>
+              <button
+                type="button"
+                className="underline underline-offset-2 hover:text-text-primary"
+                onClick={() => setKeepWhole(useTrimmed ? blob : undefined)}
+              >
+                {useTrimmed ? 'Ponechat celou' : 'Uříznout ticho'}
+              </button>
+            </div>
+          )}
           <p className="text-xs text-text-muted">Poslechni si ji. Povedla se? Pošli ji učiteli, jinak nahraj znovu.</p>
           <NoteForTeacher value={note} onChange={setNote} />
           <div className="flex gap-2.5">
@@ -82,9 +120,10 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
             <Button
               type="button"
               className="flex-1"
-              disabled={sending}
+              disabled={sending || !take}
               onClick={async () => {
-                if (await onSend(blob, elapsedSeconds, note)) {
+                if (!take) return
+                if (await onSend(take, takeSeconds, note)) {
                   setNote('')
                   reset()
                 }
