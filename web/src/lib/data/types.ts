@@ -78,6 +78,8 @@ export interface PracticeLog {
   duration_seconds?: number | null
   // Storage paths of the teacher's pictures, at most 3 (migration 0026).
   feedback_images?: string[] | null
+  // When the pupil opened the grade (migration 0036); null = new for them.
+  feedback_seen_at?: string | null
 }
 
 // A badge the teacher gave while grading a recording (migration 0025).

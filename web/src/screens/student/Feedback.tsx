@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppShell } from '../../components/layout/AppShell'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Badge } from '../../components/ui/Badge'
@@ -6,7 +6,8 @@ import { Toast } from '../../components/ui/Toast'
 import { ReportModal } from '../../components/moderation/ReportModal'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchOwnLogs } from '../../lib/data/practiceLogs'
+import { fetchOwnLogs, markFeedbackSeen } from '../../lib/data/practiceLogs'
+import { refreshNavBadges } from '../../lib/navBadges'
 import { reportContent } from '../../lib/data/moderation'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
@@ -25,6 +26,19 @@ export function Feedback() {
   const [reporting, setReporting] = useState(false)
   const [reportError, setReportError] = useState<string>()
   const { message, show } = useToast()
+  // Grades that were new when the page opened: marked "Nové" for this visit,
+  // and seen from now on (the number in the menu goes away).
+  const [newIds, setNewIds] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    const unseen = (logs.data ?? []).filter((log) => log.rating != null && log.feedback_seen_at === null)
+    if (unseen.length === 0) return
+    setNewIds(new Set(unseen.map((log) => String(log.id))))
+    markFeedbackSeen(unseen.map((log) => log.id))
+      .then(refreshNavBadges)
+      .catch(() => {
+        // Stays new; marked next time.
+      })
+  }, [logs.data])
 
   async function handleReport(reason: string, description: string) {
     if (!profile || !reportTarget) return
@@ -70,7 +84,14 @@ export function Feedback() {
                     {new Date(log.created_at).toLocaleString('cs-CZ')}
                   </span>
                   {graded ? (
-                    <Badge tone="success">+{xpForLog(log.rating, log.duration_seconds)} XP</Badge>
+                    <span className="flex items-center gap-1.5">
+                      {newIds.has(String(log.id)) && (
+                        <span className="rounded-full bg-coral px-2 py-0.5 text-[10px] font-heading font-bold uppercase tracking-wide text-white">
+                          Nové
+                        </span>
+                      )}
+                      <Badge tone="success">+{xpForLog(log.rating, log.duration_seconds)} XP</Badge>
+                    </span>
                   ) : (
                     <Badge tone="pending">Čeká na hodnocení</Badge>
                   )}
