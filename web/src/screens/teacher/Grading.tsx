@@ -20,6 +20,15 @@ import { FeedbackImagesEditor, type FeedbackImageItem } from '../../components/f
 import { fetchFeedbackImageUrls, removeFeedbackImages, uploadFeedbackImage } from '../../lib/data/feedbackImages'
 import { BADGES, type TeacherBadgeId } from '../../lib/game-logic'
 import type { AwardedBadge } from '../../lib/data/types'
+import { QuickPhrases } from '../../components/feedback/QuickPhrases'
+import {
+  addCommentSnippet,
+  appendPhrase,
+  deleteCommentSnippet,
+  fetchCommentSnippets,
+  type CommentSnippet,
+  type SnippetKind,
+} from '../../lib/data/commentSnippets'
 import { pickNextToGrade } from '../../lib/grading'
 import { refreshNavBadges } from '../../lib/navBadges'
 
@@ -64,6 +73,31 @@ export function Grading() {
   // Recordings still waiting, besides the open one (for "zbývá" and Přeskočit).
   const [waiting, setWaiting] = useState<PracticeLog[]>([])
   const { message, show } = useToast()
+  // Without migration 0036 just the default phrases (nothing can be saved).
+  const snippets = useQuery(
+    () => (profile ? fetchCommentSnippets(profile.id).catch(() => [] as CommentSnippet[]) : Promise.resolve([])),
+    [profile?.id],
+  )
+
+  async function saveSnippet(kind: SnippetKind, text: string) {
+    if (!profile) return
+    try {
+      await addCommentSnippet(profile.id, kind, text)
+      snippets.refetch()
+      show('Rychlá věta uložena')
+    } catch (err) {
+      show(getErrorMessage(err, 'Větu se nepodařilo uložit.'))
+    }
+  }
+
+  async function removeSnippet(snippet: CommentSnippet) {
+    try {
+      await deleteCommentSnippet(snippet.id)
+      snippets.refetch()
+    } catch (err) {
+      show(getErrorMessage(err, 'Větu se nepodařilo smazat.'))
+    }
+  }
 
   function nameFor(userId: string): string {
     return students.data?.find((s) => s.id === userId)?.full_name ?? 'Žák'
@@ -235,6 +269,14 @@ export function Grading() {
             onChange={(e) => setFeedbackGood(e.target.value)}
             rows={2}
           />
+          <QuickPhrases
+            kind="good"
+            saved={snippets.data ?? []}
+            current={feedbackGood}
+            onInsert={(phrase) => setFeedbackGood((v) => appendPhrase(v, phrase))}
+            onSave={(text) => void saveSnippet('good', text)}
+            onDelete={(snippet) => void removeSnippet(snippet)}
+          />
         </div>
         <div>
           <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
@@ -245,6 +287,14 @@ export function Grading() {
             value={feedbackImprove}
             onChange={(e) => setFeedbackImprove(e.target.value)}
             rows={2}
+          />
+          <QuickPhrases
+            kind="improve"
+            saved={snippets.data ?? []}
+            current={feedbackImprove}
+            onInsert={(phrase) => setFeedbackImprove((v) => appendPhrase(v, phrase))}
+            onSave={(text) => void saveSnippet('improve', text)}
+            onDelete={(snippet) => void removeSnippet(snippet)}
           />
         </div>
         <div>
