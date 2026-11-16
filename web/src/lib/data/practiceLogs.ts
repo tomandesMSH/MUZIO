@@ -200,6 +200,31 @@ export async function recordPracticeSession(userId: string): Promise<PracticeSes
 
 // Which of the given assignment ids already have a submitted recording
 // from this student.
+// For the teacher's list of assignments: who each one was given to (empty =
+// the whole classroom) and who has sent a recording for it.
+export async function fetchAssignmentProgress(
+  assignmentIds: string[],
+): Promise<{ recipients: Map<string, string[]>; submitted: Map<string, Set<string>> }> {
+  const recipients = new Map<string, string[]>()
+  const submitted = new Map<string, Set<string>>()
+  if (assignmentIds.length === 0) return { recipients, submitted }
+  const [recipientsRes, logsRes] = await Promise.all([
+    supabase.from('assignment_recipients').select('assignment_id, student_id').in('assignment_id', assignmentIds),
+    supabase.from('practice_logs').select('assignment_id, user_id').in('assignment_id', assignmentIds),
+  ])
+  if (recipientsRes.error) throw recipientsRes.error
+  if (logsRes.error) throw logsRes.error
+  for (const row of recipientsRes.data ?? []) {
+    const id = row.assignment_id as string
+    recipients.set(id, [...(recipients.get(id) ?? []), row.student_id as string])
+  }
+  for (const row of logsRes.data ?? []) {
+    const id = row.assignment_id as string
+    submitted.set(id, (submitted.get(id) ?? new Set()).add(row.user_id as string))
+  }
+  return { recipients, submitted }
+}
+
 export async function fetchCompletedAssignmentIds(userId: string, assignmentIds: string[]): Promise<Set<string>> {
   if (assignmentIds.length === 0) return new Set()
   const { data, error } = await supabase

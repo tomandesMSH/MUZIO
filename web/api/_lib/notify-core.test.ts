@@ -3,6 +3,8 @@ import {
   DEFAULT_SETTINGS,
   handleNotify,
   parseRequest,
+  nextDay,
+  pragueDay,
   pragueHour,
   xpFor,
   type AssignmentRow,
@@ -31,6 +33,7 @@ function setup(opts: {
   settings?: Record<string, Partial<Settings>>
   subs?: Subscription[]
   candidates?: ReminderCandidate[]
+  due?: Record<string, { assignment: AssignmentRow; missing: string[] }[]>
   caller?: string | null
   now?: Date
   gone?: string[]
@@ -50,6 +53,7 @@ function setup(opts: {
     subscriptions: async (ids) => (opts.subs ?? []).filter((s) => ids.includes(s.user_id)),
     deleteSubscription: async (endpoint) => void deleted.push(endpoint),
     reminderCandidates: async () => opts.candidates ?? [],
+    dueOn: async (day) => opts.due?.[day] ?? [],
     claim: async (kind, ref) => {
       const key = `${kind}:${ref}`
       if (claimed.has(key)) return false
@@ -204,5 +208,25 @@ describe('notify', () => {
     expect(sent[1].message.body).toBe('Dnes ještě žádná nahrávka. Stačí pár minut.')
     await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
     expect(sent).toHaveLength(2)
+  })
+
+  it('due tomorrow: reminds the pupils who have not sent it, at their hour, once', async () => {
+    const stupnice = { id: 'A1', teacher_id: 't1', classroom_id: 'C1', title: 'Stupnice C dur' }
+    const { deps, sent } = setup({
+      // 18:10 in Prague on 16 Nov -> due on the 17th
+      now: new Date('2026-11-16T17:10:00Z'),
+      due: { '2026-11-17': [{ assignment: stupnice, missing: ['p1', 'p2', 'p3'] }] },
+      settings: { p2: { assignments: false }, p3: { reminder_hour: 20 } },
+      subs: ['p1', 'p2', 'p3'].map((id) => sub(id)),
+    })
+    expect((await handleNotify({ type: 'reminders' }, 'cron-secret', deps)).body.sent).toBe(1)
+    expect(sent[0]).toMatchObject({ to: 'p1', message: { title: 'Zítra je termín ⏰', body: 'Stupnice C dur – ještě ti chybí nahrávka.' } })
+    await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
+    expect(sent).toHaveLength(1)
+  })
+
+  it('Czech date around midnight', () => {
+    expect(pragueDay(new Date('2026-11-16T23:30:00Z'))).toBe('2026-11-17')
+    expect(nextDay('2026-12-31')).toBe('2027-01-01')
   })
 })

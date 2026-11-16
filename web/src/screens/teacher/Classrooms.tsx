@@ -6,6 +6,9 @@ import { Toast } from '../../components/ui/Toast'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { AppShell } from '../../components/layout/AppShell'
 import { NewAssignmentModal } from '../../components/classrooms/NewAssignmentModal'
+import { AssignmentProgress } from '../../components/classrooms/AssignmentProgress'
+import { fetchAssignmentProgress } from '../../lib/data/practiceLogs'
+import { daysUntil } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
@@ -110,6 +113,11 @@ function ClassroomDetail({
     [memberIds.data?.join(',')],
   )
   const assignments = useQuery(() => fetchClassroomAssignments(classroom.id), [classroom.id])
+  const progress = useQuery(
+    () => fetchAssignmentProgress((assignments.data ?? []).map((a) => a.id)),
+    [assignments.data?.map((a) => a.id).join(',')],
+  )
+  const today = new Date()
   const { profile } = useAuth()
   const { message, show } = useToast()
   const [assignmentOpen, setAssignmentOpen] = useState(false)
@@ -132,7 +140,13 @@ function ClassroomDetail({
     }
   }
 
-  async function handleCreateAssignment(input: { title: string; description: string; recipientIds: string[]; attachment: File | null }) {
+  async function handleCreateAssignment(input: {
+    title: string
+    description: string
+    recipientIds: string[]
+    attachment: File | null
+    dueDate: string
+  }) {
     if (!profile) return
     setAssignmentSubmitting(true)
     setAssignmentError(undefined)
@@ -144,6 +158,7 @@ function ClassroomDetail({
         description: input.description,
         recipientIds: input.recipientIds,
         attachment: input.attachment,
+        dueDate: input.dueDate,
       })
       setAssignmentOpen(false)
       assignments.refetch()
@@ -225,7 +240,16 @@ function ClassroomDetail({
           <div className="space-y-2">
             {assignments.data?.map((assignment) => (
               <div key={assignment.id} className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5">
-                <div className="font-heading font-semibold text-sm">{assignment.title}</div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="font-heading font-semibold text-sm">{assignment.title}</div>
+                  {assignment.due_date && (
+                    <div
+                      className={`shrink-0 text-xs ${daysUntil(assignment.due_date, today) < 0 ? 'text-text-muted' : 'text-coral font-semibold'}`}
+                    >
+                      Termín {new Date(`${assignment.due_date}T12:00:00`).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}
+                    </div>
+                  )}
+                </div>
                 {assignment.attachment_path && (
                   <div className="mt-1.5">
                     <AttachmentLink assignment={assignment} forTeacher />
@@ -233,6 +257,15 @@ function ClassroomDetail({
                 )}
                 {assignment.description && (
                   <div className="text-text-muted text-xs mt-1">{assignment.description}</div>
+                )}
+                {progress.data && members.data && (
+                  <AssignmentProgress
+                    pupils={(() => {
+                      const chosen = progress.data.recipients.get(assignment.id)
+                      return chosen ? members.data.filter((m) => chosen.includes(m.id)) : members.data
+                    })()}
+                    submitted={progress.data.submitted.get(assignment.id) ?? new Set()}
+                  />
                 )}
               </div>
             ))}

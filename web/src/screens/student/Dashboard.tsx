@@ -10,6 +10,7 @@ import { DailyReminderBanner } from '../../components/gamification/DailyReminder
 import { Confetti } from '../../components/gamification/Confetti'
 import { Quests } from '../../components/gamification/Quests'
 import { LessonCard } from '../../components/lessons/LessonCard'
+import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
 import { PendingUploads } from '../../components/audio/PendingUploads'
@@ -128,21 +129,25 @@ export function StudentDashboard() {
             </p>
           )}
           <div className="space-y-2.5 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
-            {assignments.data?.map((assignment) => {
-              const done = completed.data?.has(assignment.id) ?? false
-              return (
-                <LessonCard
-                  key={assignment.id}
-                  icon="🎵"
-                  title={assignment.title}
-                  meta={assignment.description ?? ''}
-                  teacherName={assignment.teacher_name}
-                  badge={done ? { label: 'Hotovo', tone: 'success' } : { label: 'Čeká', tone: 'pending' }}
-                  onClick={() => openAssignment(assignment)}
-                  footer={assignment.attachment_path ? <AttachmentLink assignment={assignment} /> : undefined}
-                />
-              )
-            })}
+            {sortByDue(assignments.data ?? [])
+              // Still to do first, nearest deadline on top; done ones last.
+              .sort((a, b) => Number(completed.data?.has(a.id) ?? false) - Number(completed.data?.has(b.id) ?? false))
+              .map((assignment) => {
+                const done = completed.data?.has(assignment.id) ?? false
+                return (
+                  <LessonCard
+                    key={assignment.id}
+                    icon="🎵"
+                    title={assignment.title}
+                    meta={assignment.description ?? ''}
+                    teacherName={assignment.teacher_name}
+                    badge={done ? { label: 'Hotovo', tone: 'success' } : { label: 'Čeká', tone: 'pending' }}
+                    due={dueLabel(assignment.due_date, today, done)}
+                    onClick={() => openAssignment(assignment)}
+                    footer={assignment.attachment_path ? <AttachmentLink assignment={assignment} /> : undefined}
+                  />
+                )
+              })}
           </div>
           {assignments.data?.length === 0 && (
             <p className="text-text-muted text-sm">Zatím nemáš žádný zadaný úkol.</p>

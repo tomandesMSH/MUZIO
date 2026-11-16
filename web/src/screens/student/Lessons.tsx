@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { LessonCard } from '../../components/lessons/LessonCard'
+import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
 import { useAuth } from '../../lib/AuthProvider'
@@ -32,7 +33,8 @@ export function Lessons() {
   }
 
   const doneIds = completed.data ?? new Set<string>()
-  const pending = (assignments.data ?? []).filter((a) => !doneIds.has(a.id))
+  const today = new Date()
+  const pending = sortByDue((assignments.data ?? []).filter((a) => !doneIds.has(a.id)))
   const done = (assignments.data ?? []).filter((a) => doneIds.has(a.id))
 
   return (
@@ -69,6 +71,7 @@ export function Lessons() {
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}
                   badge={{ label: 'Čeká', tone: 'pending' }}
+                  due={dueLabel(assignment.due_date, today)}
                   onClick={() => openAssignment(assignment)}
                   footer={assignment.attachment_path ? <AttachmentLink assignment={assignment} /> : undefined}
                 />
@@ -89,6 +92,7 @@ export function Lessons() {
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}
                   badge={{ label: 'Hotovo', tone: 'success' }}
+                  due={dueLabel(assignment.due_date, today, true)}
                   footer={assignment.attachment_path ? <AttachmentLink assignment={assignment} /> : undefined}
                 />
               ))}
