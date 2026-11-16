@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
 import { NavBadge } from './NavBadge'
+import { DOCS_URL } from '../../lib/links'
 import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 interface Box {
@@ -62,7 +63,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
   const hover = hovered !== undefined && hovered !== activeIndex ? boxes[hovered] : undefined
 
   return (
-    <div className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-border md:p-5">
+    <div className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-border md:p-5 md:sticky md:top-0 md:h-dvh">
       <div className="flex items-center gap-2.5 mb-6 px-1">
         <div className="w-8 h-8 rounded-lg bg-coral shadow-clay-sm flex items-center justify-center text-sm">🎵</div>
         <span className="font-heading font-bold text-base">Muzio</span>
@@ -110,6 +111,16 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
           )
         })}
       </nav>
+      <a
+        href={DOCS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-heading font-semibold text-text-muted transition-colors duration-200 hover:bg-bg-card-alt hover:text-text-primary"
+      >
+        <span aria-hidden className="w-5 text-center">📖</span>
+        Dokumentace
+        <span aria-hidden className="ml-auto text-xs">↗</span>
+      </a>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Switch } from '../../components/ui/Switch'
 import { SettingsRow } from '../../components/ui/SettingsRow'
+import { openDocs } from '../../lib/links'
 import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { JoinClassroomModal } from '../../components/classrooms/JoinClassroomModal'
@@ -140,6 +141,7 @@ export function Profile() {
           <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
+          <SettingsRow label="📖 Dokumentace" onClick={openDocs} />
           <SettingsRow label="Nahlásit problém nebo nápad" onClick={openReportForm} />
         </div>
 

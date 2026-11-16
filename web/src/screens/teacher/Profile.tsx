@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { SettingsRow } from '../../components/ui/SettingsRow'
+import { openDocs } from '../../lib/links'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
@@ -52,6 +53,7 @@ export function Profile() {
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
+          <SettingsRow label="📖 Dokumentace" onClick={openDocs} />
         </div>
 
         {profile.is_moderator && (
