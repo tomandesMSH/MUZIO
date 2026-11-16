@@ -87,6 +87,8 @@ interface BadgeDef {
   label: string
   // How to earn it, shown next to the badge (a tooltip alone never shows on a phone).
   description: string
+  // A small number on the icon for badges of one kind (🔥 3 / 7 / 30) - one icon each, never a stack of them.
+  tier?: string
   check: (ctx: SafeBadgeContext) => boolean
   progress: (ctx: SafeBadgeContext) => { current: number; target: number }
   // Given by the teacher, can be earned again and again.
@@ -96,6 +98,7 @@ interface BadgeDef {
 export interface BadgeResult {
   id: string
   icon: string
+  tier?: string
   label: string
   description: string
   unlocked: boolean
@@ -107,16 +110,16 @@ export interface BadgeResult {
 
 export const BADGES: BadgeDef[] = [
   { id: 'novacek', icon: '🌱', label: 'Nováček', description: 'Pošli první nahrávku.', check: (ctx) => ctx.totalRecordings >= 1, progress: (ctx) => ({ current: ctx.totalRecordings, target: 1 }) },
-  { id: 'pravidelnost', icon: '🎯', label: 'Pravidelnost', description: 'Cvič 3 dny po sobě.', check: (ctx) => ctx.streak >= 3, progress: (ctx) => ({ current: ctx.streak, target: 3 }) },
-  { id: 'tyden-v-ohni', icon: '🔥', label: 'Týden v ohni', description: 'Cvič 7 dní po sobě.', check: (ctx) => ctx.streak >= 7, progress: (ctx) => ({ current: ctx.streak, target: 7 }) },
-  { id: 'mesic-discipliny', icon: '🔥🔥', label: 'Měsíc disciplíny', description: 'Cvič 30 dní po sobě.', check: (ctx) => ctx.streak >= 30, progress: (ctx) => ({ current: ctx.streak, target: 30 }) },
-  { id: 'stoleti-legenda', icon: '🔥🔥🔥', label: 'Stoletá legenda', description: 'Cvič 100 dní po sobě.', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
-  { id: 'deset-melodii', icon: '🎵', label: 'Deset melodií', description: 'Pošli 10 nahrávek.', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
-  { id: 'padesat-melodii', icon: '🎼', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
+  { id: 'pravidelnost', icon: '🔥', tier: '3', label: 'Pravidelnost', description: 'Cvič 3 dny po sobě.', check: (ctx) => ctx.streak >= 3, progress: (ctx) => ({ current: ctx.streak, target: 3 }) },
+  { id: 'tyden-v-ohni', icon: '🔥', tier: '7', label: 'Týden v ohni', description: 'Cvič 7 dní po sobě.', check: (ctx) => ctx.streak >= 7, progress: (ctx) => ({ current: ctx.streak, target: 7 }) },
+  { id: 'mesic-discipliny', icon: '🔥', tier: '30', label: 'Měsíc disciplíny', description: 'Cvič 30 dní po sobě.', check: (ctx) => ctx.streak >= 30, progress: (ctx) => ({ current: ctx.streak, target: 30 }) },
+  { id: 'stoleti-legenda', icon: '🏆', tier: '100', label: 'Stoletá legenda', description: 'Cvič 100 dní po sobě.', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
+  { id: 'deset-melodii', icon: '🎵', tier: '10', label: 'Deset melodií', description: 'Pošli 10 nahrávek.', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
+  { id: 'padesat-melodii', icon: '🎼', tier: '50', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
   { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Zahraj skladbu bez chyb – dá ti ho učitel.', byTeacher: true, check: (ctx) => ctx.awardedCounts['maly-virtuoz'] >= 1, progress: (ctx) => ({ current: ctx.awardedCounts['maly-virtuoz'], target: 1 }) },
-  { id: 'virtuoz', icon: '⭐⭐', label: 'Virtuoz', description: 'Splň výzvu od učitele, třeba stupnici v tempu 80.', byTeacher: true, check: (ctx) => ctx.awardedCounts.virtuoz >= 1, progress: (ctx) => ({ current: ctx.awardedCounts.virtuoz, target: 1 }) },
+  { id: 'virtuoz', icon: '🌟', label: 'Virtuoz', description: 'Splň výzvu od učitele, třeba stupnici v tempu 80.', byTeacher: true, check: (ctx) => ctx.awardedCounts.virtuoz >= 1, progress: (ctx) => ({ current: ctx.awardedCounts.virtuoz, target: 1 }) },
   { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', description: 'Cvič každý den v týdnu.', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
-  { id: 'tydenni-cil', icon: '🏁', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
+  { id: 'tydenni-cil', icon: '🎯', tier: '3', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
 ]
 
 export function computeBadges(ctx: BadgeContext): BadgeResult[] {
@@ -137,6 +140,7 @@ export function computeBadges(ctx: BadgeContext): BadgeResult[] {
     const result: BadgeResult = {
       id: badge.id,
       icon: badge.icon,
+      tier: badge.tier,
       label: badge.label,
       description: badge.description,
       unlocked,

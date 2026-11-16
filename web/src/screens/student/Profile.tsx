@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { BadgeTile } from '../../components/gamification/BadgeTile'
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Switch } from '../../components/ui/Switch'
@@ -128,32 +129,7 @@ export function Profile() {
           {/* Name and how to earn it are written out - a hover tooltip never shows on a phone. */}
           <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {badges.map((badge) => (
-              <li
-                key={badge.id}
-                className={`rounded-2xl p-3 flex items-start gap-2.5 ${
-                  badge.unlocked ? 'bg-bg-card shadow-clay-sm' : 'bg-bg-card-alt'
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`shrink-0 w-9 h-9 rounded-full bg-bg-card shadow-clay-sm flex items-center justify-center text-base ${
-                    badge.unlocked ? '' : 'grayscale opacity-50'
-                  }`}
-                >
-                  {badge.icon}
-                </span>
-                <div className="min-w-0">
-                  <div className={`text-xs font-heading font-semibold ${badge.unlocked ? '' : 'text-text-muted'}`}>
-                    {badge.label}
-                  </div>
-                  <div className="text-[11px] leading-snug text-text-muted">{badge.description}</div>
-                  <div className="text-[11px] font-semibold mt-0.5 text-text-muted">
-                    {badge.unlocked
-                      ? `✓ Získáno${badge.count && badge.count > 1 ? ` ×${badge.count}` : ''}`
-                      : badge.progressLabel}
-                  </div>
-                </div>
-              </li>
+              <BadgeTile key={badge.id} badge={badge} />
             ))}
           </ul>
         </div>
