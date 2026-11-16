@@ -15,6 +15,7 @@ import type { PracticeLog } from '../../lib/data/types'
 import { BADGES, xpForLog } from '../../lib/game-logic'
 import { awardsByLog, fetchAwardedBadges } from '../../lib/data/badges'
 import { FeedbackImages } from '../../components/feedback/FeedbackImages'
+import { SavedVoiceComment } from '../../components/feedback/VoiceComment'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
 
 export function Feedback() {
@@ -119,6 +120,14 @@ export function Feedback() {
                           <span aria-hidden>✅</span> Co se povedlo
                         </div>
                         <p className="text-text-muted">{log.feedback_good}</p>
+                      </div>
+                    )}
+                    {log.feedback_audio && (
+                      <div>
+                        <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-1">
+                          <span aria-hidden>🎙</span> Komentář od učitele
+                        </div>
+                        <SavedVoiceComment path={log.feedback_audio} />
                       </div>
                     )}
                     {log.feedback_images && log.feedback_images.length > 0 && (

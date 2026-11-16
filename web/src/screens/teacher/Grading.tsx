@@ -21,6 +21,8 @@ import { fetchFeedbackImageUrls, removeFeedbackImages, uploadFeedbackImage } fro
 import { BADGES, type TeacherBadgeId } from '../../lib/game-logic'
 import type { AwardedBadge } from '../../lib/data/types'
 import { QuickPhrases } from '../../components/feedback/QuickPhrases'
+import { VoiceCommentEditor, type VoiceCommentState } from '../../components/feedback/VoiceComment'
+import { removeFeedbackAudio, uploadFeedbackAudio } from '../../lib/data/feedbackAudio'
 import {
   addCommentSnippet,
   appendPhrase,
@@ -70,6 +72,7 @@ export function Grading() {
   const [awards, setAwards] = useState<AwardedBadge[]>([])
   const [wantedBadges, setWantedBadges] = useState<Set<TeacherBadgeId>>(new Set())
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
+  const [voice, setVoice] = useState<VoiceCommentState>({ kind: 'none' })
   // Recordings still waiting, besides the open one (for "zbývá" and Přeskočit).
   const [waiting, setWaiting] = useState<PracticeLog[]>([])
   const { message, show } = useToast()
@@ -114,6 +117,7 @@ export function Grading() {
     setFeedbackImprove(log.feedback_improve ?? '')
     setAwards([])
     setWantedBadges(new Set())
+    setVoice(log.feedback_audio ? { kind: 'saved', path: log.feedback_audio } : { kind: 'none' })
     const savedPaths = log.feedback_images ?? []
     setImageItems(savedPaths.map((path) => ({ kind: 'saved', path })))
     if (savedPaths.length > 0) {
@@ -165,6 +169,7 @@ export function Grading() {
     if (!selectedLog || !profile) return
     setSubmitting(true)
     const uploaded: string[] = []
+    let uploadedAudio: string | undefined
     try {
       // New pictures first, so the grade only ever points at files that exist.
       const finalPaths: string[] = []
@@ -178,6 +183,13 @@ export function Grading() {
       }
       const savedBefore = selectedLog.feedback_images ?? []
       const imagesChanged = savedBefore.join('|') !== finalPaths.join('|')
+      // The voice comment: a new one uploaded first, like the pictures.
+      const audioBefore = selectedLog.feedback_audio ?? null
+      let audioPath: string | null = voice.kind === 'saved' ? voice.path : null
+      if (voice.kind === 'new') {
+        audioPath = await uploadFeedbackAudio(selectedLog.id, voice.blob)
+        uploadedAudio = audioPath
+      }
       await submitGrading(
         selectedLog.id,
         {
@@ -185,11 +197,14 @@ export function Grading() {
           feedback_good: feedbackGood,
           feedback_improve: feedbackImprove,
           ...(imagesChanged ? { feedback_images: finalPaths.length > 0 ? finalPaths : null } : {}),
+          ...(audioPath !== audioBefore ? { feedback_audio: audioPath } : {}),
         },
         profile.id,
       )
       uploaded.length = 0
+      uploadedAudio = undefined
       await removeFeedbackImages(savedBefore.filter((path) => !finalPaths.includes(path)))
+      if (audioBefore && audioBefore !== audioPath) await removeFeedbackAudio(audioBefore)
       await setLogAwards(selectedLog, awards, wantedBadges)
       refreshNavBadges()
       logs.refetch()
@@ -207,6 +222,7 @@ export function Grading() {
     } catch (err) {
       // Pictures uploaded for a grade that didn't save would just lie around.
       await removeFeedbackImages(uploaded)
+      await removeFeedbackAudio(uploadedAudio)
       show(getErrorMessage(err, 'Odeslání se nepovedlo, zkus to znovu.'))
     } finally {
       setSubmitting(false)
@@ -314,6 +330,12 @@ export function Grading() {
               : 'Vyber 1–5 not. XP žák dostane až po ohodnocení.'}
             {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
           </p>
+        </div>
+        <div>
+          <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
+            <span aria-hidden>🎙</span> Hlasový komentář <span className="font-body font-normal text-xs text-text-muted">(nepovinné, do 1 min)</span>
+          </div>
+          <VoiceCommentEditor value={voice} onChange={setVoice} />
         </div>
         <FeedbackImagesEditor items={imageItems} onChange={setImageItems} />
         <div>

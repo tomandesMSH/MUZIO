@@ -80,6 +80,8 @@ export interface PracticeLog {
   duration_seconds?: number | null
   // Storage paths of the teacher's pictures, at most 3 (migration 0026).
   feedback_images?: string[] | null
+  // The teacher's spoken comment, a storage path (migration 0037).
+  feedback_audio?: string | null
   // A note from the pupil sent with the recording (migration 0036).
   student_note?: string | null
   // When the pupil opened the grade (migration 0036); null = new for them.
