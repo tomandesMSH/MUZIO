@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { PasswordInput } from '../components/ui/PasswordInput'
+import { SlidingTabs } from '../components/ui/SlidingTabs'
 import { useAuth } from '../lib/AuthProvider'
 import { signIn, signUpStudent, signUpTeacher } from '../lib/auth'
 import { applyTheme, getStoredTheme } from '../lib/theme'
@@ -98,25 +99,16 @@ export function Login() {
       <p className="text-text-muted text-sm">Uč se hudbu hravě, každý den.</p>
       <p className="text-text-muted text-xs opacity-70 mb-8">Dříve známé jako Keyboard Hero.</p>
 
-      <div className="flex gap-2 mb-6">
-        <button
-          type="button"
-          className={`flex-1 py-2.5 rounded-full text-xs font-heading font-semibold transition ${
-            mode !== 'register' ? 'bg-ink text-cream shadow-clay-sm' : 'bg-bg-card-alt text-text-muted shadow-clay-press'
-          }`}
-          onClick={() => setMode('login')}
-        >
-          Přihlásit se
-        </button>
-        <button
-          type="button"
-          className={`flex-1 py-2.5 rounded-full text-xs font-heading font-semibold transition ${
-            mode === 'register' ? 'bg-ink text-cream shadow-clay-sm' : 'bg-bg-card-alt text-text-muted shadow-clay-press'
-          }`}
-          onClick={() => setMode('register')}
-        >
-          Registrace
-        </button>
+      <div className="mb-6">
+        <SlidingTabs
+          label="Přihlášení nebo registrace"
+          tabs={[
+            { id: 'login', label: 'Přihlásit se' },
+            { id: 'register', label: 'Registrace' },
+          ]}
+          value={mode === 'register' ? 'register' : 'login'}
+          onChange={setMode}
+        />
       </div>
 
       {mode === 'register' && (
