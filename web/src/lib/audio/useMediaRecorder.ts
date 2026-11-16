@@ -10,6 +10,8 @@ interface MediaRecorderState {
   error: string | undefined
   start: () => Promise<void>
   stop: () => void
+  // Back to the start, the recording thrown away ("Nahrát znovu").
+  reset: () => void
 }
 
 const BAR_COUNT = 24
@@ -36,6 +38,13 @@ export function useMediaRecorder(maxSeconds = 60): MediaRecorderState {
 
   const stop = useCallback(() => {
     recorderRef.current?.stop()
+  }, [])
+
+  const reset = useCallback(() => {
+    setBlob(undefined)
+    setElapsedSeconds(0)
+    setError(undefined)
+    setStatus('idle')
   }, [])
 
   const start = useCallback(async () => {
@@ -95,5 +104,5 @@ export function useMediaRecorder(maxSeconds = 60): MediaRecorderState {
     }, 200)
   }, [cleanup, maxSeconds, stop])
 
-  return { status, elapsedSeconds, blob, levels, error, start, stop }
+  return { status, elapsedSeconds, blob, levels, error, start, stop, reset }
 }

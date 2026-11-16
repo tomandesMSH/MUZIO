@@ -34,13 +34,14 @@ export function Recording() {
   const { message, show } = useToast()
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
 
   async function handleRecorded(
     blob: Blob,
     durationSeconds: number | null,
     format?: { extension: string; contentType: string },
-  ) {
-    if (!profile || uploading) return
+  ): Promise<boolean> {
+    if (!profile || uploading) return false
     setUploading(true)
     try {
       const audioUrl = await uploadRecording(profile.id, blob, format)
@@ -67,8 +68,10 @@ export function Recording() {
         setTimeout(() => setCelebrating(false), 2500)
       }
       setTimeout(() => navigate('/student'), 1500)
+      return true
     } catch (err) {
       show(getErrorMessage(err, 'Nahrání se nepovedlo, zkus to znovu.'))
+      return false
     } finally {
       setUploading(false)
     }
@@ -88,14 +91,20 @@ export function Recording() {
           <AttachmentLink assignment={{ attachment_path: attachmentPath, attachment_name: attachmentName ?? null }} />
         </div>
       )}
-      <RecordingUI onRecorded={(blob, seconds) => handleRecorded(blob, seconds)} />
-      <AudioFilePicker
-        disabled={uploading}
-        onSend={({ file, extension, contentType, durationSeconds }) =>
-          handleRecorded(file, durationSeconds, { extension, contentType })
-        }
+      <RecordingUI
+        sending={uploading}
+        onSend={(blob, seconds) => handleRecorded(blob, seconds)}
+        onReviewingChange={setReviewing}
       />
-      {uploading && <p className="text-center text-text-muted text-sm">Nahrávám…</p>}
+      {!reviewing && (
+        <AudioFilePicker
+          disabled={uploading}
+          onSend={({ file, extension, contentType, durationSeconds }) =>
+            void handleRecorded(file, durationSeconds, { extension, contentType })
+          }
+        />
+      )}
+      {uploading && !reviewing && <p className="text-center text-text-muted text-sm">Nahrávám…</p>}
     </div>
   )
 }
