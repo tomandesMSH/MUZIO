@@ -11,6 +11,7 @@ export interface PendingUpload {
   format?: { extension: string; contentType: string }
   assignmentId?: string
   lessonTitle?: string
+  note?: string
   // Already uploaded by the failed attempt (lib/submitRecording.ts).
   audioUrl?: string
   createdAt: string

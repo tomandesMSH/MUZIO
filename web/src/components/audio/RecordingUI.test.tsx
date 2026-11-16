@@ -45,8 +45,9 @@ describe('RecordingUI', () => {
     finished()
     const onSend = vi.fn(async () => true)
     render(<RecordingUI onSend={onSend} />)
+    fireEvent.change(screen.getByLabelText('Vzkaz pro učitele (nepovinné)'), { target: { value: 'takt 8' } })
     fireEvent.click(screen.getByRole('button', { name: 'Odeslat' }))
-    expect(onSend).toHaveBeenCalledWith(rec.state.blob, 42)
+    expect(onSend).toHaveBeenCalledWith(rec.state.blob, 42, 'takt 8')
     await waitFor(() => expect(rec.reset).toHaveBeenCalled())
   })
 

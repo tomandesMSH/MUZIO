@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../ui/Button'
+import { NoteForTeacher } from './NoteForTeacher'
 import { AUDIO_FILE_ACCEPT, checkAudioFile, formatFileSize, readAudioDuration } from '../../lib/audio/audioFile'
 
 export interface PickedAudio {
@@ -8,6 +9,8 @@ export interface PickedAudio {
   contentType: string
   // Seconds, null if the browser can't read it (then it counts as 1 minute).
   durationSeconds: number | null
+  // The pupil's note for the teacher ('' = none).
+  note: string
 }
 
 interface AudioFilePickerProps {
@@ -23,6 +26,7 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
   const [picked, setPickedState] = useState<PickedAudio>()
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [error, setError] = useState<string>()
+  const [note, setNote] = useState('')
   // The object URL behind the <audio> preview, freed when replaced or on unmount.
   const previewRef = useRef<string | undefined>(undefined)
 
@@ -53,7 +57,7 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
     }
     setError(undefined)
     const durationSeconds = await readAudioDuration(file)
-    setPicked({ file, extension: check.extension, contentType: check.contentType, durationSeconds })
+    setPicked({ file, extension: check.extension, contentType: check.contentType, durationSeconds, note: '' })
   }
 
   return (
@@ -75,6 +79,7 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
           </div>
           {previewUrl && <audio controls src={previewUrl} className="w-full" />}
           <p className="text-xs text-text-muted">Poslechni si ji a pošli učiteli, když je to ta správná.</p>
+          <NoteForTeacher value={note} onChange={setNote} />
           <div className="flex gap-2.5">
             <Button type="button" variant="ghost" className="flex-1" onClick={() => setPicked(undefined)}>
               Zrušit
@@ -84,7 +89,8 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
               className="flex-1"
               disabled={disabled}
               onClick={() => {
-                onSend(picked)
+                onSend({ ...picked, note })
+                setNote('')
                 setPicked(undefined)
               }}
             >

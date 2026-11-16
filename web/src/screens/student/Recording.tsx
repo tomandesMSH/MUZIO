@@ -40,6 +40,7 @@ export function Recording() {
     blob: Blob,
     durationSeconds: number | null,
     format?: { extension: string; contentType: string },
+    note?: string,
   ): Promise<boolean> {
     if (!profile || uploading) return false
     setUploading(true)
@@ -51,6 +52,7 @@ export function Recording() {
         durationSeconds,
         format,
         assignmentId,
+        note,
         audioUrl: failedUploads.current.get(blob),
       })
       if (pendingId) await deletePendingUpload(pendingId)
@@ -89,6 +91,7 @@ export function Recording() {
         format,
         assignmentId,
         lessonTitle,
+        note,
         audioUrl,
       })
       if (kept) pendingIds.current.set(blob, id)
@@ -119,14 +122,14 @@ export function Recording() {
       )}
       <RecordingUI
         sending={uploading}
-        onSend={(blob, seconds) => handleRecorded(blob, seconds)}
+        onSend={(blob, seconds, note) => handleRecorded(blob, seconds, undefined, note)}
         onReviewingChange={setReviewing}
       />
       {!reviewing && (
         <AudioFilePicker
           disabled={uploading}
-          onSend={({ file, extension, contentType, durationSeconds }) =>
-            void handleRecorded(file, durationSeconds, { extension, contentType })
+          onSend={({ file, extension, contentType, durationSeconds, note }) =>
+            void handleRecorded(file, durationSeconds, { extension, contentType }, note)
           }
         />
       )}

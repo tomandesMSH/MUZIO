@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Waveform } from './Waveform'
 import { Button } from '../ui/Button'
+import { NoteForTeacher } from './NoteForTeacher'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
 
 // Seconds counted down before recording starts - time to get the hands on
@@ -19,7 +20,7 @@ function formatTime(seconds: number): string {
 interface RecordingUIProps {
   // Sends the recording; resolves true when it went through (then the screen
   // moves on), false to stay on the preview and let the pupil try again.
-  onSend: (blob: Blob, durationSeconds: number) => Promise<boolean>
+  onSend: (blob: Blob, durationSeconds: number, note: string) => Promise<boolean>
   sending?: boolean
   // True while the finished recording is being listened to (the screen hides
   // the "from a file" option meanwhile).
@@ -33,6 +34,7 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
   const [preview, setPreview] = useState<{ blob: Blob; url: string }>()
   // 3, 2, 1 before recording; undefined when not counting.
   const [count, setCount] = useState<number>()
+  const [note, setNote] = useState('')
 
   useEffect(() => {
     if (count === undefined) return
@@ -70,6 +72,7 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
           </div>
           {previewUrl && <audio controls src={previewUrl} className="w-full" data-testid="take-preview" />}
           <p className="text-xs text-text-muted">Poslechni si ji. Povedla se? Pošli ji učiteli, jinak nahraj znovu.</p>
+          <NoteForTeacher value={note} onChange={setNote} />
           <div className="flex gap-2.5">
             <Button type="button" variant="ghost" className="flex-1" disabled={sending} onClick={reset}>
               Nahrát znovu
@@ -79,7 +82,10 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
               className="flex-1"
               disabled={sending}
               onClick={async () => {
-                if (await onSend(blob, elapsedSeconds)) reset()
+                if (await onSend(blob, elapsedSeconds, note)) {
+                  setNote('')
+                  reset()
+                }
               }}
             >
               {sending ? 'Odesílám…' : 'Odeslat'}
