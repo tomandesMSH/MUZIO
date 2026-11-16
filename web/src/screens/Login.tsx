@@ -9,7 +9,7 @@ import { signIn, signUpStudent, signUpTeacher } from '../lib/auth'
 import { setThemeChoice, useTheme } from '../lib/theme'
 import { needsGuardianConsent } from '../lib/consent'
 import { getErrorMessage } from '../lib/errors'
-import { reportFormUrl } from '../lib/report'
+import { ReportFormModal } from '../components/ui/ReportFormModal'
 import { isTeacherAdmin } from '../lib/roles'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
@@ -22,6 +22,7 @@ export function Login() {
   const { session, profile, loading: authLoading, profileError } = useAuth()
   const [mode, setMode] = useState<Mode>('login')
   const [portal, setPortal] = useState<Portal>('student')
+  const [reportOpen, setReportOpen] = useState(false)
   const [username, setUsername] = useState(() => getLastUsername())
   const [remember, setRemember] = useState(() => getRememberMe())
   const [fullName, setFullName] = useState('')
@@ -264,15 +265,15 @@ export function Login() {
       )}
 
       <p className="text-center mt-6">
-        <a
-          href={reportFormUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => setReportOpen(true)}
           className="text-xs text-text-muted underline hover:text-text-primary"
         >
           Něco nefunguje? Nahlásit problém
-        </a>
+        </button>
       </p>
+      {reportOpen && <ReportFormModal onClose={() => setReportOpen(false)} />}
       <p className="text-center mt-2 text-xs text-text-muted">
         Vytvořil{' '}
         <a href="https://tomandes.eu/" target="_blank" rel="noopener" className="underline hover:text-text-primary">

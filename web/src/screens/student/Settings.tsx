@@ -13,7 +13,7 @@ import { ThemePicker } from '../../components/ui/ThemePicker'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
-import { reportFormUrl } from '../../lib/report'
+import { ReportFormModal } from '../../components/ui/ReportFormModal'
 import { useToast } from '../../lib/useToast'
 import { updateShareBasicProgress } from '../../lib/data/profiles'
 import { getErrorMessage } from '../../lib/errors'
@@ -26,6 +26,7 @@ export function Settings() {
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
   const { message, show } = useToast()
 
   if (!profile) return null
@@ -98,7 +99,7 @@ export function Settings() {
           <SettingsRow label="Dokumentace" onClick={openDocs} />
           <SettingsRow
             label="Nahlásit problém nebo nápad"
-            onClick={() => window.open(reportFormUrl({ pupil: true }), '_blank', 'noopener,noreferrer')}
+            onClick={() => setReportOpen(true)}
           />
         </div>
 
@@ -116,6 +117,7 @@ export function Settings() {
           }}
         />
       )}
+      {reportOpen && <ReportFormModal pupil onClose={() => setReportOpen(false)} />}
       {notificationsOpen && (
         <NotificationsModal role="student" userId={profile.id} onClose={() => setNotificationsOpen(false)} />
       )}

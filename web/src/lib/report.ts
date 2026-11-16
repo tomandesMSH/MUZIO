@@ -1,5 +1,6 @@
 // "Nahlásit problém": the report form on tomandes.eu. No GitHub account needed - it files the report as an
-// issue in this repository. zus=1 ticks "Jsem žákem ZUŠ Moravský Krumlov" (simpler form, marked for the author).
-export function reportFormUrl(options: { pupil?: boolean } = {}): string {
-  return `https://tomandes.eu/report/?app=keyboard-hero${options.pupil ? '&zus=1' : ''}`
+// issue in this repository. zus=1 ticks "Jsem žákem ZUŠ Moravský Krumlov" (simpler form, marked for the author);
+// embed=1 is the form alone, for showing it in a window inside the app (ReportFormModal).
+export function reportFormUrl(options: { pupil?: boolean; embed?: boolean } = {}): string {
+  return `https://tomandes.eu/report/?app=keyboard-hero&lang=cs${options.pupil ? '&zus=1' : ''}${options.embed ? '&embed=1' : ''}`
 }
