@@ -20,6 +20,18 @@ function versionFile(): Plugin {
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [react(), tailwindcss(), versionFile()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Libraries change less often than the app: their own files stay
+        // cached in the browser across Muzio updates.
+        manualChunks(id) {
+          if (id.includes('node_modules/@supabase')) return 'supabase'
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'react'
+        },
+      },
+    },
+  },
   define: {
     // 'dev' while developing: no version checks then.
     __APP_VERSION__: JSON.stringify(command === 'build' ? APP_VERSION : 'dev'),

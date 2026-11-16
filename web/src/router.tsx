@@ -1,19 +1,9 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Login } from './screens/Login'
 import { ChoosePanel } from './screens/ChoosePanel'
-import { StudentDashboard } from './screens/student/Dashboard'
-import { Lessons } from './screens/student/Lessons'
-import { Recording } from './screens/student/Recording'
-import { Feedback } from './screens/student/Feedback'
-import { Profile } from './screens/student/Profile'
-import { TeacherDashboard } from './screens/teacher/Dashboard'
-import { Students } from './screens/teacher/Students'
-import { Grading } from './screens/teacher/Grading'
-import { Classrooms } from './screens/teacher/Classrooms'
-import { Profile as TeacherProfile } from './screens/teacher/Profile'
-import { Queue } from './screens/moderator/Queue'
 import { RequireRole } from './components/routing/RequireRole'
 import { RequireModerator } from './components/routing/RequireModerator'
+import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Queue } from './screens.lazy'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -23,7 +13,7 @@ export const router = createBrowserRouter([
     path: '/student',
     element: (
       <RequireRole role="student">
-        <StudentDashboard />
+        <Screen><StudentDashboard /></Screen>
       </RequireRole>
     ),
   },
@@ -31,7 +21,7 @@ export const router = createBrowserRouter([
     path: '/student/lessons',
     element: (
       <RequireRole role="student">
-        <Lessons />
+        <Screen><Lessons /></Screen>
       </RequireRole>
     ),
   },
@@ -39,7 +29,7 @@ export const router = createBrowserRouter([
     path: '/student/recording',
     element: (
       <RequireRole role="student">
-        <Recording />
+        <Screen><Recording /></Screen>
       </RequireRole>
     ),
   },
@@ -47,7 +37,7 @@ export const router = createBrowserRouter([
     path: '/student/feedback',
     element: (
       <RequireRole role="student">
-        <Feedback />
+        <Screen><Feedback /></Screen>
       </RequireRole>
     ),
   },
@@ -55,7 +45,7 @@ export const router = createBrowserRouter([
     path: '/student/profile',
     element: (
       <RequireRole role="student">
-        <Profile />
+        <Screen><Profile /></Screen>
       </RequireRole>
     ),
   },
@@ -63,7 +53,7 @@ export const router = createBrowserRouter([
     path: '/teacher',
     element: (
       <RequireRole role="teacher">
-        <TeacherDashboard />
+        <Screen><TeacherDashboard /></Screen>
       </RequireRole>
     ),
   },
@@ -71,7 +61,7 @@ export const router = createBrowserRouter([
     path: '/teacher/students',
     element: (
       <RequireRole role="teacher">
-        <Students />
+        <Screen><Students /></Screen>
       </RequireRole>
     ),
   },
@@ -79,7 +69,7 @@ export const router = createBrowserRouter([
     path: '/teacher/grading',
     element: (
       <RequireRole role="teacher">
-        <Grading />
+        <Screen><Grading /></Screen>
       </RequireRole>
     ),
   },
@@ -87,7 +77,7 @@ export const router = createBrowserRouter([
     path: '/teacher/classrooms',
     element: (
       <RequireRole role="teacher">
-        <Classrooms />
+        <Screen><Classrooms /></Screen>
       </RequireRole>
     ),
   },
@@ -95,7 +85,7 @@ export const router = createBrowserRouter([
     path: '/teacher/profile',
     element: (
       <RequireRole role="teacher">
-        <TeacherProfile />
+        <Screen><TeacherProfile /></Screen>
       </RequireRole>
     ),
   },
@@ -103,7 +93,7 @@ export const router = createBrowserRouter([
     path: '/moderator',
     element: (
       <RequireModerator>
-        <Queue />
+        <Screen><Queue /></Screen>
       </RequireModerator>
     ),
   },
