@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { AppShell } from '../../components/layout/AppShell'
 import { NewAssignmentModal } from '../../components/classrooms/NewAssignmentModal'
 import { AssignmentProgress } from '../../components/classrooms/AssignmentProgress'
+import { EditAssignmentModal } from '../../components/classrooms/EditAssignmentModal'
 import { fetchAssignmentProgress } from '../../lib/data/practiceLogs'
 import { daysUntil } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -14,6 +15,8 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import {
   createAssignment,
+  updateAssignment,
+  type AssignmentUpdate,
   createClassroom,
   deleteClassroom,
   fetchClassroomAssignments,
@@ -24,7 +27,7 @@ import {
 import { fetchProfilesByIds } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
-import type { Classroom } from '../../lib/data/types'
+import type { Assignment, Classroom } from '../../lib/data/types'
 
 export function Classrooms() {
   const { profile } = useAuth()
@@ -124,6 +127,9 @@ function ClassroomDetail({
   const [assignmentSubmitting, setAssignmentSubmitting] = useState(false)
   const [assignmentError, setAssignmentError] = useState<string>()
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [editing, setEditing] = useState<Assignment>()
+  const [editSubmitting, setEditSubmitting] = useState(false)
+  const [editError, setEditError] = useState<string>()
   const [deleting, setDeleting] = useState(false)
 
   const canDelete = !!profile && (profile.id === classroom.teacher_id || profile.role === 'moderator' || profile.is_moderator)
@@ -137,6 +143,22 @@ function ClassroomDetail({
     } catch (err) {
       show(getErrorMessage(err, 'Smazání třídy se nepovedlo.'))
       setDeleting(false)
+    }
+  }
+
+  async function handleEditAssignment(update: AssignmentUpdate) {
+    if (!editing) return
+    setEditSubmitting(true)
+    setEditError(undefined)
+    try {
+      await updateAssignment(editing, update)
+      setEditing(undefined)
+      assignments.refetch()
+      show('Úkol upraven')
+    } catch (err) {
+      setEditError(getErrorMessage(err, 'Úpravu se nepodařilo uložit.'))
+    } finally {
+      setEditSubmitting(false)
     }
   }
 
@@ -241,7 +263,7 @@ function ClassroomDetail({
             {assignments.data?.map((assignment) => (
               <div key={assignment.id} className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <div className="font-heading font-semibold text-sm">{assignment.title}</div>
+                  <div className="font-heading font-semibold text-sm min-w-0 break-words">{assignment.title}</div>
                   {assignment.due_date && (
                     <div
                       className={`shrink-0 text-xs ${daysUntil(assignment.due_date, today) < 0 ? 'text-text-muted' : 'text-coral font-semibold'}`}
@@ -258,6 +280,18 @@ function ClassroomDetail({
                 {assignment.description && (
                   <div className="text-text-muted text-xs mt-1">{assignment.description}</div>
                 )}
+                <div className="mt-2 flex gap-3 text-xs">
+                  <button
+                    type="button"
+                    className="text-text-muted underline underline-offset-2 hover:text-text-primary"
+                    onClick={() => {
+                      setEditError(undefined)
+                      setEditing(assignment)
+                    }}
+                  >
+                    Upravit
+                  </button>
+                </div>
                 {progress.data && members.data && (
                   <AssignmentProgress
                     pupils={(() => {
@@ -274,6 +308,15 @@ function ClassroomDetail({
         </div>
       </div>
 
+      {editing && (
+        <EditAssignmentModal
+          assignment={editing}
+          submitting={editSubmitting}
+          error={editError}
+          onClose={() => setEditing(undefined)}
+          onSubmit={(update) => void handleEditAssignment(update)}
+        />
+      )}
       <NewAssignmentModal
         open={assignmentOpen}
         members={members.data ?? []}

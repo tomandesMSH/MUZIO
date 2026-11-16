@@ -157,6 +157,44 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<vo
   notifyPush({ type: 'assignment', assignmentId: String(data.id) })
 }
 
+export type AttachmentChange = { kind: 'keep' } | { kind: 'remove' } | { kind: 'replace'; file: File }
+
+export interface AssignmentUpdate {
+  title: string
+  description: string
+  // "YYYY-MM-DD", or '' for no deadline.
+  dueDate: string
+  attachment: AttachmentChange
+}
+
+// The teacher fixes an assignment: text, deadline, the attached score.
+export async function updateAssignment(assignment: Assignment, update: AssignmentUpdate): Promise<void> {
+  const { error } = await supabase
+    .from('assignments')
+    .update({
+      title: update.title.trim(),
+      description: update.description.trim() || null,
+      due_date: update.dueDate || null,
+    })
+    .eq('id', assignment.id)
+  if (error) throw error
+
+  const oldPath = assignment.attachment_path
+  if (update.attachment.kind === 'replace') {
+    await attachToAssignment(assignment.id, update.attachment.file)
+    const newPath = attachmentPath(assignment.id, update.attachment.file.name)
+    if (oldPath && oldPath !== newPath) await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([oldPath])
+  } else if (update.attachment.kind === 'remove' && oldPath) {
+    const { error: clearError } = await supabase
+      .from('assignments')
+      .update({ attachment_path: null, attachment_name: null })
+      .eq('id', assignment.id)
+    if (clearError) throw clearError
+    // Best effort: an orphaned file is harmless, nothing points at it.
+    await supabase.storage.from(ASSIGNMENT_FILES_BUCKET).remove([oldPath])
+  }
+}
+
 async function attachToAssignment(assignmentId: string, file: File): Promise<void> {
   const path = attachmentPath(assignmentId, file.name)
   const { error: uploadError } = await supabase.storage
