@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { RecordingUI } from '../../components/audio/RecordingUI'
 import { Metronome } from '../../components/practice/Metronome'
+import { Tuner } from '../../components/practice/Tuner'
 import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { AudioFilePicker } from '../../components/audio/AudioFilePicker'
 import { Toast } from '../../components/ui/Toast'
@@ -38,6 +39,7 @@ export function Recording() {
   const [celebrating, setCelebrating] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [metronomeOpen, setMetronomeOpen] = useState(false)
+  const [tunerOpen, setTunerOpen] = useState(false)
   // A take that failed to send is kept under one id, however many retries.
   const pendingIds = useRef(new WeakMap<Blob, string>())
   // The sound already uploaded by a failed attempt: not uploaded again.
@@ -156,6 +158,21 @@ export function Recording() {
               Tip: cvič s ním se sluchátky. Když hraje z reproduktoru a nahráváš, mikrofon ho nahraje taky.
             </p>
           </div>
+        </Collapse>
+      </div>
+      <div className="mb-1">
+        <button
+          type="button"
+          aria-expanded={tunerOpen}
+          onClick={() => setTunerOpen(!tunerOpen)}
+          className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-heading font-semibold"
+        >
+          <span>🎼 Ladička</span>
+          <Chevron open={tunerOpen} />
+        </button>
+        <Collapse open={tunerOpen}>
+          {/* Closed = unmounted, so the microphone is free again. */}
+          <div className="pb-2">{tunerOpen && <Tuner />}</div>
         </Collapse>
       </div>
       <RecordingUI
