@@ -77,6 +77,8 @@ update practice_logs set feedback_seen_at = now() where rating is not null and f
 create table if not exists comment_snippets (
   id uuid primary key default gen_random_uuid(),
   teacher_id uuid not null references profiles(id) on delete cascade,
+  -- Which field it goes into: "Co se povedlo" (good) or "Co zlepšit" (improve).
+  kind text not null default 'good' check (kind in ('good', 'improve')),
   text text not null check (char_length(text) between 1 and 200),
   created_at timestamptz not null default now()
 );
