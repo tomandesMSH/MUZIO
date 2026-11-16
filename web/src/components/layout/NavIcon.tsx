@@ -1,0 +1,69 @@
+// Line icons for the navigation (bottom bar and sidebar) - one stroke style,
+// they take the text colour, so active/inactive is just the colour change.
+export type NavIconName = 'home' | 'lessons' | 'recordings' | 'profile' | 'students' | 'classrooms'
+
+const PATHS: Record<NavIconName, React.ReactNode> = {
+  home: (
+    <>
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" />
+    </>
+  ),
+  // A sheet of music with a note.
+  lessons: (
+    <>
+      <path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+      <path d="M14 3v5h5" />
+      <circle cx="10" cy="16.5" r="1.75" />
+      <path d="M11.75 16.5V10.5l3 1" />
+    </>
+  ),
+  recordings: (
+    <>
+      <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
+      <rect x="3" y="14" width="4.5" height="7" rx="1.5" />
+      <rect x="16.5" y="14" width="4.5" height="7" rx="1.5" />
+    </>
+  ),
+  profile: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </>
+  ),
+  students: (
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8" />
+      <path d="M18.5 14.2A6.5 6.5 0 0 1 21.5 20" />
+    </>
+  ),
+  classrooms: (
+    <>
+      <path d="M3 9.5 12 4l9 5.5" />
+      <path d="M5 10.5V20h14v-9.5" />
+      <path d="M3 20h18" />
+      <path d="M10 20v-5h4v5" />
+    </>
+  ),
+}
+
+export function NavIcon({ name, className = 'w-6 h-6' }: { name: NavIconName | string; className?: string }) {
+  const paths = PATHS[name as NavIconName]
+  if (!paths) return null
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths}
+    </svg>
+  )
+}

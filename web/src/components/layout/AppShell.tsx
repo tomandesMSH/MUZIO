@@ -13,9 +13,10 @@ interface AppShellProps {
 // in a phone-width strip in the middle of the screen.
 export function AppShell({ role, children }: AppShellProps) {
   return (
-    <div className="md:flex md:min-h-screen">
+    <div className="md:flex md:min-h-dvh">
       <Sidebar role={role} />
-      <div className="flex-1 flex flex-col min-h-screen max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full mx-auto p-5 md:p-8">
+      {/* pb-28: room for the bottom bar, which is fixed on a phone. */}
+      <div className="flex-1 flex flex-col min-h-dvh max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full mx-auto p-5 pb-28 md:p-8">
         {children}
         <BottomNav role={role} />
       </div>

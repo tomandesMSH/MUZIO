@@ -49,7 +49,10 @@
     font-family: var(--font-body);
     color: var(--color-text-primary);
     background: var(--color-bg);
+    /* dvh, not vh: on a phone 100vh is the height with the address bar
+       hidden, so a page that fits would still scroll a bit. */
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
   }
 

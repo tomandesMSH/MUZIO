@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { navItemsFor } from './navItems'
+import { NavIcon } from './NavIcon'
 
 interface Box {
   top: number
@@ -81,7 +82,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
               onBlur={() => setHovered(undefined)}
               onClick={() => navigate(item.to)}
             >
-              <span aria-hidden>{item.icon}</span>
+              <NavIcon name={item.icon} className="w-5 h-5 shrink-0" />
               {item.label}
             </button>
           )

@@ -98,9 +98,10 @@ export function StudentDashboard() {
       <Confetti active={celebrating} />
       {message && <Toast message={message} />}
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
+        {/* Phone: greeting on its own line, the counters in a row under it. */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-xl">Ahoj, {firstName}! 👋</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Streak count={profile.streak} freezesAvailable={profile.streak_freezes_available} />
             <XPDisplay xp={profile.xp ?? 0} />
             <StarsDisplay stars={profile.stars} />
