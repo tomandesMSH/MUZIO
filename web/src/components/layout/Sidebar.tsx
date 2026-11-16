@@ -119,7 +119,6 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
       >
         <span aria-hidden className="w-5 text-center">📖</span>
         Dokumentace
-        <span aria-hidden className="ml-auto text-xs">↗</span>
       </a>
     </div>
   )
