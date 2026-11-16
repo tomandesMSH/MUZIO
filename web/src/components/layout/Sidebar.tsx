@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
@@ -7,6 +7,11 @@ interface Box {
   top: number
   height: number
 }
+
+// Every page mounts its own AppShell, so the sidebar is new on each page. It
+// remembers where the pill was, draws it there first and then slides it to
+// the new page.
+let lastActiveIndex: number | undefined
 
 // Desktop navigation. Like the admin tabs (SlidingTabs), the highlight
 // slides: the coral pill to the current page, a faint one under the pointer.
@@ -22,6 +27,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [hovered, setHovered] = useState<number>()
   const [boxes, setBoxes] = useState<Box[]>([])
+  const [shownIndex, setShownIndex] = useState(() => lastActiveIndex ?? activeIndex)
 
   const measure = useCallback(() => {
     setBoxes(itemRefs.current.map((el) => (el ? { top: el.offsetTop, height: el.offsetHeight } : { top: 0, height: 0 })))
@@ -39,7 +45,17 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
     }
   }, [measure, items.length])
 
-  const active = activeIndex >= 0 ? boxes[activeIndex] : undefined
+  // Once the pill has been painted where it was, move it (the CSS transition
+  // does the sliding).
+  const measured = boxes.length > 0
+  useEffect(() => {
+    lastActiveIndex = activeIndex
+    if (!measured) return
+    const frame = requestAnimationFrame(() => setShownIndex(activeIndex))
+    return () => cancelAnimationFrame(frame)
+  }, [activeIndex, measured])
+
+  const active = shownIndex >= 0 ? boxes[shownIndex] : undefined
   const hover = hovered !== undefined && hovered !== activeIndex ? boxes[hovered] : undefined
 
   return (

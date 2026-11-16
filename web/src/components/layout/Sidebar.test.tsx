@@ -47,4 +47,22 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: /Nahrávky/ }))
     await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '100px' }))
   })
+
+  it('a new page (its own sidebar) starts the pill where it was, then slides it', async () => {
+    const first = render(
+      <MemoryRouter initialEntries={['/student/feedback']}>
+        <Sidebar role="student" />
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '100px' }))
+    first.unmount()
+
+    render(
+      <MemoryRouter initialEntries={['/student']}>
+        <Sidebar role="student" />
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '100px' }))
+    await waitFor(() => expect(screen.getByTestId('nav-active-pill')).toHaveStyle({ top: '0px' }))
+  })
 })
