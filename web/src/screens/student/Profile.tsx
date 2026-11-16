@@ -16,7 +16,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchOwnLogsCount, fetchPracticeHistory, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { computeBadges, computeLevel, computeUnlockedSkins, isPerfectWeek } from '../../lib/game-logic'
 import { signOut } from '../../lib/auth'
-import { applyTheme, getStoredTheme } from '../../lib/theme'
+import { ThemePicker } from '../../components/ui/ThemePicker'
 import { useToast } from '../../lib/useToast'
 import { updateShareBasicProgress } from '../../lib/data/profiles'
 import { getErrorMessage } from '../../lib/errors'
@@ -28,7 +28,6 @@ export function Profile() {
   const { profile, refreshProfile } = useAuth()
   const userId = profile?.id
   const [today] = useState(() => new Date())
-  const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
   const [pairingOpen, setPairingOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -60,11 +59,6 @@ export function Profile() {
     awardedCounts: countAwards(awards.data ?? []),
   })
   const skins = computeUnlockedSkins(level.level)
-
-  function toggleDarkMode(next: boolean) {
-    setDarkMode(next)
-    applyTheme(next ? 'dark' : 'light')
-  }
 
   function openReportForm() {
     window.open(reportFormUrl({ pupil: true }), '_blank', 'noopener,noreferrer')
@@ -141,7 +135,7 @@ export function Profile() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nastavení</h2>
-          <SettingsRow label="Tmavý režim" right={<Switch checked={darkMode} onChange={toggleDarkMode} />} />
+          <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
           <SettingsRow label="Moje třídy" onClick={() => setPairingOpen(true)} />
           <SettingsRow label="Změnit heslo" onClick={() => setPasswordOpen(true)} />

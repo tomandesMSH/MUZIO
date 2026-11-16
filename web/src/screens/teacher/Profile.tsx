@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
-import { Switch } from '../../components/ui/Switch'
 import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Badge } from '../../components/ui/Badge'
 import { Toast } from '../../components/ui/Toast'
@@ -11,23 +10,17 @@ import { InstallAppRow } from '../../components/ui/InstallAppRow'
 import { AppShell } from '../../components/layout/AppShell'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
-import { applyTheme, getStoredTheme } from '../../lib/theme'
+import { ThemePicker } from '../../components/ui/ThemePicker'
 import { useToast } from '../../lib/useToast'
 
 export function Profile() {
   const navigate = useNavigate()
   const { profile } = useAuth()
-  const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const { message, show } = useToast()
 
   if (!profile) return null
-
-  function toggleDarkMode(next: boolean) {
-    setDarkMode(next)
-    applyTheme(next ? 'dark' : 'light')
-  }
 
   async function handleLogout() {
     await signOut()
@@ -45,7 +38,7 @@ export function Profile() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nastavení</h2>
-          <SettingsRow label="Tmavý režim" right={<Switch checked={darkMode} onChange={toggleDarkMode} />} />
+          <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow
             label="Ověření identity"
             right={

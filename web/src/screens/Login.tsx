@@ -6,7 +6,7 @@ import { PasswordInput } from '../components/ui/PasswordInput'
 import { SlidingTabs } from '../components/ui/SlidingTabs'
 import { useAuth } from '../lib/AuthProvider'
 import { signIn, signUpStudent, signUpTeacher } from '../lib/auth'
-import { applyTheme, getStoredTheme } from '../lib/theme'
+import { setThemeChoice, useTheme } from '../lib/theme'
 import { needsGuardianConsent } from '../lib/consent'
 import { getErrorMessage } from '../lib/errors'
 import { reportFormUrl } from '../lib/report'
@@ -31,15 +31,14 @@ export function Login() {
   const [consentChecked, setConsentChecked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string>()
-  const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark')
+  const { dark: darkMode } = useTheme()
 
   const isMinor = dateOfBirth ? needsGuardianConsent(dateOfBirth) : false
   const isStudentRegistration = mode === 'register' && portal === 'student'
 
   function toggleDarkMode() {
-    const next = !darkMode
-    setDarkMode(next)
-    applyTheme(next ? 'dark' : 'light')
+    // From the login screen it's an explicit choice (Profile can set it back to the system).
+    setThemeChoice(darkMode ? 'light' : 'dark')
   }
 
   useEffect(() => {
