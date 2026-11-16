@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../components/ui/Card'
 import { Toast } from '../../components/ui/Toast'
@@ -123,6 +124,7 @@ export function StudentDashboard() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Zadané lekce</h2>
+          {assignments.loading && !assignments.data && <Skeleton rows={2} height="h-[72px]" />}
           {assignments.error && (
             <p className="text-sm text-coral-dark mb-2">
               Načtení úkolů se nepovedlo: {assignments.error.message}

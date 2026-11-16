@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { SearchBar } from '../../components/ui/SearchBar'
 import { useQuery } from '../../lib/data/useQuery'
 import { describeAction, fetchAdminActions } from '../../lib/data/adminHistory'
@@ -20,7 +21,7 @@ export function HistorySection() {
   return (
     <div className="space-y-3">
       <SearchBar value={search} onChange={setSearch} placeholder="Hledat podle jména nebo akce" />
-      {history.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+      {history.loading && !history.data && <Skeleton rows={4} height="h-12" />}
       {history.error && (
         <p className="text-sm text-coral-dark">
           Načtení se nepovedlo: {history.error.message}. Je spuštěná migrace 0027?

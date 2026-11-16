@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -41,7 +42,7 @@ export function Lessons() {
     <AppShell role="student">
       <div className="space-y-5 flex-1">
         <h1 className="text-xl">Lekce</h1>
-        {assignments.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {assignments.loading && !assignments.data && <Skeleton />}
         {assignments.error && (
           <p className="text-sm text-coral-dark">
             Načtení úkolů se nepovedlo: {assignments.error.message}

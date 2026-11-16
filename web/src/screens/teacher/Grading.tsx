@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useLocation } from 'react-router-dom'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Button } from '../../components/ui/Button'
@@ -426,7 +427,7 @@ export function Grading() {
             </Button>
           )}
         </div>
-        {logs.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {logs.loading && !logs.data && <Skeleton />}
         {logs.data?.length === 0 && <p className="text-text-muted text-sm">Žádné nahrávky ke zobrazení.</p>}
         <div className="space-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
           {logs.data?.map((log) => (

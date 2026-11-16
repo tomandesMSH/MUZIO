@@ -1,4 +1,5 @@
 import { useQuery } from '../../lib/data/useQuery'
+import { Skeleton } from '../../components/ui/Skeleton'
 import {
   BUCKET_NAMES,
   FREE_DATABASE_BYTES,
@@ -48,7 +49,7 @@ export function UsageSection() {
 
   return (
     <div className="space-y-3">
-      {usage.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+      {usage.loading && !usage.data && <Skeleton rows={2} height="h-24" />}
       {usage.error && (
         <p className="text-sm text-coral-dark">Načtení se nepovedlo: {usage.error.message}. Je spuštěná migrace 0032?</p>
       )}

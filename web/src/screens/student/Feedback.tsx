@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { AppShell } from '../../components/layout/AppShell'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
 import { Badge } from '../../components/ui/Badge'
@@ -67,7 +68,7 @@ export function Feedback() {
       {message && <Toast message={message} />}
       <div className="space-y-4 flex-1">
         <h1 className="text-xl">Nahrávky</h1>
-        {logs.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {logs.loading && !logs.data && <Skeleton rows={2} height="h-40" />}
         {logs.error && (
           <p className="text-sm text-coral-dark">Načtení nahrávek se nepovedlo: {logs.error.message}</p>
         )}

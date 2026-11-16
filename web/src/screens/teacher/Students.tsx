@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { SearchBar } from '../../components/ui/SearchBar'
 import { Avatar } from '../../components/ui/Avatar'
@@ -142,7 +143,7 @@ export function Students() {
       <div className="space-y-4 flex-1">
         <h1 className="text-xl">Žáci</h1>
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
-        {students.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {students.loading && !students.data && <Skeleton rows={4} height="h-20" />}
 
         {pending.length > 0 && (
           <div>

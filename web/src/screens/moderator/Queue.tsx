@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { RecordingAudio } from '../../components/audio/RecordingAudio'
@@ -146,7 +147,7 @@ export function Queue() {
 
       {tab === 'reports' && (
         <>
-          {reports.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+          {reports.loading && !reports.data && <Skeleton rows={3} height="h-20" />}
           {reports.error && (
             <p className="text-sm text-coral-dark">Načtení se nepovedlo: {reports.error.message}</p>
           )}
@@ -252,7 +253,7 @@ function RecordingsSection() {
       <div className="space-y-3">
         {message && <Toast message={message} />}
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
-        {students.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {students.loading && !students.data && <Skeleton rows={3} height="h-14" />}
         <div className="space-y-2">
           {matches.map((student) => (
             <button
@@ -287,7 +288,7 @@ function RecordingsSection() {
         ← Zpět na žáky
       </button>
       <h2 className="font-heading font-semibold">{selectedStudent.full_name}</h2>
-      {logs.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+      {logs.loading && !logs.data && <Skeleton rows={2} height="h-32" />}
       {logs.data?.length === 0 && <p className="text-text-muted text-sm">Žádné nahrávky.</p>}
       <div className="space-y-3">
         {logs.data?.map((log) => (

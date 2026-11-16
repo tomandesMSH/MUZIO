@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { Button } from '../../components/ui/Button'
 import { PickerMenu } from '../../components/ui/PickerMenu'
 import { Chevron, Collapse } from '../../components/ui/Collapse'
@@ -137,7 +138,7 @@ export function ClassroomsSection() {
       />
 
       <SearchBar value={search} onChange={setSearch} placeholder="Hledat třídu, učitele nebo žáka" />
-      {loading && <p className="text-text-muted text-sm">Načítám…</p>}
+      {loading && <Skeleton rows={3} height="h-20" />}
       {error && (
         <p className="text-sm text-coral-dark">Načtení se nepovedlo: {error.message}. Je spuštěná migrace 0031?</p>
       )}

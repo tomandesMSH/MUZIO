@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '../../components/ui/Badge'
 import { Avatar } from '../../components/ui/Avatar'
@@ -108,7 +109,7 @@ export function TeacherDashboard() {
               )}
             </div>
           )}
-          {pending.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+          {pending.loading && !pending.data && <Skeleton rows={2} />}
           {filteredPending?.length === 0 && <p className="text-text-muted text-sm">Vše zkontrolováno 🎉</p>}
           <div className="space-y-2">
             {filteredPending?.map((log) => (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -240,7 +241,7 @@ export function UsersSection() {
         </Chip>
       </div>
 
-      {users.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+      {users.loading && !users.data && <Skeleton rows={4} height="h-14" />}
       {users.error && <p className="text-sm text-coral-dark">Načtení se nepovedlo: {users.error.message}</p>}
 
       <div className="space-y-2">

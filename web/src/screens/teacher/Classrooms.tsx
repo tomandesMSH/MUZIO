@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Avatar } from '../../components/ui/Avatar'
@@ -81,7 +82,7 @@ export function Classrooms() {
             Vytvořit
           </Button>
         </form>
-        {classrooms.loading && <p className="text-text-muted text-sm">Načítám…</p>}
+        {classrooms.loading && !classrooms.data && <Skeleton rows={2} height="h-20" />}
         {classrooms.data?.length === 0 && (
           <p className="text-text-muted text-sm">Zatím žádná třída - vytvoř první výše.</p>
         )}
