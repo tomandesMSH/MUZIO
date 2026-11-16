@@ -19,7 +19,7 @@ describe('submitRecording', () => {
 
   it('uploads, adds the row and updates the streak', async () => {
     const { session } = await submitRecording(input)
-    expect(api.insertPracticeLog).toHaveBeenCalledWith('u1', 'https://x/rec.webm', 'a1', 60, undefined)
+    expect(api.insertPracticeLog).toHaveBeenCalledWith('u1', 'https://x/rec.webm', 'a1', 60, undefined, undefined)
     expect(session?.streak).toBe(3)
   })
 
@@ -41,7 +41,7 @@ describe('submitRecording', () => {
   it('a retry with the uploaded sound does not upload again', async () => {
     await submitRecording({ ...input, note: 'ahoj', audioUrl: 'https://x/earlier.webm' })
     expect(api.uploadRecording).not.toHaveBeenCalled()
-    expect(api.insertPracticeLog).toHaveBeenCalledWith('u1', 'https://x/earlier.webm', 'a1', 60, 'ahoj')
+    expect(api.insertPracticeLog).toHaveBeenCalledWith('u1', 'https://x/earlier.webm', 'a1', 60, 'ahoj', undefined)
   })
 
   it('a failed streak update still counts as sent (no duplicate on retry)', async () => {

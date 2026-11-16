@@ -186,12 +186,15 @@ export async function insertPracticeLog(
   assignmentId?: string,
   durationSeconds?: number | null,
   note?: string | null,
+  ownPieceId?: string,
 ): Promise<string> {
   const row: Record<string, unknown> = { user_id: userId, audio_url: audioUrl, assignment_id: assignmentId ?? null }
   // Only sent when known, so a database without migration 0024 still accepts the row.
   if (durationSeconds != null) row.duration_seconds = Math.round(durationSeconds)
   // Only when written (migration 0036).
   if (note?.trim()) row.student_note = note.trim().slice(0, 300)
+  // Only for an own piece (migration 0039).
+  if (ownPieceId) row.own_piece_id = ownPieceId
   const { data, error } = await supabase.from('practice_logs').insert([row]).select('id').single()
   if (error) throw error
   const logId = String(data.id)

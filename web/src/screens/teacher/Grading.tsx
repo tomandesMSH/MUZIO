@@ -33,6 +33,7 @@ import {
   type SnippetKind,
 } from '../../lib/data/commentSnippets'
 import { pickNextToGrade } from '../../lib/grading'
+import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
 import { refreshNavBadges } from '../../lib/navBadges'
 
@@ -66,6 +67,13 @@ export function Grading() {
   )
 
   const [selectedLog, setSelectedLog] = useState<PracticeLog>()
+  // Own pieces behind the recordings (migration 0039).
+  const pieceIds = [...new Set((logs.data ?? []).flatMap((l) => (l.own_piece_id ? [l.own_piece_id] : [])))]
+  const pieces = useQuery(
+    () => fetchPiecesByIds(pieceIds).catch(() => new Map<string, OwnPiece>()),
+    [pieceIds.join(',')],
+  )
+  const pieceOf = (log: PracticeLog) => (log.own_piece_id ? pieces.data?.get(log.own_piece_id) : undefined)
   const openedFromLink = useRef(false)
   const [rating, setRating] = useState(0)
   const [feedbackGood, setFeedbackGood] = useState('')
@@ -314,6 +322,23 @@ export function Grading() {
             {!selectedLog.teacher_comment && ` · ke kontrole zbývá ${waiting.length + 1}`}
           </p>
         </div>
+        {pieceOf(selectedLog) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <span>
+              🎸 Vlastní skladba: <b>{pieceOf(selectedLog)?.title}</b>
+            </span>
+            {pieceOf(selectedLog)?.link && (
+              <a
+                href={pieceOf(selectedLog)?.link ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary"
+              >
+                🔗 odkaz
+              </a>
+            )}
+          </div>
+        )}
         {selectedLog.student_note && (
           <div className="rounded-xl border-l-4 border-coral bg-bg-card-alt px-3 py-2">
             <div className="text-xs font-semibold text-text-muted">💬 Vzkaz od žáka</div>
@@ -441,6 +466,7 @@ export function Grading() {
                 {new Date(log.created_at).toLocaleString('cs-CZ')}
                 {log.teacher_comment ? ' · ohodnoceno' : ' · čeká na hodnocení'}
                 {log.student_note ? ' · 💬 vzkaz' : ''}
+                {pieceOf(log) ? ` · 🎸 ${pieceOf(log)?.title}` : ''}
               </div>
             </button>
           ))}

@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { LessonCard } from '../../components/lessons/LessonCard'
+import { OwnPieces } from '../../components/lessons/OwnPieces'
+import { addOwnPiece, archiveOwnPiece, fetchOwnPieces, type OwnPiece } from '../../lib/data/ownPieces'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
@@ -20,6 +22,18 @@ export function Lessons() {
     () => (profile ? fetchCompletedAssignmentIds(profile.id, assignmentIds) : Promise.resolve(new Set<string>())),
     [profile?.id, assignmentIds.join(',')],
   )
+
+  // Own pieces (migration 0039); without it the section just stays empty.
+  const pieces = useQuery(
+    () => (profile ? fetchOwnPieces(profile.id).catch(() => [] as OwnPiece[]) : Promise.resolve([])),
+    [profile?.id],
+  )
+
+  function openPiece(piece: OwnPiece) {
+    navigate('/student/recording', {
+      state: { lessonTitle: piece.title, ownPieceId: piece.id, pieceLink: piece.link ?? undefined },
+    })
+  }
 
   function openAssignment(assignment: Assignment) {
     navigate('/student/recording', {
@@ -79,6 +93,18 @@ export function Lessons() {
               ))}
             </div>
           </div>
+        )}
+
+        {profile && (
+          <OwnPieces
+            pieces={pieces.data ?? []}
+            onOpen={openPiece}
+            onAdd={async (title, link) => {
+              await addOwnPiece(profile.id, title, link)
+              pieces.refetch()
+            }}
+            onArchive={(piece) => void archiveOwnPiece(piece.id).then(pieces.refetch)}
+          />
         )}
 
         {done.length > 0 && (

@@ -82,6 +82,8 @@ export interface PracticeLog {
   feedback_images?: string[] | null
   // The teacher's spoken comment, a storage path (migration 0037).
   feedback_audio?: string | null
+  // The pupil's own piece this recording is for (migration 0039).
+  own_piece_id?: string | null
   // A note from the pupil sent with the recording (migration 0036).
   student_note?: string | null
   // When the pupil opened the grade (migration 0036); null = new for them.

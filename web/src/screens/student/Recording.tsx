@@ -22,12 +22,16 @@ interface LocationState {
   assignmentId?: string
   attachmentPath?: string
   attachmentName?: string
+  // An own piece instead of an assignment (migration 0039), and its link.
+  ownPieceId?: string
+  pieceLink?: string
 }
 
 export function Recording() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { lessonTitle, instructions, assignmentId, attachmentPath, attachmentName } = (location.state ?? {}) as LocationState
+  const { lessonTitle, instructions, assignmentId, attachmentPath, attachmentName, ownPieceId, pieceLink } = (location.state ??
+    {}) as LocationState
   const { profile, refreshProfile } = useAuth()
   const { message, show } = useToast()
   const [uploading, setUploading] = useState(false)
@@ -55,6 +59,7 @@ export function Recording() {
         durationSeconds,
         format,
         assignmentId,
+        ownPieceId,
         note,
         audioUrl: failedUploads.current.get(blob),
       })
@@ -93,6 +98,7 @@ export function Recording() {
         durationSeconds,
         format,
         assignmentId,
+        ownPieceId,
         lessonTitle,
         note,
         audioUrl,
@@ -118,6 +124,16 @@ export function Recording() {
       </button>
       <h1 className="text-xl mb-1.5">{lessonTitle ?? 'Nahrávání'}</h1>
       {instructions && <p className="text-text-muted text-xs leading-relaxed mb-2">{instructions}</p>}
+      {pieceLink && (
+        <a
+          href={pieceLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-3 inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-heading font-semibold hover:bg-bg-card-alt"
+        >
+          🔗 Otevřít odkaz ke skladbě
+        </a>
+      )}
       {attachmentPath && (
         <div className="mb-3">
           <AttachmentLink assignment={{ attachment_path: attachmentPath, attachment_name: attachmentName ?? null }} />

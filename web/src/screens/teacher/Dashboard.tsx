@@ -13,6 +13,7 @@ import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
 import { PickerMenu } from '../../components/ui/PickerMenu'
 import { fetchReviewContext } from '../../lib/data/classrooms'
+import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { NO_ASSIGNMENT, assignmentsWaiting, filterReview, type ReviewFilter } from '../../lib/reviewFilter'
 import { INACTIVE_AFTER_DAYS, inactivePupils, inactivityText } from '../../lib/inactivity'
 
@@ -25,6 +26,11 @@ export function TeacherDashboard() {
   const { profile } = useAuth()
   const [filter, setFilter] = useState<ReviewFilter>({ sort: 'oldest' })
   const waitingIds = [...new Set((pending.data ?? []).flatMap((l) => (l.assignment_id ? [l.assignment_id] : [])))]
+  const pieceIds = [...new Set((pending.data ?? []).flatMap((l) => (l.own_piece_id ? [l.own_piece_id] : [])))]
+  const pieces = useQuery(
+    () => fetchPiecesByIds(pieceIds).catch(() => new Map<string, OwnPiece>()),
+    [pieceIds.join(',')],
+  )
   const context = useQuery(
     () => (profile ? fetchReviewContext(profile.id, waitingIds) : Promise.resolve(undefined)),
     [profile?.id, waitingIds.join(',')],
@@ -126,6 +132,9 @@ export function TeacherDashboard() {
                       {new Date(log.created_at).toLocaleDateString('cs-CZ')}
                       {log.assignment_id && context.data?.titles.get(log.assignment_id)
                         ? ` · ${context.data.titles.get(log.assignment_id)}`
+                        : ''}
+                      {log.own_piece_id && pieces.data?.get(log.own_piece_id)
+                        ? ` · 🎸 ${pieces.data.get(log.own_piece_id)?.title}`
                         : ''}
                     </div>
                   </div>
