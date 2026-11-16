@@ -32,6 +32,7 @@ import {
   type SnippetKind,
 } from '../../lib/data/commentSnippets'
 import { pickNextToGrade } from '../../lib/grading'
+import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
 import { refreshNavBadges } from '../../lib/navBadges'
 
 // The badges a teacher gives by hand, with the reason shown on the toggle.
@@ -153,6 +154,28 @@ export function Grading() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs.data, state.logId])
 
+  // Keyboard grading while a recording is open (see lib/gradingKeys.ts).
+  const submitRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    if (!selectedLog) return
+    function onKey(e: KeyboardEvent) {
+      if (e.defaultPrevented || e.repeat) return
+      const action = gradingKeyAction({ ...e, key: e.key, inTextField: isTextField(e.target) })
+      if (!action) return
+      // Space on a focused button presses it - leave buttons alone.
+      if (action.type === 'play' && (e.target as HTMLElement | null)?.tagName === 'BUTTON') return
+      e.preventDefault()
+      if (action.type === 'rate') setRating(action.rating)
+      else if (action.type === 'submit') submitRef.current()
+      else {
+        const audio = document.querySelector<HTMLAudioElement>('[data-grading-audio] audio')
+        if (audio) void (audio.paused ? audio.play() : audio.pause())
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedLog])
+
   function toggleBadge(id: TeacherBadgeId) {
     setWantedBadges((prev) => {
       const next = new Set(prev)
@@ -241,6 +264,10 @@ export function Grading() {
     }
   }
 
+  submitRef.current = () => {
+    if (!submitting) void handleSubmit()
+  }
+
   if (selectedLog) {
     return (
       <div className="max-w-md md:max-w-lg mx-auto p-5 space-y-4">
@@ -292,7 +319,9 @@ export function Grading() {
             <p className="text-sm whitespace-pre-wrap break-words">{selectedLog.student_note}</p>
           </div>
         )}
-        <RecordingAudio src={selectedLog.audio_url} />
+        <div data-grading-audio>
+          <RecordingAudio src={selectedLog.audio_url} />
+        </div>
         <div>
           <label className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
             <span aria-hidden>✅</span> Co se povedlo
@@ -373,6 +402,9 @@ export function Grading() {
             })}
           </div>
         </div>
+        <p className="hidden md:block text-center text-[11px] text-text-muted">
+          ⌨ Klávesy: <b>1–5</b> noty · <b>mezerník</b> přehrát / pauza · <b>Ctrl+Enter</b> odeslat a další
+        </p>
         <Button className="w-full" disabled={submitting} onClick={handleSubmit}>
           Odeslat hodnocení
         </Button>
