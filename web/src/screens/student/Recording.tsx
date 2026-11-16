@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { RecordingUI } from '../../components/audio/RecordingUI'
 import { AudioFilePicker } from '../../components/audio/AudioFilePicker'
@@ -6,13 +6,9 @@ import { Toast } from '../../components/ui/Toast'
 import { Confetti } from '../../components/gamification/Confetti'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { useAuth } from '../../lib/AuthProvider'
-import {
-  uploadRecording,
-  insertPracticeLog,
-  recordPracticeSession,
-  fetchOwnLogsCount,
-  fetchWeeklyStats,
-} from '../../lib/data/practiceLogs'
+import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { SubmitError, submitRecording } from '../../lib/submitRecording'
+import { deletePendingUpload, savePendingUpload } from '../../lib/pendingUploads'
 import { isPerfectWeek } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
 import { useToast } from '../../lib/useToast'
@@ -35,6 +31,10 @@ export function Recording() {
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const [reviewing, setReviewing] = useState(false)
+  // A take that failed to send is kept under one id, however many retries.
+  const pendingIds = useRef(new WeakMap<Blob, string>())
+  // The sound already uploaded by a failed attempt: not uploaded again.
+  const failedUploads = useRef(new WeakMap<Blob, string>())
 
   async function handleRecorded(
     blob: Blob,
@@ -43,10 +43,17 @@ export function Recording() {
   ): Promise<boolean> {
     if (!profile || uploading) return false
     setUploading(true)
+    const pendingId = pendingIds.current.get(blob)
     try {
-      const audioUrl = await uploadRecording(profile.id, blob, format)
-      await insertPracticeLog(profile.id, audioUrl, assignmentId, durationSeconds)
-      const session = await recordPracticeSession(profile.id)
+      const { session } = await submitRecording({
+        userId: profile.id,
+        blob,
+        durationSeconds,
+        format,
+        assignmentId,
+        audioUrl: failedUploads.current.get(blob),
+      })
+      if (pendingId) await deletePendingUpload(pendingId)
       show('Nahrávka odeslána ke kontrole')
 
       const today = new Date()
@@ -55,8 +62,8 @@ export function Recording() {
         fetchWeeklyStats(profile.id, today),
       ])
       const result = detectNewUnlocks(profile.id, profile.xp ?? 0, {
-        stars: session.stars,
-        streak: session.streak,
+        stars: session?.stars ?? profile.stars,
+        streak: session?.streak ?? profile.streak,
         totalRecordings: logsCount,
         perfectWeek: isPerfectWeek(weekly.dateKeys, today),
         daysPlayedThisWeek: weekly.dateKeys.length,
@@ -70,7 +77,26 @@ export function Recording() {
       setTimeout(() => navigate('/student'), 1500)
       return true
     } catch (err) {
-      show(getErrorMessage(err, 'Nahrání se nepovedlo, zkus to znovu.'))
+      // Keep the take in the phone, so it's not lost if the page is closed.
+      const audioUrl = err instanceof SubmitError ? err.audioUrl : undefined
+      if (audioUrl) failedUploads.current.set(blob, audioUrl)
+      const id = pendingId ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const kept = await savePendingUpload({
+        id,
+        userId: profile.id,
+        blob,
+        durationSeconds,
+        format,
+        assignmentId,
+        lessonTitle,
+        audioUrl,
+      })
+      if (kept) pendingIds.current.set(blob, id)
+      show(
+        kept
+          ? 'Nahrávka se neodeslala, ale je uložená v telefonu. Zkus to znovu, nebo ji pošli později z Dashboardu.'
+          : getErrorMessage(err, 'Nahrání se nepovedlo, zkus to znovu.'),
+      )
       return false
     } finally {
       setUploading(false)

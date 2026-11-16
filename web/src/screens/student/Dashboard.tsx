@@ -12,6 +12,7 @@ import { Quests } from '../../components/gamification/Quests'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
+import { PendingUploads } from '../../components/audio/PendingUploads'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -24,7 +25,7 @@ import type { Assignment } from '../../lib/data/types'
 
 export function StudentDashboard() {
   const navigate = useNavigate()
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
   const userId = profile?.id
   const [today] = useState(() => new Date())
 
@@ -107,6 +108,16 @@ export function StudentDashboard() {
             <StarsDisplay stars={profile.stars} />
           </div>
         </div>
+        <PendingUploads
+          userId={profile.id}
+          onMessage={show}
+          onSent={() => {
+            refreshProfile()
+            logsCount.refetch()
+            weekly.refetch()
+            completed.refetch()
+          }}
+        />
         <DailyReminderBanner playedToday={playedToday} onStart={() => navigate('/student/recording')} />
 
         <div>
