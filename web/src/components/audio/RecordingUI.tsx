@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Waveform } from './Waveform'
 import { Button } from '../ui/Button'
 import { NoteForTeacher } from './NoteForTeacher'
+import { MicCheck } from './MicCheck'
 import { useMediaRecorder } from '../../lib/audio/useMediaRecorder'
 
 // Seconds counted down before recording starts - time to get the hands on
@@ -35,6 +36,7 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
   // 3, 2, 1 before recording; undefined when not counting.
   const [count, setCount] = useState<number>()
   const [note, setNote] = useState('')
+  const [checkingMic, setCheckingMic] = useState(false)
 
   useEffect(() => {
     if (count === undefined) return
@@ -125,7 +127,11 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
         onClick={() => {
           if (status === 'recording') stop()
           else if (count !== undefined) setCount(undefined)
-          else setCount(COUNTDOWN_FROM)
+          else {
+            // The test's microphone closes before recording opens its own.
+            setCheckingMic(false)
+            setCount(COUNTDOWN_FROM)
+          }
         }}
       >
         <span
@@ -136,6 +142,19 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
         <p role="alert" className="text-sm text-coral-dark text-center">
           {error}
         </p>
+      )}
+      {status !== 'recording' && count === undefined && (
+        checkingMic ? (
+          <MicCheck onClose={() => setCheckingMic(false)} />
+        ) : (
+          <button
+            type="button"
+            className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary"
+            onClick={() => setCheckingMic(true)}
+          >
+            🎚 Vyzkoušet mikrofon
+          </button>
+        )
       )}
       <p className="text-text-muted text-xs">
         {status === 'recording'
