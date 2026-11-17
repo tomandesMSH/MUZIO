@@ -70,7 +70,10 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title || 'Muzio', {
       body: data.body || '',
       icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      // The small icon in the phone's status bar: Android draws only its
+      // transparency, so it must be a white shape on transparent (a full
+      // picture would show as a white square).
+      badge: '/notification-badge.png',
       tag: data.tag,
       data: { url: data.url || '/' },
     }),

@@ -65,7 +65,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
   return (
     <div className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-border md:p-5 md:sticky md:top-0 md:h-dvh">
       <div className="flex items-center gap-2.5 mb-6 px-1">
-        <div className="w-8 h-8 rounded-lg bg-coral shadow-clay-sm flex items-center justify-center text-sm">🎵</div>
+        <img src="/favicon.svg" alt="" className="w-8 h-8 shrink-0" />
         <span className="font-heading font-bold text-base">Muzio</span>
       </div>
       <nav ref={listRef} className="relative flex flex-col gap-1" onMouseLeave={() => setHovered(undefined)}>
