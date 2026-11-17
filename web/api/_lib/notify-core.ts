@@ -223,9 +223,14 @@ export function reminderMessage(candidate: ReminderCandidate): Message {
   }
 }
 
-export function testMessage(): Message {
-  return { title: 'Muzio 🎵', body: 'Notifikace fungují. Takhle ti dáme vědět.', url: '/', tag: 'test' }
+// A tag of its own each time: with the same tag the phone would just swap it
+// for the previous test quietly, and it would look like nothing came.
+export function testMessage(now: Date): Message {
+  return { title: 'Muzio 🎵', body: 'Notifikace fungují. Takhle ti dáme vědět.', url: '/', tag: `test-${now.getTime()}` }
 }
+
+// "Poslat zkušební" can be pressed again after this many seconds.
+export const TEST_EVERY_SECONDS = 15
 
 export function parseRequest(body: unknown): NotifyRequest | null {
   if (!body || typeof body !== 'object') return null
@@ -312,11 +317,12 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
   if (!caller) return { status: 401, body: { error: 'unauthorized' } }
 
   if (request.type === 'test') {
-    // At most one a minute.
-    if (!(await deps.db.claim('test', `${caller}:${deps.now.toISOString().slice(0, 16)}`))) {
+    // At most one in TEST_EVERY_SECONDS.
+    const slot = Math.floor(deps.now.getTime() / (TEST_EVERY_SECONDS * 1000))
+    if (!(await deps.db.claim('test', `${caller}:${slot}`))) {
       return { status: 429, body: { error: 'too many' } }
     }
-    return { status: 200, body: { sent: await deliver(deps, [caller], () => true, testMessage()) } }
+    return { status: 200, body: { sent: await deliver(deps, [caller], () => true, testMessage(deps.now)) } }
   }
 
   if (request.type === 'graded') {

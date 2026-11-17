@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Switch } from './Switch'
-import { disablePush, enablePush, isPushEnabled, notifyPush, pushErrorText, pushSupport } from '../../lib/push'
+import { disablePush, enablePush, isPushEnabled, pushErrorText, pushSupport, sendTestNotification } from '../../lib/push'
 import {
   DEFAULT_NOTIFICATION_SETTINGS,
   REMINDER_HOURS,
@@ -88,9 +88,18 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
     }
   }
 
-  function sendTest() {
-    notifyPush({ type: 'test' })
-    setNote('Zkušební notifikace je na cestě – měla by přijít do pár vteřin.')
+  async function sendTest() {
+    setNote('Posílám…')
+    const result = await sendTestNotification()
+    setNote(
+      result.kind === 'sent'
+        ? `Odesláno ${result.devices === 1 ? 'na 1 zařízení' : `na ${result.devices} zařízení`} – mělo by přijít do pár vteřin.`
+        : result.kind === 'wait'
+          ? 'Zkušební jde poslat jednou za 15 vteřin. Zkus to za chvilku.'
+          : result.kind === 'none'
+            ? 'Není kam poslat – na tomhle zařízení zapni notifikace (přepínač nahoře).'
+            : 'Odeslání se nepovedlo. Zkontroluj internet a zkus to znovu.',
+    )
   }
 
   const row = (label: string, hint: string, checked: boolean, onChange: (v: boolean) => void) => (
@@ -201,7 +210,7 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
 
         <div className="flex gap-2.5">
           {enabled && (
-            <Button type="button" variant="ghost" className="flex-1" onClick={sendTest}>
+            <Button type="button" variant="ghost" className="flex-1" onClick={() => void sendTest()}>
               Poslat zkušební
             </Button>
           )}

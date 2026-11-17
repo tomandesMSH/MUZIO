@@ -214,11 +214,16 @@ describe('notify', () => {
     expect(deleted).toEqual(['https://push.example/old'])
   })
 
-  it('test: to your own devices, at most once a minute', async () => {
-    const { deps, sent } = setup({ subs: [sub('p1'), sub('p2')], settings: { p1: { graded: false } } })
+  it('test: to your own devices, again after 15 s, each one a notification of its own', async () => {
+    const now = new Date('2026-11-17T10:00:01Z')
+    const { deps, sent } = setup({ subs: [sub('p1'), sub('p2')], settings: { p1: { graded: false } }, now })
     expect((await handleNotify({ type: 'test' }, 'jwt', deps)).body.sent).toBe(1)
     expect(sent.map((s) => s.to)).toEqual(['p1'])
     expect((await handleNotify({ type: 'test' }, 'jwt', deps)).status).toBe(429)
+    deps.now = new Date('2026-11-17T10:00:16Z')
+    expect((await handleNotify({ type: 'test' }, 'jwt', deps)).body.sent).toBe(1)
+    expect(sent).toHaveLength(2)
+    expect(sent[0].message.tag).not.toBe(sent[1].message.tag)
   })
 
   it('reminders: need the cron secret', async () => {

@@ -97,6 +97,29 @@ export type NotifyEvent =
   | { type: 'announcement'; announcementId: string }
   | { type: 'test' }
 
+// "Poslat zkušební": what the server did - sent to n devices, nothing to send
+// to (no device subscribed), asked too soon again, or it failed.
+export type TestResult = { kind: 'sent'; devices: number } | { kind: 'none' } | { kind: 'wait' } | { kind: 'failed' }
+
+export async function sendTestNotification(): Promise<TestResult> {
+  try {
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    if (!token) return { kind: 'failed' }
+    const response = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ type: 'test' }),
+    })
+    if (response.status === 429) return { kind: 'wait' }
+    if (!response.ok) return { kind: 'failed' }
+    const body = (await response.json().catch(() => ({}))) as { sent?: number }
+    return body.sent ? { kind: 'sent', devices: body.sent } : { kind: 'none' }
+  } catch {
+    return { kind: 'failed' }
+  }
+}
+
 // Asks the server to send the notification for something that just happened.
 // Best effort: a failure never gets in the way of what the user was doing.
 export function notifyPush(event: NotifyEvent): void {
