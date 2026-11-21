@@ -3,6 +3,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 
+vi.mock('../../lib/supabase', () => ({ supabase: {} }))
+vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 'u1' } }) }))
+
 // jsdom has no layout: each nav item sits 50 px below the previous one.
 Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
   configurable: true,
