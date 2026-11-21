@@ -266,13 +266,11 @@ export function recordingMessage(log: LogRow, pupilName: string | null): Message
   }
 }
 
-export function reminderMessage(candidate: ReminderCandidate): Message {
+export function reminderMessage(_candidate: ReminderCandidate): Message {
   return {
     title: 'Čas na cvičení 🎹',
-    body:
-      candidate.streak > 0
-        ? `Dnes jsi ještě necvičil(a). Neztrať sérii ${candidate.streak} 🔥!`
-        : 'Dnes ještě žádná nahrávka. Stačí pár minut.',
+    // Flames (lib/flames.ts) don't need days in a row, so no "streak" talk.
+    body: 'Dnes ti ještě chybí plamínek 🔥. Stačí pár minut.',
     url: '/student/recording',
     tag: 'reminder',
   }

@@ -14,6 +14,7 @@ vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 't1'
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
 vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameDays: async () => ['2026-11-20', '2026-11-21'], fetchImportedFlames: async () => 0 }))
 vi.mock('../../components/teacher/StudentNotes', () => ({ StudentNotes: () => <div>poznámky</div> }))
+vi.mock('../../lib/data/ownPieces', () => ({ fetchPiecesByIds: async () => new Map() }))
 vi.mock('../../components/classrooms/AssignToStudentModal', () => ({ AssignToStudentModal: () => null }))
 vi.mock('../../lib/data/profiles', () => ({
   fetchStudents: async () => [{ id: 's1', full_name: 'Adam Novák', streak: 4, xp: 120, stars: 2, is_approved: true }],

@@ -20,6 +20,10 @@ import { awardsByLog, fetchAwardedBadges } from '../../lib/data/badges'
 import { FeedbackImages } from '../../components/feedback/FeedbackImages'
 import { SavedVoiceComment } from '../../components/feedback/VoiceComment'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
+import { BeforeAfter } from '../../components/feedback/BeforeAfter'
+import { fetchStudentAssignments } from '../../lib/data/classrooms'
+import { fetchPiecesByIds } from '../../lib/data/ownPieces'
+import { isSkipped } from '../../lib/grading'
 import { canOfferDownload, downloadRecording, DOWNLOAD_OFFER_AFTER_DAYS } from '../../lib/recordingDownload'
 
 export function Feedback() {
@@ -27,6 +31,10 @@ export function Feedback() {
   const logs = useQuery(() => (profile ? fetchOwnLogs(profile.id) : Promise.resolve([])), [profile?.id])
   const awards = useQuery(() => (profile ? fetchAwardedBadges(profile.id) : Promise.resolve([])), [profile?.id])
   const awardsForLog = awardsByLog(awards.data ?? [])
+  // Names for "Před a po" (a failure just leaves the generic name).
+  const assignments = useQuery(() => fetchStudentAssignments().catch(() => []), [])
+  const pieceIds = [...new Set((logs.data ?? []).flatMap((l) => (l.own_piece_id ? [l.own_piece_id] : [])))]
+  const pieces = useQuery(() => fetchPiecesByIds(pieceIds).catch(() => new Map()), [pieceIds.join(',')])
   const [reportTarget, setReportTarget] = useState<PracticeLog>()
   const [reporting, setReporting] = useState(false)
   const [reportError, setReportError] = useState<string>()
@@ -105,6 +113,17 @@ export function Feedback() {
           <p className="text-text-muted text-sm">Ještě jsi nic nenahrál/a - zkus to na Dashboardu.</p>
         )}
 
+        <BeforeAfter
+          logs={logs.data}
+          titleFor={(pair) =>
+            pair.assignmentId
+              ? assignments.data?.find((a) => a.id === pair.assignmentId)?.title
+              : pair.ownPieceId
+                ? pieces.data?.get(pair.ownPieceId)?.title
+                : undefined
+          }
+        />
+
         <div className="space-y-3">
           {logs.data?.map((log) => {
             const graded = log.rating != null
@@ -123,6 +142,8 @@ export function Feedback() {
                       )}
                       <Badge tone="success">+{xpForLog(log.rating, log.duration_seconds)} XP</Badge>
                     </span>
+                  ) : isSkipped(log) ? (
+                    <Badge tone="success">Zkontrolováno</Badge>
                   ) : (
                     <Badge tone="pending">Čeká na hodnocení</Badge>
                   )}

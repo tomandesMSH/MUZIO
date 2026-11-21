@@ -17,6 +17,8 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchStudents } from '../../lib/data/profiles'
 import { fetchStudentLogs } from '../../lib/data/practiceLogs'
 import { isReviewed, isSkipped } from '../../lib/grading'
+import { BeforeAfter } from '../../components/feedback/BeforeAfter'
+import { fetchPiecesByIds } from '../../lib/data/ownPieces'
 import { fetchPupilAssignments } from '../../lib/data/classrooms'
 import { dueLabel } from '../../lib/dueDate'
 import { NavIcon } from '../../components/layout/NavIcon'
@@ -35,6 +37,8 @@ export function StudentCard() {
     () => (profile ? fetchPupilAssignments(profile.id, id).catch(() => []) : Promise.resolve([])),
     [profile?.id, id],
   )
+  const pieceIds = [...new Set((logs.data ?? []).flatMap((l) => (l.own_piece_id ? [l.own_piece_id] : [])))]
+  const pieces = useQuery(() => fetchPiecesByIds(pieceIds).catch(() => new Map()), [pieceIds.join(',')])
   const flameDays = useQuery(() => fetchPupilFlameDays(id).catch(() => null), [id])
   const importedFlames = useQuery(() => fetchImportedFlames(id), [id])
   const [assignOpen, setAssignOpen] = useState(false)
@@ -176,6 +180,19 @@ export function StudentCard() {
             </ul>
           </div>
         </div>
+
+        <BeforeAfter
+          logs={logs.data}
+          heading="Pokrok žáka"
+          intro="První a poslední nahrávka stejného úkolu nebo vlastní skladby, třeba na třídní schůzky."
+          titleFor={(pair) =>
+            pair.assignmentId
+              ? assignments.data?.find((a) => a.assignment.id === pair.assignmentId)?.assignment.title
+              : pair.ownPieceId
+                ? pieces.data?.get(pair.ownPieceId)?.title
+                : undefined
+          }
+        />
 
         {profile && (
           <div>

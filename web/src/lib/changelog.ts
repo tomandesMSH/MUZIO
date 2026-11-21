@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-22-pokrok',
+    date: '2026-11-22',
+    title: 'Tvůj pokrok',
+    role: 'student',
+    items: ['Ve Zpětné vazbě si pustíš svou první a poslední nahrávku stejné skladby a uslyšíš, jak ses zlepšil(a).'],
+  },
+  {
+    id: '2026-11-22-pokrok-ucitel',
+    date: '2026-11-22',
+    title: 'Pokrok žáka',
+    role: 'teacher',
+    items: ['Na kartě žáka je nově „Pokrok žáka“: první a poslední nahrávka stejného úkolu nebo vlastní skladby pod sebou.'],
+  },
+  {
     id: '2026-11-21-ucitel-kontrola',
     date: '2026-11-21',
     title: 'Nahrávky bez hodnocení',
