@@ -23,6 +23,7 @@ import { HistorySection } from './HistorySection'
 import { ClassroomsSection } from './ClassroomsSection'
 import { UsageSection } from './UsageSection'
 import { BugReportsSection } from './BugReportsSection'
+import { MigrationSection } from './MigrationSection'
 import { countOpenBugReports } from '../../lib/data/bugReports'
 import type { PracticeLog, Profile } from '../../lib/data/types'
 
@@ -32,7 +33,7 @@ interface SuspendTarget {
   name: string
 }
 
-type Tab = 'reports' | 'bugs' | 'recordings' | 'users' | 'classrooms' | 'usage' | 'history'
+type Tab = 'reports' | 'bugs' | 'recordings' | 'users' | 'classrooms' | 'migration' | 'usage' | 'history'
 
 // The admin's sections; the bar scrolls sideways on a phone.
 const TABS: { id: Tab; label: string }[] = [
@@ -41,6 +42,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'recordings', label: 'Nahrávky' },
   { id: 'users', label: 'Uživatelé' },
   { id: 'classrooms', label: 'Třídy' },
+  { id: 'migration', label: 'Migrace' },
   { id: 'usage', label: 'Využití' },
   { id: 'history', label: 'Historie' },
 ]
@@ -215,6 +217,7 @@ export function Queue() {
       )}
 
       {tab === 'bugs' && <BugReportsSection onChanged={openBugs.refetch} />}
+      {tab === 'migration' && <MigrationSection />}
       {tab === 'recordings' && <RecordingsSection />}
       {tab === 'users' && <UsersSection />}
       {tab === 'classrooms' && <ClassroomsSection />}

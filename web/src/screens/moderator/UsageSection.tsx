@@ -10,7 +10,6 @@ import {
 } from '../../lib/data/adminUsage'
 import { CleanupSection } from './CleanupSection'
 import { AnnounceCleanup } from './AnnounceCleanup'
-import { Base44Overview } from '../../components/teacher/Base44Overview'
 import { OrphanRecordings } from './OrphanRecordings'
 
 const TONE_BAR = { ok: 'bg-coral', warn: 'bg-[#e0a100]', full: 'bg-coral-dark' } as const
@@ -98,7 +97,6 @@ export function UsageSection() {
             </div>
           )}
 
-          <Base44Overview />
           <AnnounceCleanup />
           <CleanupSection onCleaned={usage.refetch} />
           <OrphanRecordings onRestored={usage.refetch} />

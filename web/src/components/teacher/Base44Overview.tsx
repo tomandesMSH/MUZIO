@@ -14,7 +14,7 @@ export interface Base44Row {
   claimed_at: string | null
 }
 
-async function fetchOverview(): Promise<Base44Row[]> {
+export async function fetchBase44Overview(): Promise<Base44Row[]> {
   const { data, error } = await supabase.rpc('base44_migration_overview')
   if (error) throw error
   return (data ?? []) as Base44Row[]
@@ -23,7 +23,7 @@ async function fetchOverview(): Promise<Base44Row[]> {
 // Who of the Base44 pupils has moved their data to Muzio (migration 0056),
 // the ones still missing on top. Nothing shows without the migration or data.
 export function Base44Overview({ rows: given }: { rows?: Base44Row[] }) {
-  const loaded = useQuery(() => (given ? Promise.resolve(given) : fetchOverview().catch(() => [])), [given])
+  const loaded = useQuery(() => (given ? Promise.resolve(given) : fetchBase44Overview().catch(() => [])), [given])
   const [open, setOpen] = useState(false)
   const rows = loaded.data ?? []
   if (rows.length === 0) return null
