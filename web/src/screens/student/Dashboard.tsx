@@ -10,6 +10,9 @@ import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { DailyReminderBanner } from '../../components/gamification/DailyReminderBanner'
 import { Confetti } from '../../components/gamification/Confetti'
 import { Quests } from '../../components/gamification/Quests'
+import { Mascot } from '../../components/style/Mascot'
+import { StylePicker } from '../../components/style/StylePicker'
+import { styleOf } from '../../lib/style'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -104,13 +107,17 @@ export function StudentDashboard() {
       <div className="space-y-5">
         {/* Phone: greeting on its own line, the counters in a row under it. */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-xl">Ahoj, {firstName}</h1>
+          <div className="flex items-center gap-3">
+            <Mascot style={styleOf(profile.style)} className="h-14 w-14 shrink-0" />
+            <h1 className="text-xl">Ahoj, {firstName}</h1>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <Streak count={profile.streak} freezesAvailable={profile.streak_freezes_available} />
             <XPDisplay xp={profile.xp ?? 0} />
             <StarsDisplay stars={profile.stars} />
           </div>
         </div>
+        <StylePicker onError={show} />
         <AnnouncementsCard />
         <PendingUploads
           userId={profile.id}

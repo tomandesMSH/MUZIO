@@ -1,3 +1,4 @@
+import type { StyleId } from '../style'
 export type UserRole = 'student' | 'teacher' | 'moderator'
 
 export interface Profile {
@@ -33,6 +34,9 @@ export interface Profile {
   // applied.
   streak_freezes_available?: number
   last_practice_date?: string | null
+  // Pohádkový svět or Moderní studio (lib/style.ts). Null = pohádka; absent
+  // until migration 0044 is applied.
+  style?: StyleId | null
 }
 
 export interface Classroom {
