@@ -16,6 +16,7 @@ import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
 import { PendingUploads } from '../../components/audio/PendingUploads'
 import { AnnouncementsCard } from '../../components/classrooms/AnnouncementsCard'
+import { CleanupNoticeBanner } from '../../components/cleanup/CleanupNoticeBanner'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -111,6 +112,7 @@ export function StudentDashboard() {
             <StarsDisplay stars={profile.stars} />
           </div>
         </div>
+        <CleanupNoticeBanner />
         <AnnouncementsCard />
         <PendingUploads
           userId={profile.id}
