@@ -1,3 +1,4 @@
+import type { WorldId } from '../world'
 export type UserRole = 'student' | 'teacher' | 'moderator'
 
 export interface Profile {
@@ -33,6 +34,9 @@ export interface Profile {
   // applied.
   streak_freezes_available?: number
   last_practice_date?: string | null
+  // The pupil's musical world (lib/world.ts). Null until they pick one;
+  // absent until migration 0043 is applied.
+  world?: WorldId | null
 }
 
 export interface Classroom {

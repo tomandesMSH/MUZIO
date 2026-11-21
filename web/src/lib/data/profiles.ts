@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { deleteAccount } from './adminUsers'
 import type { Profile } from './types'
+import type { WorldId } from '../world'
 
 export async function fetchOwnProfile(userId: string): Promise<Profile> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
@@ -45,6 +46,11 @@ export async function updateShareBasicProgress(userId: string, shareBasicProgres
     .from('profiles')
     .update({ share_basic_progress: shareBasicProgress })
     .eq('id', userId)
+  if (error) throw error
+}
+
+export async function updateWorld(userId: string, world: WorldId): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ world }).eq('id', userId)
   if (error) throw error
 }
 
