@@ -11,6 +11,7 @@ import { DailyReminderBanner } from '../../components/gamification/DailyReminder
 import { Confetti } from '../../components/gamification/Confetti'
 import { Quests } from '../../components/gamification/Quests'
 import { Flames } from '../../components/gamification/Flames'
+import { WorldCard } from '../../components/world/WorldCard'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -114,6 +115,7 @@ export function StudentDashboard() {
             <StarsDisplay stars={profile.stars} />
           </div>
         </div>
+        <WorldCard world={profile.world} />
         <AnnouncementsCard />
         <PendingUploads
           userId={profile.id}
