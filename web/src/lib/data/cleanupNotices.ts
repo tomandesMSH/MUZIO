@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import { toDateKey } from '../game-logic'
+import { notifyPush } from '../push'
 
 // Notices that old sound files are about to be cleared (migration 0046).
 // Row level security decides who sees which: every pupil the admin's
@@ -27,4 +28,13 @@ export async function fetchOpenCleanupNotices(today: Date): Promise<CleanupNotic
 export function noticeDay(day: string): string {
   const [y, m, d] = day.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
+}
+
+// "Oznámit čištění" (admin): the notice, then the notification to every pupil.
+export async function announceCleanup(): Promise<string> {
+  const { data, error } = await supabase.rpc('admin_announce_cleanup')
+  if (error) throw error
+  const id = data as string
+  notifyPush({ type: 'cleanup', noticeId: id })
+  return id
 }

@@ -131,6 +131,22 @@ function supabaseDb(url: string, serviceKey: string) {
         .gte('created_at', sinceIso)
       return (data ?? []) as { user_id: string }[]
     },
+    async getCleanupNotice(id) {
+      const { data } = await sb
+        .from('cleanup_notices')
+        .select('id, kind, delete_after, created_by')
+        .eq('id', id)
+        .maybeSingle()
+      return data
+    },
+    async isModerator(userId) {
+      const { data } = await sb.from('profiles').select('role, is_moderator').eq('id', userId).maybeSingle()
+      return !!data && (data.role === 'moderator' || data.is_moderator === true)
+    },
+    async allPupils() {
+      const { data } = await sb.from('profiles').select('id').eq('role', 'student').eq('is_banned', false)
+      return ids(data, 'id')
+    },
     async claim(kind, ref) {
       const { error } = await sb.from('push_sent').insert({ kind, ref })
       // 23505 = already there: sent before.

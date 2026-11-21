@@ -95,6 +95,7 @@ export type NotifyEvent =
   | { type: 'recording'; logId: string }
   | { type: 'assignment'; assignmentId: string }
   | { type: 'announcement'; announcementId: string }
+  | { type: 'cleanup'; noticeId: string }
   | { type: 'test' }
 
 // "Poslat zkušební": what the server did - sent to n devices, nothing to send
