@@ -43,6 +43,14 @@ export async function fetchWeeklyStats(userId: string, today: Date): Promise<Wee
   return { dateKeys: Array.from(new Set(dateKeys)), weeklyCount: data?.length ?? 0 }
 }
 
+// The days the pupil sent a recording (local date keys, each once) - for the
+// flames (lib/flames.ts).
+export async function fetchPracticeDayKeys(userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from('practice_logs').select('created_at').eq('user_id', userId)
+  if (error) throw error
+  return Array.from(new Set((data ?? []).map((row) => toDateKey(new Date(row.created_at as string)))))
+}
+
 // When and how long the pupil practised - all of it, for the calendar and
 // the longest streak (a few hundred rows at most per pupil).
 export async function fetchPracticeHistory(userId: string): Promise<{ created_at: string; duration_seconds: number | null }[]> {
