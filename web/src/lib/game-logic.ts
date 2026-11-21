@@ -67,9 +67,27 @@ export interface BadgeContext {
   awardedCounts?: Partial<Record<TeacherBadgeId, number>>
 }
 
-// Badges the teacher gives while grading a recording (issue #4).
-export const TEACHER_BADGE_IDS = ['maly-virtuoz', 'virtuoz'] as const
+// Badges the teacher gives while grading a recording (issue #4, migrations
+// 0025 and 0045 - keep the list in sync with the check there).
+export const TEACHER_BADGE_IDS = [
+  'maly-virtuoz',
+  'virtuoz',
+  'lovec-not',
+  'akordovy-kouzelnik',
+  'rytmicky-mistr',
+  'velky-pokrok',
+  'maly-skladatel',
+  'odvazny-muzikant',
+  'koncertni-hvezda',
+] as const
 export type TeacherBadgeId = (typeof TEACHER_BADGE_IDS)[number]
+
+// Every teacher badge at 0, with the given counts on top (never negative).
+export function teacherBadgeCounts(counts?: Partial<Record<TeacherBadgeId, number>>): Record<TeacherBadgeId, number> {
+  return Object.fromEntries(
+    TEACHER_BADGE_IDS.map((id) => [id, Math.max(0, counts?.[id] || 0)]),
+  ) as Record<TeacherBadgeId, number>
+}
 
 interface SafeBadgeContext {
   stars: number
@@ -108,6 +126,19 @@ export interface BadgeResult {
   count?: number
 }
 
+// A badge only the teacher gives, earned again with every award.
+function teacherBadge(id: TeacherBadgeId, icon: string, label: string, description: string): BadgeDef {
+  return {
+    id,
+    icon,
+    label,
+    description,
+    byTeacher: true,
+    check: (ctx) => ctx.awardedCounts[id] >= 1,
+    progress: (ctx) => ({ current: ctx.awardedCounts[id], target: 1 }),
+  }
+}
+
 export const BADGES: BadgeDef[] = [
   { id: 'novacek', icon: '🌱', label: 'Nováček', description: 'Pošli první nahrávku.', check: (ctx) => ctx.totalRecordings >= 1, progress: (ctx) => ({ current: ctx.totalRecordings, target: 1 }) },
   { id: 'pravidelnost', icon: '🔥', tier: '3', label: 'Pravidelnost', description: 'Cvič 3 dny po sobě.', check: (ctx) => ctx.streak >= 3, progress: (ctx) => ({ current: ctx.streak, target: 3 }) },
@@ -118,6 +149,13 @@ export const BADGES: BadgeDef[] = [
   { id: 'padesat-melodii', icon: '🎼', tier: '50', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
   { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Zahraj skladbu bez chyb. Dává ho učitel.', byTeacher: true, check: (ctx) => ctx.awardedCounts['maly-virtuoz'] >= 1, progress: (ctx) => ({ current: ctx.awardedCounts['maly-virtuoz'], target: 1 }) },
   { id: 'virtuoz', icon: '🌟', label: 'Virtuoz', description: 'Splň výzvu od učitele, třeba stupnici v tempu 80.', byTeacher: true, check: (ctx) => ctx.awardedCounts.virtuoz >= 1, progress: (ctx) => ({ current: ctx.awardedCounts.virtuoz, target: 1 }) },
+  teacherBadge('lovec-not', '🎶', 'Lovec not', 'Za správně nastudovanou skladbu podle notového zápisu.'),
+  teacherBadge('akordovy-kouzelnik', '🪄', 'Akordový kouzelník', 'Za sekvenci akordů zahranou plynule za sebou.'),
+  teacherBadge('rytmicky-mistr', '🥁', 'Rytmický mistr', 'Za výrazné zlepšení rytmu.'),
+  teacherBadge('velky-pokrok', '📈', 'Velký pokrok', 'Za osobní hudební zlepšení.'),
+  teacherBadge('maly-skladatel', '✏️', 'Malý skladatel', 'Za vlastní hudební nápad nebo skladbu.'),
+  teacherBadge('odvazny-muzikant', '🦁', 'Odvážný muzikant', 'Za překonání obtížného hudebního místa.'),
+  teacherBadge('koncertni-hvezda', '🎤', 'Koncertní hvězda', 'Za vystoupení před publikem.'),
   { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', description: 'Cvič každý den v týdnu.', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
   { id: 'tydenni-cil', icon: '🎯', tier: '3', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
 ]
@@ -130,10 +168,7 @@ export function computeBadges(ctx: BadgeContext): BadgeResult[] {
     perfectWeek: !!ctx?.perfectWeek,
     daysPlayedThisWeek: Math.max(0, ctx?.daysPlayedThisWeek || 0),
     weeklyCount: Math.max(0, ctx?.weeklyCount || 0),
-    awardedCounts: {
-      'maly-virtuoz': Math.max(0, ctx?.awardedCounts?.['maly-virtuoz'] || 0),
-      virtuoz: Math.max(0, ctx?.awardedCounts?.virtuoz || 0),
-    },
+    awardedCounts: teacherBadgeCounts(ctx?.awardedCounts),
   }
   return BADGES.map((badge) => {
     const unlocked = badge.check(safeCtx)

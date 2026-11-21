@@ -73,6 +73,15 @@ describe('computeBadges', () => {
     expect(awarded.find((b) => b.id === 'virtuoz')?.unlocked).toBe(false)
   })
 
+  it('every teacher badge id has its badge, given by the teacher only', () => {
+    const teacherBadges = KHGame.computeBadges({}).filter((b) => b.byTeacher)
+    expect(teacherBadges.map((b) => b.id).sort()).toEqual([...KHGame.TEACHER_BADGE_IDS].sort())
+    expect(teacherBadges.every((b) => !b.unlocked && b.progressLabel === 'Uděluje učitel')).toBe(true)
+
+    const lovec = KHGame.computeBadges({ awardedCounts: { 'lovec-not': 2 } }).find((b) => b.id === 'lovec-not')
+    expect(lovec).toMatchObject({ unlocked: true, count: 2, label: 'Lovec not' })
+  })
+
   it('every badge says how to earn it, so it can be shown without a tooltip', () => {
     for (const badge of KHGame.computeBadges({})) {
       expect(badge.description.length).toBeGreaterThan(0)
