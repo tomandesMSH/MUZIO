@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Switch } from '../../components/ui/Switch'
+import { setSoundsOn, soundsOn } from '../../lib/sounds'
 import { SettingsRow } from '../../components/ui/SettingsRow'
 import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
@@ -21,6 +22,11 @@ import { getErrorMessage } from '../../lib/errors'
 export function Settings() {
   const navigate = useNavigate()
   const { profile, refreshProfile } = useAuth()
+  const [sounds, setSounds] = useState(soundsOn)
+  function toggleSounds(on: boolean) {
+    setSoundsOn(on)
+    setSounds(on)
+  }
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
@@ -92,6 +98,7 @@ export function Settings() {
           <h2 className="text-sm font-heading font-semibold mb-1">Aplikace</h2>
           <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
+          <SettingsRow label="Zvuk při dokončení" right={<Switch checked={sounds} onChange={toggleSounds} />} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
         </div>
 
