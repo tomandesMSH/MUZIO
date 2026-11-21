@@ -20,10 +20,16 @@ import { isReauthed } from '../../lib/reauth'
 import { getErrorMessage } from '../../lib/errors'
 import type { Profile } from '../../lib/data/types'
 import { NavIcon } from '../../components/layout/NavIcon'
+import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
+import { flamesLabel } from '../../lib/flames'
 
 export function Students() {
   const navigate = useNavigate()
   const students = useQuery(() => fetchStudents(), [])
+  const flameCounts = useQuery(
+    () => fetchPupilFlameCounts((students.data ?? []).map((s) => s.id)).catch(() => null),
+    [(students.data ?? []).map((s) => s.id).join(',')],
+  )
   const [search, setSearch] = useState('')
   const [approving, setApproving] = useState<string>()
   const [deleting, setDeleting] = useState<string>()
@@ -220,6 +226,7 @@ export function Students() {
                     <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
                     <div className="text-text-muted text-xs">
                       🔥 {student.streak} · {student.xp ?? 0} XP
+                      {flameCounts.data && ` · ${flamesLabel(flameCounts.data.get(student.id) ?? 0)}`}
                     </div>
                   </div>
                 </button>
