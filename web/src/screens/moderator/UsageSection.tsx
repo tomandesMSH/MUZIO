@@ -10,6 +10,7 @@ import {
 } from '../../lib/data/adminUsage'
 import { CleanupSection } from './CleanupSection'
 import { AnnounceCleanup } from './AnnounceCleanup'
+import { OrphanRecordings } from './OrphanRecordings'
 
 const TONE_BAR = { ok: 'bg-coral', warn: 'bg-[#e0a100]', full: 'bg-coral-dark' } as const
 
@@ -98,6 +99,7 @@ export function UsageSection() {
 
           <AnnounceCleanup />
           <CleanupSection onCleaned={usage.refetch} />
+          <OrphanRecordings onRestored={usage.refetch} />
 
           <p className="text-xs text-text-muted">
             {u.counts.students} žáků · {u.counts.teachers} učitelů · {u.counts.recordings} nahrávek. Limity jsou z free
