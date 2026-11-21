@@ -8,6 +8,7 @@ import { PracticeCalendar } from '../../components/gamification/PracticeCalendar
 import { RatingNotes } from '../../components/gamification/RatingNotes'
 import { AssignToStudentModal } from '../../components/classrooms/AssignToStudentModal'
 import { StudentNotes } from '../../components/teacher/StudentNotes'
+import { MessageToPupil } from '../../components/teacher/MessageToPupil'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchStudents } from '../../lib/data/profiles'
@@ -153,6 +154,13 @@ export function StudentCard() {
             </ul>
           </div>
         </div>
+
+        {profile && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold mb-2">Hudební pošta</h2>
+            <MessageToPupil teacherId={profile.id} studentId={id} />
+          </div>
+        )}
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-2">

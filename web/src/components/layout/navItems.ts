@@ -14,7 +14,13 @@ export interface NavItem {
 }
 
 export const STUDENT_NAV_ITEMS: NavItem[] = [
-  { to: '/student', label: 'Dashboard', icon: 'home', isActive: (p) => p === '/student' },
+  {
+    to: '/student',
+    label: 'Dashboard',
+    icon: 'home',
+    badge: { key: 'new-messages', label: 'nepřečtených zpráv' },
+    isActive: (p) => p === '/student',
+  },
   { to: '/student/lessons', label: 'Lekce', icon: 'lessons', isActive: (p) => p === '/student/lessons' },
   {
     to: '/student/feedback',

@@ -4,15 +4,17 @@
 // something changed them (refreshNavBadges).
 import { useEffect, useSyncExternalStore } from 'react'
 import { countPendingReview, countUnseenFeedback } from './data/practiceLogs'
+import { countUnreadMessages } from './data/pupilMessages'
 import { onAppResume } from './appResume'
 
-export type NavBadgeKey = 'pending-review' | 'new-feedback'
+export type NavBadgeKey = 'pending-review' | 'new-feedback' | 'new-messages'
 
 type Counts = Partial<Record<NavBadgeKey, number>>
 
 const FETCHERS: Record<NavBadgeKey, () => Promise<number>> = {
   'pending-review': countPendingReview,
   'new-feedback': countUnseenFeedback,
+  'new-messages': countUnreadMessages,
 }
 
 const MAX_AGE_MS = 30_000

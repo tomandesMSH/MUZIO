@@ -8,6 +8,8 @@ export type NotifyRequest =
   | { type: 'assignment'; assignmentId: string }
   // A class announcement (migration 0041): to the pupils of the class.
   | { type: 'announcement'; announcementId: string }
+  // Hudební pošta (migration 0052): to one pupil.
+  | { type: 'message'; messageId: string }
   | { type: 'reminders' }
   // "Oznámit čištění" by an admin (migration 0046): to every pupil.
   | { type: 'cleanup'; noticeId: string }
@@ -42,6 +44,13 @@ export interface CleanupNoticeRow {
   kind: 'all' | 'largest'
   delete_after: string // YYYY-MM-DD
   created_by: string | null
+}
+
+export interface MessageRow {
+  id: string
+  teacher_id: string
+  student_id: string
+  body: string
 }
 
 export interface Settings {
@@ -87,6 +96,7 @@ export interface Db {
   getLog(id: string): Promise<LogRow | null>
   getAssignment(id: string): Promise<AssignmentRow | null>
   getAnnouncement(id: string): Promise<AnnouncementRow | null>
+  getMessage(id: string): Promise<MessageRow | null>
   getName(userId: string): Promise<string | null>
   // Explicit recipients, or [] = the whole classroom.
   assignmentRecipients(assignmentId: string): Promise<string[]>
@@ -236,6 +246,17 @@ export function cleanupMessage(notice: CleanupNoticeRow): Message {
   }
 }
 
+// The text shortened for the notification (the whole message is in the app).
+export function pupilMessage(message: MessageRow, teacherName: string | null): Message {
+  const text = message.body.trim().replace(/\s+/g, ' ')
+  return {
+    title: teacherName ? `Zpráva od ${teacherName}` : 'Nová zpráva',
+    body: text.length > 140 ? `${text.slice(0, 139)}…` : text,
+    url: '/student',
+    tag: `message-${message.id}`,
+  }
+}
+
 export function recordingMessage(log: LogRow, pupilName: string | null): Message {
   return {
     title: 'Nová nahrávka 🎧',
@@ -291,6 +312,7 @@ export function parseRequest(body: unknown): NotifyRequest | null {
   if (b.type === 'announcement' && id(b.announcementId)) {
     return { type: 'announcement', announcementId: b.announcementId as string }
   }
+  if (b.type === 'message' && id(b.messageId)) return { type: 'message', messageId: b.messageId as string }
   if (b.type === 'reminders') return { type: 'reminders' }
   if (b.type === 'cleanup' && id(b.noticeId)) return { type: 'cleanup', noticeId: b.noticeId as string }
   if (b.type === 'test') return { type: 'test' }
@@ -414,6 +436,15 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
       status: 200,
       body: { sent: await deliver(deps, teachers, (s) => s.recordings && !s.recordings_digest, message) },
     }
+  }
+
+  if (request.type === 'message') {
+    const message = await deps.db.getMessage(request.messageId)
+    if (!message || message.teacher_id !== caller) return forbidden
+    if (!(await deps.db.claim('message', message.id))) return { status: 200, body: { sent: 0 } }
+    const text = pupilMessage(message, await deps.db.getName(message.teacher_id))
+    // Same setting as assignments and announcements.
+    return { status: 200, body: { sent: await deliver(deps, [message.student_id], (s) => s.assignments, text) } }
   }
 
   if (request.type === 'announcement') {

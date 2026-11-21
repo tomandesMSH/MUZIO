@@ -41,6 +41,14 @@ function supabaseDb(url: string, serviceKey: string) {
         .maybeSingle()
       return data
     },
+    async getMessage(id) {
+      const { data } = await sb
+        .from('pupil_messages')
+        .select('id, teacher_id, student_id, body')
+        .eq('id', id)
+        .maybeSingle()
+      return data
+    },
     async getName(userId) {
       const { data } = await sb.from('profiles').select('full_name').eq('id', userId).maybeSingle()
       return data?.full_name ?? null
