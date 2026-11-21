@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { useLocation } from 'react-router-dom'
@@ -64,6 +65,40 @@ const TEACHER_BADGES = BADGES.filter((b) => b.byTeacher).map((b) => ({
 
 const FEEDBACK_OPEN_KEY = 'muzio-grading-feedback-open'
 
+// A part of the grading form that opens and closes ("Přílohy", "Odznaky").
+function GradingSection({
+  title,
+  hint,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string
+  hint?: string
+  open: boolean
+  onToggle: () => void
+  children: ReactNode
+}) {
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+        className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-sm font-heading font-semibold"
+      >
+        <span>
+          {title} {hint && <span className="font-body font-normal text-xs text-text-muted">{hint}</span>}
+        </span>
+        <Chevron open={open} />
+      </button>
+      <Collapse open={open}>
+        <div className="space-y-4 pb-1 pt-1">{children}</div>
+      </Collapse>
+    </div>
+  )
+}
+
 interface LocationState {
   studentId?: string
   // Open this recording straight away (from the dashboard's "Ke kontrole").
@@ -117,6 +152,8 @@ export function Grading() {
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
   const [voice, setVoice] = useState<VoiceCommentState>({ kind: 'none' })
   const [notesOpen, setNotesOpen] = useState(false)
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false)
+  const [badgesOpen, setBadgesOpen] = useState(false)
   // "Zpětná vazba" (Co se povedlo, Co zlepšit): open unless the teacher closed
   // it; remembered in this browser.
   const [feedbackOpen, setFeedbackOpen] = useState(() => {
@@ -274,6 +311,8 @@ export function Grading() {
       setDeleting(false)
     }
   }
+
+  const attachmentCount = (voice.kind === 'none' ? 0 : 1) + imageItems.length
 
   async function handleSubmit() {
     if (!selectedLog || !profile) return
@@ -529,47 +568,56 @@ export function Grading() {
             </div>
           </Collapse>
         </div>
+        <GradingSection
+          title="Přílohy"
+          hint={attachmentCount > 0 ? `(${attachmentCount})` : '(hlasový komentář, obrázky)'}
+          open={attachmentsOpen}
+          onToggle={() => setAttachmentsOpen(!attachmentsOpen)}
+        >
+          <div>
+            <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
+              Hlasový komentář <span className="font-body font-normal text-xs text-text-muted">(nepovinné, do 1 min)</span>
+            </div>
+            <VoiceCommentEditor value={voice} onChange={setVoice} />
+          </div>
+          <FeedbackImagesEditor items={imageItems} onChange={setImageItems} />
+        </GradingSection>
+        <GradingSection
+          title="Odznaky"
+          hint={wantedBadges.size > 0 ? `(${wantedBadges.size})` : undefined}
+          open={badgesOpen}
+          onToggle={() => setBadgesOpen(!badgesOpen)}
+        >
+            <div className="flex flex-wrap gap-2">
+              {TEACHER_BADGES.map((badge) => {
+                const on = wantedBadges.has(badge.id)
+                return (
+                  <button
+                    key={badge.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => toggleBadge(badge.id)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-heading font-semibold transition ${
+                      on ? 'bg-coral-tint text-coral-dark shadow-clay-sm' : 'bg-bg-card-alt text-text-muted shadow-clay-press'
+                    }`}
+                  >
+                    {badge.icon} {badge.label} <span className="font-body font-normal">· {badge.hint}</span>
+                  </button>
+                )
+              })}
+            </div>
+        </GradingSection>
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
             Hodnocení
           </div>
-          <RatingNotes rating={rating} onChange={setRating} />
+          <RatingNotes rating={rating} onChange={setRating} wide />
           <p className="text-xs text-text-muted mt-1.5">
             {rating > 0
               ? `Za tuhle nahrávku: ${xpMinutes(selectedLog.duration_seconds)} min × ${rating} = ${xpForLog(rating, selectedLog.duration_seconds)} XP`
               : 'Vyber 1 až 5 not. XP žák dostane až po ohodnocení.'}
             {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
           </p>
-        </div>
-        <div>
-          <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            Hlasový komentář <span className="font-body font-normal text-xs text-text-muted">(nepovinné, do 1 min)</span>
-          </div>
-          <VoiceCommentEditor value={voice} onChange={setVoice} />
-        </div>
-        <FeedbackImagesEditor items={imageItems} onChange={setImageItems} />
-        <div>
-          <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            Odznak za tuhle nahrávku
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {TEACHER_BADGES.map((badge) => {
-              const on = wantedBadges.has(badge.id)
-              return (
-                <button
-                  key={badge.id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => toggleBadge(badge.id)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-heading font-semibold transition ${
-                    on ? 'bg-coral-tint text-coral-dark shadow-clay-sm' : 'bg-bg-card-alt text-text-muted shadow-clay-press'
-                  }`}
-                >
-                  {badge.icon} {badge.label} <span className="font-body font-normal">· {badge.hint}</span>
-                </button>
-              )
-            })}
-          </div>
         </div>
         <p className="hidden md:block text-center text-[11px] text-text-muted">
           Klávesy: <b>1-5</b> noty · <b>mezerník</b> přehrát / pauza · <b>Ctrl+Enter</b> odeslat a další
