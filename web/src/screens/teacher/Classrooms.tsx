@@ -29,6 +29,7 @@ import {
 } from '../../lib/data/classrooms'
 import { fetchProfilesByIds } from '../../lib/data/profiles'
 import { ClassAnnouncements } from '../../components/classrooms/ClassAnnouncements'
+import { ClassLeague } from '../../components/gamification/ClassLeague'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment, Classroom } from '../../lib/data/types'
@@ -279,6 +280,8 @@ function ClassroomDetail({
         {profile && profile.id === classroom.teacher_id && (
           <ClassAnnouncements classroomId={classroom.id} teacherId={profile.id} />
         )}
+
+        <ClassLeague classroomId={classroom.id} top={50} />
 
         <div>
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Žáci ({members.data?.length ?? 0})</h2>

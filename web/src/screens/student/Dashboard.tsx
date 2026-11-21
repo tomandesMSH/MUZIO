@@ -25,7 +25,8 @@ import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, f
 import { countPracticeDays, flameProgress } from '../../lib/flames'
 import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
 import { playFanfare } from '../../lib/sounds'
-import { fetchStudentAssignments } from '../../lib/data/classrooms'
+import { fetchStudentAssignments, fetchStudentClassrooms } from '../../lib/data/classrooms'
+import { ClassLeague } from '../../components/gamification/ClassLeague'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
 import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
@@ -49,6 +50,7 @@ export function StudentDashboard() {
   const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
   const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
+  const myClasses = useQuery(() => (userId ? fetchStudentClassrooms(userId).catch(() => []) : Promise.resolve([])), [userId])
   const assignmentIds = (assignments.data ?? []).map((a) => a.id)
   const completed = useQuery(
     () => (userId ? fetchCompletedAssignmentIds(userId, assignmentIds) : Promise.resolve(new Set<string>())),
@@ -192,6 +194,10 @@ export function StudentDashboard() {
         </Card>
 
         <Quests quests={quests} />
+
+        {(myClasses.data ?? []).map((c) => (
+          <ClassLeague key={c.id} classroomId={c.id} classroomName={(myClasses.data ?? []).length > 1 ? c.name : undefined} />
+        ))}
       </div>
     </AppShell>
   )
