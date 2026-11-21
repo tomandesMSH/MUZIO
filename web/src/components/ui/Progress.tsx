@@ -6,8 +6,9 @@ interface ProgressProps {
 export function Progress({ value, className = '' }: ProgressProps) {
   const pct = Math.max(0, Math.min(1, value)) * 100
   return (
-    <div className={`h-3.5 rounded-full bg-bg-card-alt overflow-hidden ${className}`}>
+    <div data-ui="progress" className={`h-3.5 rounded-full bg-bg-card-alt overflow-hidden ${className}`}>
       <div
+        data-ui="progress-fill"
         className="h-full rounded-full bg-coral transition-[width]"
         style={{ width: `${pct}%` }}
       />

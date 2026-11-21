@@ -149,3 +149,146 @@
     transform: translate(70px, -60px) rotate(20deg) scale(0.6);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Moderní (Settings > Styl, data-style="modern" on <html>, lib/theme.ts).
+   Classic above stays as it is. Direction: a music school practice room -
+   quiet graphite surfaces and hairlines, Inter only, the red of the logo used
+   rarely, colour kept for the world and the flames. Signature: progress as a
+   staff line with a note head. Designed with unslop by Damir Sokolovsky
+   (@heydamir), CC BY 4.0.
+   ------------------------------------------------------------------------ */
+[data-style='modern'] {
+  --font-heading: 'Inter', 'Segoe UI', sans-serif;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+
+  --color-bg: #fafafa;
+  --color-bg-card: #ffffff;
+  --color-bg-card-alt: #f4f4f5;
+  --color-text-primary: #171717;
+  --color-text-muted: #5c5c63;
+  --color-border: rgb(23 23 23 / 0.09);
+  --color-coral: #e04a3c;
+  --color-coral-dark: #c13628;
+  --color-coral-tint: #fbebe8;
+  --color-ink: #171717;
+  --staff-line: rgb(23 23 23 / 0.16);
+}
+
+[data-style='modern'].dark {
+  --color-bg: #141415;
+  --color-bg-card: #19191b;
+  --color-bg-card-alt: #232325;
+  --color-text-primary: #ededed;
+  --color-text-muted: #a1a1a6;
+  --color-border: rgb(237 237 237 / 0.08);
+  --color-coral: #ec5a4a;
+  /* On dark, "coral-dark" is the accent as text (links, the active menu
+     item), so it gets lighter for contrast; primary buttons turn off-white
+     below instead of red. */
+  --color-coral-dark: #ff8273;
+  --color-coral-tint: rgb(255 255 255 / 0.06);
+  --staff-line: rgb(237 237 237 / 0.18);
+}
+
+[data-style='modern'].dark .bg-coral-dark.text-cream:not([data-ui='daily']),
+[data-style='modern'].dark [data-ui='daily-button'] {
+  background-color: #ededed;
+  color: #141415;
+}
+[data-style='modern'].dark [data-ui='daily'] {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+[data-style='modern'] :is(h1, h2, h3, h4) {
+  font-weight: 500;
+}
+[data-style='modern'] h1 {
+  letter-spacing: -0.01em;
+}
+
+/* Depth from hairlines, not clay. */
+[data-style='modern'] .shadow-clay {
+  box-shadow:
+    0 0 0 1px var(--color-border),
+    0 8px 24px rgb(0 0 0 / 0.06);
+}
+[data-style='modern'] .shadow-clay-sm {
+  box-shadow:
+    0 0 0 1px var(--color-border),
+    0 1px 2px rgb(0 0 0 / 0.05);
+}
+[data-style='modern'] .shadow-clay-press {
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+[data-style='modern'].dark .shadow-clay,
+[data-style='modern'].dark .shadow-clay-sm {
+  box-shadow:
+    0 0 0 1px var(--color-border),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+[data-style='modern'].dark .shadow-clay-press {
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Progress as a staff line: a hairline with the filled part in red and a
+   note head at its end. */
+[data-style='modern'] [data-ui='progress'] {
+  position: relative;
+  height: 12px;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+[data-style='modern'] [data-ui='progress']::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--staff-line);
+}
+[data-style='modern'] [data-ui='progress-fill'] {
+  position: relative;
+  top: 50%;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-coral);
+  transform: translateY(-50%);
+}
+[data-style='modern'] [data-ui='progress-fill']::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-coral);
+  transform: translateY(-50%) rotate(-20deg);
+}
+
+/* The daily task: a calm card, not a red block. */
+[data-style='modern'] [data-ui='daily'] {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+[data-style='modern'] [data-ui='daily-button'] {
+  background: var(--color-coral-dark);
+  color: var(--color-cream);
+}
+
+/* XP and the XP badge: figures, not red pills. */
+[data-style='modern'] [data-ui='xp'],
+[data-style='modern'] [data-tone='xp'] {
+  background: var(--color-bg-card-alt);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}

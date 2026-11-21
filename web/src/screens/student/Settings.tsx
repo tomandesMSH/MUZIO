@@ -9,7 +9,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { ChangePasswordModal } from '../../components/ui/ChangePasswordModal'
 import { NotificationsModal } from '../../components/ui/NotificationsModal'
 import { InstallAppRow } from '../../components/ui/InstallAppRow'
-import { ThemePicker } from '../../components/ui/ThemePicker'
+import { StylePicker, ThemePicker } from '../../components/ui/ThemePicker'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
@@ -102,6 +102,7 @@ export function Settings() {
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Aplikace</h2>
           <SettingsRow label="Vzhled" right={<ThemePicker />} />
+          <SettingsRow label="Styl" right={<StylePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
           <SettingsRow label="Zvuk při dokončení" right={<Switch checked={sounds} onChange={toggleSounds} />} />
           <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
