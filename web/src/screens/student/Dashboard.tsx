@@ -182,6 +182,7 @@ export function StudentDashboard() {
                     title={assignment.title}
                     meta={assignment.description ?? ''}
                     teacherName={assignment.teacher_name}
+                    reward={assignment.stars_reward ?? 0}
                     badge={done ? { label: 'Hotovo', tone: 'success' } : { label: 'Čeká', tone: 'pending' }}
                     due={dueLabel(assignment.due_date, today, done)}
                     onClick={() => openAssignment(assignment)}

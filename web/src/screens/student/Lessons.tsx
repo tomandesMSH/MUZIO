@@ -84,6 +84,7 @@ export function Lessons() {
                   title={assignment.title}
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}
+                  reward={assignment.stars_reward ?? 0}
                   badge={{ label: 'Čeká', tone: 'pending' }}
                   due={dueLabel(assignment.due_date, today)}
                   onClick={() => openAssignment(assignment)}
@@ -117,6 +118,7 @@ export function Lessons() {
                   title={assignment.title}
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}
+                  reward={assignment.stars_reward ?? 0}
                   badge={{ label: 'Hotovo', tone: 'success' }}
                   due={dueLabel(assignment.due_date, today, true)}
                   footer={assignment.attachment_path ? <AttachmentLink assignment={assignment} /> : undefined}

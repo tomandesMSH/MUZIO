@@ -183,6 +183,8 @@ export interface CreateAssignmentInput {
   attachment?: File | null
   // "YYYY-MM-DD"; empty or omitted = no deadline (and no need for migration 0036).
   dueDate?: string
+  // 0-5; 0 or omitted = none (and no need for migration 0058).
+  starsReward?: number
   // "Zadat znovu": the score of an existing assignment, copied in storage.
   copyAttachmentFrom?: { path: string; name: string }
 }
@@ -197,6 +199,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<vo
         title: input.title,
         description: input.description || null,
         ...(input.dueDate ? { due_date: input.dueDate } : {}),
+        ...(input.starsReward ? { stars_reward: input.starsReward } : {}),
       },
     ])
     .select()
@@ -240,6 +243,8 @@ export interface AssignmentUpdate {
   description: string
   // "YYYY-MM-DD", or '' for no deadline.
   dueDate: string
+  // 0-5 stars for completing it (migration 0058); undefined = leave as is.
+  starsReward?: number
   attachment: AttachmentChange
 }
 
@@ -251,6 +256,9 @@ export async function updateAssignment(assignment: Assignment, update: Assignmen
       title: update.title.trim(),
       description: update.description.trim() || null,
       due_date: update.dueDate || null,
+      ...(update.starsReward !== undefined && update.starsReward !== (assignment.stars_reward ?? 0)
+        ? { stars_reward: update.starsReward }
+        : {}),
     })
     .eq('id', assignment.id)
   if (error) throw error

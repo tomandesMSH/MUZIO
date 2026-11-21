@@ -5,6 +5,7 @@ import { Input } from '../ui/Input'
 import { Avatar } from '../ui/Avatar'
 import { AttachmentField } from './AttachmentField'
 import { DueDateField } from './DueDateField'
+import { StarsRewardField } from './StarsRewardField'
 import type { Profile } from '../../lib/data/types'
 
 interface NewAssignmentModalProps {
@@ -19,6 +20,7 @@ interface NewAssignmentModalProps {
     recipientIds: string[]
     attachment: File | null
     dueDate: string
+    starsReward: number
   }) => void
 }
 
@@ -31,6 +33,7 @@ export function NewAssignmentModal({ open, members, submitting, error, onClose, 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [attachment, setAttachment] = useState<File | null>(null)
   const [dueDate, setDueDate] = useState('')
+  const [starsReward, setStarsReward] = useState(0)
 
   function toggleSelected(id: string) {
     setSelected((prev) => {
@@ -49,6 +52,7 @@ export function NewAssignmentModal({ open, members, submitting, error, onClose, 
       recipientIds: target === 'selected' ? Array.from(selected) : [],
       attachment,
       dueDate,
+      starsReward,
     })
   }
 
@@ -70,6 +74,7 @@ export function NewAssignmentModal({ open, members, submitting, error, onClose, 
           />
         </div>
         <DueDateField value={dueDate} onChange={setDueDate} />
+        <StarsRewardField value={starsReward} onChange={setStarsReward} />
         <AttachmentField file={attachment} onChange={setAttachment} />
         <div>
           <div className="text-xs font-semibold text-text-muted mb-1.5">Komu</div>

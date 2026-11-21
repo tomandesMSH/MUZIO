@@ -220,6 +220,7 @@ function ClassroomDetail({
     recipientIds: string[]
     attachment: File | null
     dueDate: string
+    starsReward: number
   }) {
     if (!profile) return
     setAssignmentSubmitting(true)
@@ -233,6 +234,7 @@ function ClassroomDetail({
         recipientIds: input.recipientIds,
         attachment: input.attachment,
         dueDate: input.dueDate,
+        starsReward: input.starsReward,
       })
       setAssignmentOpen(false)
       assignments.refetch()

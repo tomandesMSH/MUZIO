@@ -66,6 +66,8 @@ export interface Assignment {
   attachment_name?: string | null
   // Deadline, a day ("YYYY-MM-DD"), or none. Absent until migration 0036.
   due_date?: string | null
+  // Stars for completing it, given at the first grading (migration 0058).
+  stars_reward?: number
 }
 
 export interface PracticeLog {
