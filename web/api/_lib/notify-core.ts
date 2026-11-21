@@ -9,6 +9,8 @@ export type NotifyRequest =
   // A class announcement (migration 0041): to the pupils of the class.
   | { type: 'announcement'; announcementId: string }
   | { type: 'reminders' }
+  // "Oznámit čištění" by an admin (migration 0046): to every pupil.
+  | { type: 'cleanup'; noticeId: string }
   // "Poslat zkušební" in the settings: to the caller's own devices.
   | { type: 'test' }
 
@@ -33,6 +35,13 @@ export interface AnnouncementRow {
   classroom_id: string
   teacher_id: string
   body: string
+}
+
+export interface CleanupNoticeRow {
+  id: string
+  kind: 'all' | 'largest'
+  delete_after: string // YYYY-MM-DD
+  created_by: string | null
 }
 
 export interface Settings {
@@ -95,6 +104,10 @@ export interface Db {
   digestTeachers(): Promise<string[]>
   // Ungraded recordings of this teacher's pupils sent since then.
   waitingSince(teacherId: string, sinceIso: string): Promise<{ user_id: string }[]>
+  getCleanupNotice(id: string): Promise<CleanupNoticeRow | null>
+  isModerator(userId: string): Promise<boolean>
+  // Every pupil who isn't banned (who has a device is decided later).
+  allPupils(): Promise<string[]>
   // True the first time (kind, ref) is claimed - the "sent already" guard.
   claim(kind: string, ref: string): Promise<boolean>
 }
@@ -202,6 +215,24 @@ export function announcementMessage(announcement: AnnouncementRow, teacherName: 
   }
 }
 
+// "1. 12." - the day the clearing may start.
+export function czechDay(day: string): string {
+  const [, m, d] = day.split('-').map(Number)
+  return `${d}. ${m}.`
+}
+
+export function cleanupMessage(notice: CleanupNoticeRow): Message {
+  return {
+    title: 'Ulož si své nahrávky',
+    body:
+      notice.kind === 'all'
+        ? `Od ${czechDay(notice.delete_after)} budeme mazat staré nahrávky. Stáhni si ty, na kterých ti záleží.`
+        : `Od ${czechDay(notice.delete_after)} smažeme tvoje největší nahrávky, dochází místo. Stáhni si je, jestli o ně stojíš.`,
+    url: '/student/feedback',
+    tag: `cleanup-${notice.id}`,
+  }
+}
+
 export function recordingMessage(log: LogRow, pupilName: string | null): Message {
   return {
     title: 'Nová nahrávka 🎧',
@@ -242,6 +273,7 @@ export function parseRequest(body: unknown): NotifyRequest | null {
     return { type: 'announcement', announcementId: b.announcementId as string }
   }
   if (b.type === 'reminders') return { type: 'reminders' }
+  if (b.type === 'cleanup' && id(b.noticeId)) return { type: 'cleanup', noticeId: b.noticeId as string }
   if (b.type === 'test') return { type: 'test' }
   return null
 }
@@ -323,6 +355,15 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
       return { status: 429, body: { error: 'too many' } }
     }
     return { status: 200, body: { sent: await deliver(deps, [caller], () => true, testMessage(deps.now)) } }
+  }
+
+  if (request.type === 'cleanup') {
+    if (!(await deps.db.isModerator(caller))) return forbidden
+    const notice = await deps.db.getCleanupNotice(request.noticeId)
+    if (!notice || notice.kind !== 'all' || notice.created_by !== caller) return forbidden
+    if (!(await deps.db.claim('cleanup', notice.id))) return { status: 200, body: { sent: 0 } }
+    // Losing recordings matters more than the notification settings: to all.
+    return { status: 200, body: { sent: await deliver(deps, await deps.db.allPupils(), () => true, cleanupMessage(notice)) } }
   }
 
   if (request.type === 'graded') {

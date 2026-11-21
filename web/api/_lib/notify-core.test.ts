@@ -10,6 +10,7 @@ import {
   xpFor,
   type AnnouncementRow,
   type AssignmentRow,
+  type CleanupNoticeRow,
   type Db,
   type Deps,
   type LogRow,
@@ -40,6 +41,9 @@ function setup(opts: {
   digest?: string[]
   waiting?: Record<string, { user_id: string }[]>
   caller?: string | null
+  notices?: CleanupNoticeRow[]
+  moderators?: string[]
+  pupils?: string[]
   now?: Date
   gone?: string[]
 }) {
@@ -62,6 +66,9 @@ function setup(opts: {
     dueOn: async (day) => opts.due?.[day] ?? [],
     digestTeachers: async () => opts.digest ?? [],
     waitingSince: async (teacher) => opts.waiting?.[teacher] ?? [],
+    getCleanupNotice: async (id) => opts.notices?.find((n) => n.id === id) ?? null,
+    isModerator: async (id) => (opts.moderators ?? []).includes(id),
+    allPupils: async () => opts.pupils ?? [],
     claim: async (kind, ref) => {
       const key = `${kind}:${ref}`
       if (claimed.has(key)) return false
@@ -293,5 +300,30 @@ describe('notify', () => {
     expect(sent[0]).toMatchObject({ to: 't1', message: { body: 'Za poslední den 3 nové nahrávky od 2 žáků.' } })
     await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
     expect(sent).toHaveLength(1)
+  })
+
+  it('cleanup: an admin tells every pupil once, whatever their settings', async () => {
+    const notice: CleanupNoticeRow = { id: 'N1', kind: 'all', delete_after: '2026-11-28', created_by: 'a1' }
+    const { deps, sent } = setup({
+      caller: 'a1',
+      moderators: ['a1'],
+      notices: [notice],
+      pupils: ['p1', 'p2'],
+      settings: { p2: { assignments: false, graded: false, reminder: false } },
+      subs: [sub('p1'), sub('p2'), sub('t1')],
+    })
+    expect(parseRequest({ type: 'cleanup', noticeId: 'N1' })).toEqual({ type: 'cleanup', noticeId: 'N1' })
+    expect((await handleNotify({ type: 'cleanup', noticeId: 'N1' }, 'jwt', deps)).body.sent).toBe(2)
+    expect(sent.map((s) => s.to).sort()).toEqual(['p1', 'p2'])
+    expect(sent[0].message).toMatchObject({ url: '/student/feedback', body: expect.stringContaining('Od 28. 11.') })
+    expect((await handleNotify({ type: 'cleanup', noticeId: 'N1' }, 'jwt', deps)).body.sent).toBe(0)
+  })
+
+  it('cleanup: only the admin who made the notice', async () => {
+    const notice: CleanupNoticeRow = { id: 'N1', kind: 'all', delete_after: '2026-11-28', created_by: 'a1' }
+    const pupil = setup({ caller: 'p1', notices: [notice], pupils: ['p1'], subs: [sub('p1')] })
+    expect((await handleNotify({ type: 'cleanup', noticeId: 'N1' }, 'jwt', pupil.deps)).status).toBe(403)
+    const other = setup({ caller: 'a2', moderators: ['a2'], notices: [notice], pupils: ['p1'], subs: [sub('p1')] })
+    expect((await handleNotify({ type: 'cleanup', noticeId: 'N1' }, 'jwt', other.deps)).status).toBe(403)
   })
 })

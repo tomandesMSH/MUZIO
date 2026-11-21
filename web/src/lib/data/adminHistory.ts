@@ -71,6 +71,8 @@ export function describeAction(entry: Pick<AdminAction, 'action' | 'details'>): 
       return `předal(a) třídu ${d.classroom} (od: ${d.from ?? '-'})`
     case 'remove_from_classroom':
       return `odebral(a) žáka ze třídy ${d.classroom ?? ''}`.trim()
+    case 'announce_cleanup':
+      return `oznámil(a) čištění nahrávek (od ${d.delete_after})`
     case 'cleanup_recordings':
       return `uklidil(a) ${d.count} starých nahrávek (do ${d.before})`
     default:
