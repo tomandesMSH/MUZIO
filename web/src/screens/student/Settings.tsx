@@ -13,6 +13,7 @@ import { ThemePicker } from '../../components/ui/ThemePicker'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
+import { appVersionLabel } from '../../lib/appVersion'
 import { ReportFormModal } from '../../components/ui/ReportFormModal'
 import { useToast } from '../../lib/useToast'
 import { updateShareBasicProgress } from '../../lib/data/profiles'
@@ -150,6 +151,9 @@ export function Settings() {
         <Button variant="ghost" className="w-full" onClick={handleLogout}>
           Odhlásit se
         </Button>
+        <p className="text-center text-[11px] text-text-muted" title={__APP_VERSION__}>
+          Muzio beta · {appVersionLabel()}
+        </p>
       </div>
       {passwordOpen && (
         <ChangePasswordModal

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fetchDeployedVersion, isNewVersion } from './appVersion'
+import { appVersionLabel, fetchDeployedVersion, isNewVersion } from './appVersion'
 
 describe('app version', () => {
   it('reads the deployed version, without the cache', async () => {
@@ -18,5 +18,12 @@ describe('app version', () => {
     expect(isNewVersion('abc', 'def')).toBe(true)
     expect(isNewVersion('abc', 'abc')).toBe(false)
     expect(isNewVersion('dev', 'def')).toBe(false)
+  })
+})
+
+describe('appVersionLabel', () => {
+  it('shows the short build id', () => {
+    expect(appVersionLabel('a5a9d6c1b2c3')).toBe('verze a5a9d6c')
+    expect(appVersionLabel('dev')).toBe('verze dev')
   })
 })

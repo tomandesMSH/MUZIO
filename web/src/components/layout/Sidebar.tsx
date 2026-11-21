@@ -4,6 +4,7 @@ import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
 import { NavBadge } from './NavBadge'
 import { DOCS_URL } from '../../lib/links'
+import { appVersionLabel } from '../../lib/appVersion'
 import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 interface Box {
@@ -126,7 +127,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
         Dokumentace
       </a>
       <p className="px-3 pt-1 text-[11px] text-text-muted" title={__APP_VERSION__}>
-        verze {__APP_VERSION__.slice(0, 7)}
+        {appVersionLabel()}
       </p>
     </div>
   )
