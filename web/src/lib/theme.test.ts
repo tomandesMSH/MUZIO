@@ -9,7 +9,7 @@ window.matchMedia = vi.fn(() => ({
   addEventListener: (_: string, fn: () => void) => changeListeners.push(fn),
 })) as unknown as typeof window.matchMedia
 
-const { getThemeChoice, initTheme, isDarkNow, setThemeChoice } = await import('./theme')
+const { getStyleChoice, getThemeChoice, initTheme, isDarkNow, setStyleChoice, setThemeChoice } = await import('./theme')
 const isDarkClass = () => document.documentElement.classList.contains('dark')
 
 describe('theme', () => {
@@ -27,6 +27,19 @@ describe('theme', () => {
     systemDark = false
     changeListeners.forEach((fn) => fn())
     expect(isDarkClass()).toBe(false)
+  })
+
+  it('classic by default; modern marks <html> and is remembered, with either theme', () => {
+    initTheme()
+    expect(getStyleChoice()).toBe('classic')
+    expect(document.documentElement.dataset.style).toBeUndefined()
+    setStyleChoice('modern')
+    setThemeChoice('dark')
+    expect(document.documentElement.dataset.style).toBe('modern')
+    expect(isDarkClass()).toBe(true)
+    expect(localStorage.getItem('muzio-style')).toBe('modern')
+    setStyleChoice('classic')
+    expect(document.documentElement.dataset.style).toBeUndefined()
   })
 
   it('an explicit choice wins over the system', () => {

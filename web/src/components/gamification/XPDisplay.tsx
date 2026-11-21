@@ -2,6 +2,7 @@
 export function XPDisplay({ xp }: { xp: number }) {
   return (
     <div
+      data-ui="xp"
       className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-coral text-cream px-3 py-1.5 text-xs font-heading font-semibold shadow-clay-sm"
       title="XP za ohodnocené nahrávky"
     >
