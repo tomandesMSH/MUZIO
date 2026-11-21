@@ -34,7 +34,7 @@ export const WORLDS: WorldInfo[] = [
     id: 'podium',
     name: 'Hudební pódium',
     tagline: 'Staň se hvězdou vlastního koncertu.',
-    phases: ['Prázdné pódium', 'Mikrofon a světla', 'Opona se otevírá', 'Koncert'],
+    phases: ['Opona se otevírá', 'Světla', 'Klavír', 'Koncert'],
   },
 ]
 
