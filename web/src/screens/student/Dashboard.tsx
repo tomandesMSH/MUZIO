@@ -10,6 +10,7 @@ import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { DailyReminderBanner } from '../../components/gamification/DailyReminderBanner'
 import { Confetti } from '../../components/gamification/Confetti'
 import { Quests } from '../../components/gamification/Quests'
+import { Flames } from '../../components/gamification/Flames'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -18,7 +19,8 @@ import { PendingUploads } from '../../components/audio/PendingUploads'
 import { AnnouncementsCard } from '../../components/classrooms/AnnouncementsCard'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { countPracticeDays, flameProgress } from '../../lib/flames'
 import { fetchStudentAssignments } from '../../lib/data/classrooms'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
@@ -40,6 +42,7 @@ export function StudentDashboard() {
     () => (userId ? fetchWeeklyStats(userId, today) : Promise.resolve({ dateKeys: [], weeklyCount: 0 })),
     [userId],
   )
+  const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
   const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
   const assignmentIds = (assignments.data ?? []).map((a) => a.id)
@@ -119,6 +122,7 @@ export function StudentDashboard() {
             refreshProfile()
             logsCount.refetch()
             weekly.refetch()
+            dayKeys.refetch()
             completed.refetch()
           }}
         />
@@ -157,6 +161,12 @@ export function StudentDashboard() {
             <p className="text-text-muted text-sm">Zatím nemáš žádný zadaný úkol.</p>
           )}
         </div>
+
+        {dayKeys.data && (
+          <Card>
+            <Flames progress={flameProgress(countPracticeDays(dayKeys.data))} />
+          </Card>
+        )}
 
         <Card>
           <LevelProgress xp={profile.xp ?? 0} />
