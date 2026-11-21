@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { playSent } from '../../lib/sounds'
 import { Button } from '../ui/Button'
 import { deletePendingUpload, listPendingUploads, savePendingUpload, type PendingUpload } from '../../lib/pendingUploads'
 import { SubmitError, submitRecording } from '../../lib/submitRecording'
@@ -33,6 +34,7 @@ export function PendingUploads({ userId, onSent, onMessage }: PendingUploadsProp
       await submitRecording(upload)
       await deletePendingUpload(upload.id)
       onMessage('Nahrávka odeslána ke kontrole')
+      playSent()
       onSent()
     } catch (err) {
       // Remember an upload that got through, so the next try doesn't repeat it.

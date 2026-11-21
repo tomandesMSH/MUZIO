@@ -7,6 +7,8 @@ import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { AudioFilePicker } from '../../components/audio/AudioFilePicker'
 import { Toast } from '../../components/ui/Toast'
 import { Confetti } from '../../components/gamification/Confetti'
+import { SentOverlay } from '../../components/audio/SentOverlay'
+import { playSent } from '../../lib/sounds'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { useAuth } from '../../lib/AuthProvider'
 import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
@@ -38,6 +40,8 @@ export function Recording() {
   const [uploading, setUploading] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const [reviewing, setReviewing] = useState(false)
+  // The recording went through: "Nahrávka už letí k učiteli" until the dashboard.
+  const [sent, setSent] = useState(false)
   const [metronomeOpen, setMetronomeOpen] = useState(false)
   const [tunerOpen, setTunerOpen] = useState(false)
   // A take that failed to send is kept under one id, however many retries.
@@ -66,7 +70,8 @@ export function Recording() {
         audioUrl: failedUploads.current.get(blob),
       })
       if (pendingId) await deletePendingUpload(pendingId)
-      show('Nahrávka odeslána ke kontrole')
+      setSent(true)
+      playSent()
 
       const today = new Date()
       const [logsCount, weekly] = await Promise.all([
@@ -86,7 +91,7 @@ export function Recording() {
         setCelebrating(true)
         setTimeout(() => setCelebrating(false), 2500)
       }
-      setTimeout(() => navigate('/student'), 1500)
+      setTimeout(() => navigate('/student'), 2200)
       return true
     } catch (err) {
       // Keep the take in the phone, so it's not lost if the page is closed.
@@ -120,6 +125,7 @@ export function Recording() {
   return (
     <div className="max-w-md md:max-w-lg mx-auto p-5">
       <Confetti active={celebrating} />
+      <SentOverlay show={sent} />
       {message && <Toast message={message} />}
       <button className="text-sm text-text-muted mb-2.5" onClick={() => navigate(-1)}>
         ← Zpět
