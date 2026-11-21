@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
-import { clearedIds, defaultCleanupDate } from './adminCleanup'
+import { clearedIds, defaultCleanupDate, tomorrowKey } from './adminCleanup'
 
 vi.mock('../supabase', () => ({ supabase: {} }))
+
+describe('tomorrowKey', () => {
+  it('is the next local day, also across a month', () => {
+    expect(tomorrowKey(new Date(2026, 10, 21, 23, 30))).toBe('2026-11-22')
+    expect(tomorrowKey(new Date(2026, 11, 31, 8))).toBe('2027-01-01')
+  })
+})
 
 describe('defaultCleanupDate', () => {
   it('is 1 September of the current school year', () => {

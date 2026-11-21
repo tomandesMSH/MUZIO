@@ -6,12 +6,15 @@ import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import {
   defaultCleanupDate,
   fetchCleanupCandidates,
+  fetchPendingNoticeCleanup,
+  tomorrowKey,
   runCleanup,
   type CleanupCandidate,
 } from '../../lib/data/adminCleanup'
 import { formatBytes } from '../../lib/data/adminUsage'
 import { isReauthed } from '../../lib/reauth'
 import { getErrorMessage } from '../../lib/errors'
+import { useQuery } from '../../lib/data/useQuery'
 
 // "Úklid starých nahrávek" under Využití (migration 0034).
 export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
@@ -24,14 +27,27 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
   const [reauthOpen, setReauthOpen] = useState(false)
   const [result, setResult] = useState<string>()
   const [error, setError] = useState<string>()
+  // The files from the automatic warning (0047), loaded with "Načíst".
+  const pending = useQuery(() => fetchPendingNoticeCleanup().catch(() => null), [])
+  const [fromNotice, setFromNotice] = useState(false)
 
   const totalBytes = (candidates ?? []).reduce((sum, c) => sum + c.bytes, 0)
   const dateLabel = new Date(before).toLocaleDateString('cs-CZ')
+
+  function loadNotice() {
+    if (!pending.data) return
+    setCandidates(pending.data.candidates)
+    setBefore(tomorrowKey())
+    setFromNotice(true)
+    setResult(undefined)
+    setError(undefined)
+  }
 
   async function search() {
     setSearching(true)
     setError(undefined)
     setResult(undefined)
+    setFromNotice(false)
     try {
       setCandidates(await fetchCleanupCandidates(before))
     } catch (err) {
@@ -56,6 +72,9 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
       const cleared = await runCleanup(candidates, before, setProgress)
       setResult(`Hotovo: uklizeno ${cleared} nahrávek, uvolněno asi ${formatBytes(totalBytes)}.`)
       setCandidates(undefined)
+      setFromNotice(false)
+      setBefore(defaultCleanupDate())
+      pending.refetch()
       onCleaned()
     } catch (err) {
       setError(getErrorMessage(err, 'Úklid se nepovedl celý, zkus ho spustit znovu. Pokračuje, kde skončil.'))
@@ -77,7 +96,9 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
       <ConfirmDialog
         open={!reauthOpen && confirmOpen}
         title="Smazat zvuk starých nahrávek?"
-        message={`Smaže se zvuk ${candidates?.length ?? 0} ohodnocených nahrávek starších než ${dateLabel} (asi ${formatBytes(totalBytes)}). Hodnocení, komentáře, obrázky, XP a odznaky zůstanou, jen už nepůjdou přehrát. Nejde to vrátit.`}
+        message={`Smaže se zvuk ${candidates?.length ?? 0} ohodnocených nahrávek ${
+          fromNotice ? 'z upozornění na plné úložiště' : `starších než ${dateLabel}`
+        } (asi ${formatBytes(totalBytes)}). Hodnocení, komentáře, obrázky, XP a odznaky zůstanou, jen už nepůjdou přehrát. Nejde to vrátit.`}
         confirmLabel="Smazat zvuk"
         onConfirm={cleanup}
         onCancel={() => setConfirmOpen(false)}
@@ -90,6 +111,18 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
           zůstanou. Neohodnocené nahrávky se nemažou.
         </p>
       </div>
+      {pending.data && (
+        <div className="rounded-xl bg-coral-tint text-coral-dark p-3 text-xs space-y-1.5">
+          <p>
+            Úložiště bylo skoro plné, a tak dostali majitelé {pending.data.candidates.length} největších nahrávek (asi{' '}
+            {formatBytes(pending.data.candidates.reduce((sum, c) => sum + c.bytes, 0))}) upozornění, že se smažou od{' '}
+            {new Date(pending.data.deleteAfter).toLocaleDateString('cs-CZ')}.
+          </p>
+          <Button variant="secondary" className="!px-3 !py-1.5 text-xs" disabled={running} onClick={loadNotice}>
+            Načíst nahrávky z upozornění
+          </Button>
+        </div>
+      )}
       <div className="flex flex-wrap items-end gap-2">
         <label className="block">
           <div className="text-xs font-semibold text-text-muted mb-1">Starší než</div>
@@ -99,6 +132,7 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
             onChange={(e) => {
               setBefore(e.target.value)
               setCandidates(undefined)
+              setFromNotice(false)
             }}
             className="!w-auto"
           />

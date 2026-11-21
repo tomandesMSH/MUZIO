@@ -75,6 +75,18 @@ function supabaseDb(url: string, serviceKey: string) {
     async deleteSubscription(endpoint) {
       await sb.from('push_subscriptions').delete().eq('endpoint', endpoint)
     },
+    async autoCleanupNotice(limitBytes) {
+      const { data, error } = await sb.rpc('auto_cleanup_notice', { p_limit_bytes: limitBytes })
+      if (error) throw error
+      const rows = (data ?? []) as { notice_id: string; user_id: string }[]
+      if (rows.length === 0) return null
+      const { data: notice } = await sb.from('cleanup_notices').select('delete_after').eq('id', rows[0].notice_id).single()
+      return {
+        noticeId: rows[0].notice_id,
+        deleteAfter: notice?.delete_after as string,
+        owners: [...new Set(rows.map((r) => r.user_id))],
+      }
+    },
     async reminderCandidates() {
       const { data: subs } = await sb.from('push_subscriptions').select('user_id')
       const userIds = [...new Set(ids(subs, 'user_id'))]
