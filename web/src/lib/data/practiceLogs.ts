@@ -112,6 +112,20 @@ export async function countPendingReview(): Promise<number> {
   return count ?? 0
 }
 
+// "Skip grading" / "mark as reviewed": the recording stops waiting without a
+// grade. An empty teacher_comment with no rating means exactly that, so no
+// migration is needed; the pupil gets no XP and no "new feedback" number.
+// Already graded recordings are left alone.
+export async function markReviewed(logIds: string[]): Promise<void> {
+  if (logIds.length === 0) return
+  const { error } = await supabase
+    .from('practice_logs')
+    .update({ teacher_comment: '' })
+    .in('id', logIds)
+    .is('teacher_comment', null)
+  if (error) throw error
+}
+
 export async function fetchLogsByIds(ids: string[]): Promise<PracticeLog[]> {
   if (ids.length === 0) return []
   const { data, error } = await supabase.from('practice_logs').select('*').in('id', ids)

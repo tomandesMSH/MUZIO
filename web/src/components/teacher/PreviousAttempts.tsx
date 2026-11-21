@@ -7,6 +7,7 @@ import { Collapse, Chevron } from '../ui/Collapse'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchAttempts } from '../../lib/data/practiceLogs'
 import type { PracticeLog } from '../../lib/data/types'
+import { isReviewed, reviewLabel } from '../../lib/grading'
 
 function Attempt({ log, newer }: { log: PracticeLog; newer: boolean }) {
   const [open, setOpen] = useState(false)
@@ -26,7 +27,7 @@ function Attempt({ log, newer }: { log: PracticeLog; newer: boolean }) {
           {newer && ' · novější'}
         </span>
         <span className="min-w-0 flex-1 truncate text-xs text-text-muted">
-          {log.teacher_comment ? comment || 'ohodnoceno' : 'čeká na hodnocení'}
+          {(isReviewed(log) && comment) || reviewLabel(log)}
         </span>
         {log.rating ? (
           <span className="shrink-0 text-xs">

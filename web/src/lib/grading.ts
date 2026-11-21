@@ -13,3 +13,17 @@ export function pickNextToGrade<T extends Log>(pending: T[], graded: Log): T | u
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
   return rest.find((log) => log.user_id === graded.user_id) ?? rest[0]
 }
+
+// Graded, or marked as reviewed without a grade (teacher_comment '' then).
+export function isReviewed(log: { teacher_comment: string | null }): boolean {
+  return log.teacher_comment != null
+}
+
+// Marked as reviewed without a grade.
+export function isSkipped(log: { teacher_comment: string | null; rating: number | null }): boolean {
+  return log.teacher_comment != null && log.rating == null
+}
+
+export function reviewLabel(log: { teacher_comment: string | null; rating: number | null }): string {
+  return !isReviewed(log) ? 'čeká na hodnocení' : isSkipped(log) ? 'bez hodnocení' : 'ohodnoceno'
+}

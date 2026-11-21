@@ -13,6 +13,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-21-ucitel-kontrola',
+    date: '2026-11-21',
+    title: 'Nahrávky bez hodnocení',
+    role: 'teacher',
+    items: [
+      'Nahrávku, kterou hodnotit nechcete, můžete přeskočit tlačítkem „Přeskočit hodnocení“. Zmizí z kontroly i z čísla v menu.',
+      'Na Přehledu žáků jde nahrávku rovnou „Označit jako ohodnocené“.',
+    ],
+  },
+  {
     id: '2026-11-21',
     date: '2026-11-21',
     title: 'Hudební svět a plamínky',

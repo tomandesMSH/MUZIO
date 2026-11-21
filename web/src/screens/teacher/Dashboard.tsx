@@ -7,7 +7,9 @@ import { SearchBar } from '../../components/ui/SearchBar'
 import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchPendingReview } from '../../lib/data/practiceLogs'
+import { fetchPendingReview, markReviewed } from '../../lib/data/practiceLogs'
+import { refreshNavBadges } from '../../lib/navBadges'
+import { getErrorMessage } from '../../lib/errors'
 import { fetchStudents } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
@@ -36,7 +38,23 @@ export function TeacherDashboard() {
     () => (profile ? fetchReviewContext(profile.id, waitingIds) : Promise.resolve(undefined)),
     [profile?.id, waitingIds.join(',')],
   )
-  const { message } = useToast()
+  const { message, show } = useToast()
+  const [marking, setMarking] = useState<string | undefined>()
+
+  // "Označit jako ohodnocené": off the list without a grade.
+  async function markAsReviewed(logId: string) {
+    setMarking(logId)
+    try {
+      await markReviewed([logId])
+      refreshNavBadges()
+      pending.refetch()
+      show('Označeno jako ohodnocené')
+    } catch (err) {
+      show(getErrorMessage(err, 'Nepovedlo se, zkus to znovu.'))
+    } finally {
+      setMarking(undefined)
+    }
+  }
 
   function nameFor(userId: string): string {
     return students.data?.find((s) => s.id === userId)?.full_name ?? 'Žák'
@@ -120,11 +138,11 @@ export function TeacherDashboard() {
           {filteredPending?.length === 0 && <p className="text-text-muted text-sm">Vše zkontrolováno</p>}
           <div className="space-y-2">
             {filteredPending?.map((log) => (
-              <button
-                key={log.id}
-                className="w-full flex items-center justify-between rounded-2xl bg-bg-card shadow-clay-sm p-3.5 text-left"
-                onClick={() => navigate('/teacher/grading', { state: { studentId: log.user_id, logId: String(log.id) } })}
-              >
+              <div key={log.id} className="rounded-2xl bg-bg-card shadow-clay-sm">
+                <button
+                  className="w-full flex items-center justify-between p-3.5 pb-2 text-left"
+                  onClick={() => navigate('/teacher/grading', { state: { studentId: log.user_id, logId: String(log.id) } })}
+                >
                 <div className="flex items-center gap-2.5">
                   <Avatar name={nameFor(log.user_id)} size={38} />
                   <div>
@@ -141,7 +159,18 @@ export function TeacherDashboard() {
                   </div>
                 </div>
                 <Badge tone="pending">Nové</Badge>
-              </button>
+                </button>
+                <div className="flex justify-end px-3.5 pb-2.5">
+                  <button
+                    type="button"
+                    disabled={marking === String(log.id)}
+                    onClick={() => void markAsReviewed(String(log.id))}
+                    className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary disabled:opacity-40"
+                  >
+                    Označit jako ohodnocené
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>

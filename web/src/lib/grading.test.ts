@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pickNextToGrade } from './grading'
+import { isReviewed, isSkipped, pickNextToGrade, reviewLabel } from './grading'
 
 const log = (id: string, user_id: string, created_at: string) => ({ id, user_id, created_at })
 
@@ -22,5 +22,17 @@ describe('pickNextToGrade', () => {
   it('never offers the one just graded; nothing left = undefined', () => {
     expect(pickNextToGrade([log('a', 'pavel', '2026-11-10T10:00:00Z')], log('a', 'pavel', ''))).toBeUndefined()
     expect(pickNextToGrade([], log('a', 'pavel', ''))).toBeUndefined()
+  })
+})
+
+describe('isReviewed', () => {
+  it('waiting = no comment at all; skipped = empty comment and no rating', () => {
+    expect(isReviewed({ teacher_comment: null })).toBe(false)
+    expect(isReviewed({ teacher_comment: '' })).toBe(true)
+    expect(isSkipped({ teacher_comment: '', rating: null })).toBe(true)
+    expect(isSkipped({ teacher_comment: '', rating: 4 })).toBe(false)
+    expect(reviewLabel({ teacher_comment: null, rating: null })).toBe('čeká na hodnocení')
+    expect(reviewLabel({ teacher_comment: '', rating: null })).toBe('bez hodnocení')
+    expect(reviewLabel({ teacher_comment: '', rating: 5 })).toBe('ohodnoceno')
   })
 })

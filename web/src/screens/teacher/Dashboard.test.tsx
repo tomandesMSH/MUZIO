@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { TeacherDashboard } from './Dashboard'
+import { markReviewed } from '../../lib/data/practiceLogs'
+import { refreshNavBadges } from '../../lib/navBadges'
 
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
@@ -12,7 +14,9 @@ vi.mock('../../lib/data/practiceLogs', () => ({
     { id: 12, user_id: '2', created_at: '2026-11-12T10:00:00Z', assignment_id: null },
     { id: 13, user_id: '3', created_at: '2026-11-11T10:00:00Z', assignment_id: 'a1' },
   ],
+  markReviewed: vi.fn(async () => {}),
 }))
+vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn() }))
 vi.mock('../../lib/data/classrooms', () => ({
   fetchReviewContext: async () => ({
     classrooms: [
@@ -81,5 +85,18 @@ describe('TeacherDashboard', () => {
     fireEvent.click(screen.getByRole('option', { name: '4.B' }))
     expect(screen.getByText('Ke kontrole (1)')).toBeInTheDocument()
     expect(screen.getByText(/Stupnice C dur/)).toBeInTheDocument()
+  })
+
+  it('marks a waiting recording as reviewed and refreshes the menu number', async () => {
+    render(
+      <MemoryRouter>
+        <TeacherDashboard />
+      </MemoryRouter>,
+    )
+    const buttons = await screen.findAllByRole('button', { name: 'Označit jako ohodnocené' })
+    expect(buttons).toHaveLength(3)
+    fireEvent.click(buttons[0])
+    await vi.waitFor(() => expect(refreshNavBadges).toHaveBeenCalled())
+    expect(markReviewed).toHaveBeenCalledWith(['11'])
   })
 })

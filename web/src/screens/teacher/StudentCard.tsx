@@ -16,6 +16,7 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchStudents } from '../../lib/data/profiles'
 import { fetchStudentLogs } from '../../lib/data/practiceLogs'
+import { isReviewed, isSkipped } from '../../lib/grading'
 import { fetchPupilAssignments } from '../../lib/data/classrooms'
 import { dueLabel } from '../../lib/dueDate'
 import { NavIcon } from '../../components/layout/NavIcon'
@@ -41,7 +42,7 @@ export function StudentCard() {
   const pupil = students.data?.find((s) => s.id === id)
   const list = logs.data ?? []
   const lastAt = list[0]?.created_at
-  const waiting = list.filter((l) => !l.teacher_comment).length
+  const waiting = list.filter((l) => !isReviewed(l)).length
   const open = (assignments.data ?? []).filter((a) => !a.done)
   const doneCount = (assignments.data ?? []).length - open.length
   const today = new Date()
@@ -158,10 +159,12 @@ export function StudentCard() {
                     <span className="min-w-0 flex-1 truncate text-xs text-text-muted">
                       {log.feedback_good || log.feedback_improve || (log.student_note ? `Vzkaz: ${log.student_note}` : '')}
                     </span>
-                    {log.teacher_comment && log.rating ? (
+                    {isReviewed(log) && log.rating ? (
                       <span className="shrink-0 text-xs">
                         <RatingNotes rating={log.rating} />
                       </span>
+                    ) : isSkipped(log) ? (
+                      <span className="shrink-0 text-[10px] text-text-muted">bez hodnocení</span>
                     ) : (
                       <span className="shrink-0 rounded-full bg-coral-tint px-2 py-0.5 text-[10px] font-heading font-semibold text-coral-dark">
                         Ohodnotit

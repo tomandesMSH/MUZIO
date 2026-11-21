@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { AppShell } from '../../components/layout/AppShell'
 import { AssignToStudentModal } from '../../components/classrooms/AssignToStudentModal'
 import { useQuery } from '../../lib/data/useQuery'
-import { deletePracticeLog, fetchPendingReview, fetchStudentLogs, submitGrading } from '../../lib/data/practiceLogs'
+import { deletePracticeLog, fetchPendingReview, fetchStudentLogs, markReviewed, submitGrading } from '../../lib/data/practiceLogs'
 import { fetchStudents } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
@@ -38,7 +38,7 @@ import type { AudioPlayerHandle } from '../../components/audio/AudioPlayer'
 import { PreviousAttempts } from '../../components/teacher/PreviousAttempts'
 import { StudentNotes } from '../../components/teacher/StudentNotes'
 import { Collapse, Chevron } from '../../components/ui/Collapse'
-import { pickNextToGrade } from '../../lib/grading'
+import { isReviewed, pickNextToGrade, reviewLabel } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
 import { refreshNavBadges } from '../../lib/navBadges'
@@ -300,7 +300,7 @@ export function Grading() {
       logs.refetch()
       // A new grade goes straight on to the next waiting recording; changing
       // an older grade goes back to the list.
-      const wasWaiting = !selectedLog.teacher_comment
+      const wasWaiting = !isReviewed(selectedLog)
       const next = wasWaiting ? pickNextToGrade(await fetchPendingReview().catch(() => []), selectedLog) : undefined
       if (next) {
         show(`Odesláno. Další nahrávka: ${nameFor(next.user_id)}`)
@@ -314,6 +314,29 @@ export function Grading() {
       await removeFeedbackImages(uploaded)
       await removeFeedbackAudio(uploadedAudio)
       show(getErrorMessage(err, 'Odeslání se nepovedlo, zkus to znovu.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // "Přeskočit hodnocení": the recording stops waiting, the pupil gets no grade.
+  async function handleSkipGrading() {
+    if (!selectedLog) return
+    setSubmitting(true)
+    try {
+      await markReviewed([selectedLog.id])
+      refreshNavBadges()
+      logs.refetch()
+      const next = pickNextToGrade(await fetchPendingReview().catch(() => []), selectedLog)
+      if (next) {
+        show(`Přeskočeno. Další nahrávka: ${nameFor(next.user_id)}`)
+        selectLog(next)
+      } else {
+        show('Vše zkontrolováno')
+        setSelectedLog(undefined)
+      }
+    } catch (err) {
+      show(getErrorMessage(err, 'Nepovedlo se, zkus to znovu.'))
     } finally {
       setSubmitting(false)
     }
@@ -340,7 +363,7 @@ export function Grading() {
             <button className="text-sm text-text-muted" onClick={() => setSelectedLog(undefined)}>
               ← Zpět na seznam
             </button>
-            {!selectedLog.teacher_comment && waiting.length > 0 && (
+            {!isReviewed(selectedLog) && waiting.length > 0 && (
               <button
                 className="text-sm text-text-muted underline underline-offset-2 hover:text-text-primary"
                 onClick={() => {
@@ -348,7 +371,7 @@ export function Grading() {
                   if (next) selectLog(next)
                 }}
               >
-                Přeskočit →
+                Později →
               </button>
             )}
           </div>
@@ -365,7 +388,7 @@ export function Grading() {
           <h1 className="text-xl">Hodnocení nahrávky</h1>
           <p className="text-text-muted text-sm">
             {nameFor(selectedLog.user_id)} · {new Date(selectedLog.created_at).toLocaleString('cs-CZ')}
-            {!selectedLog.teacher_comment && ` · ke kontrole zbývá ${waiting.length + 1}`}
+            {!isReviewed(selectedLog) && ` · ke kontrole zbývá ${waiting.length + 1}`}
           </p>
         </div>
         {pieceOf(selectedLog) && (
@@ -519,6 +542,16 @@ export function Grading() {
         <Button className="w-full" disabled={submitting} onClick={handleSubmit}>
           Odeslat hodnocení
         </Button>
+        {!isReviewed(selectedLog) && (
+          <div className="space-y-1">
+            <Button variant="ghost" className="w-full" disabled={submitting} onClick={handleSkipGrading}>
+              Přeskočit hodnocení
+            </Button>
+            <p className="text-center text-[11px] text-text-muted">
+              Nahrávka zmizí z kontroly, žák hodnocení ani XP nedostane.
+            </p>
+          </div>
+        )}
       </div>
     )
   }
@@ -549,7 +582,7 @@ export function Grading() {
               <div className="font-heading font-semibold text-sm">{nameFor(log.user_id)}</div>
               <div className="text-text-muted text-xs">
                 {new Date(log.created_at).toLocaleString('cs-CZ')}
-                {log.teacher_comment ? ' · ohodnoceno' : ' · čeká na hodnocení'}
+                {` · ${reviewLabel(log)}`}
                 {log.student_note ? ' · vzkaz' : ''}
                 {pieceOf(log) ? ` · ${pieceOf(log)?.title}` : ''}
               </div>
