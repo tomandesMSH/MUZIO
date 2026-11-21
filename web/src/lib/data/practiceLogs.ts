@@ -45,10 +45,17 @@ export async function fetchWeeklyStats(userId: string, today: Date): Promise<Wee
 
 // The days the pupil sent a recording (local date keys, each once) - for the
 // flames (lib/flames.ts).
+// The days added by the teacher (migration 0057) count too.
 export async function fetchPracticeDayKeys(userId: string): Promise<string[]> {
-  const { data, error } = await supabase.from('practice_logs').select('created_at').eq('user_id', userId)
-  if (error) throw error
-  return Array.from(new Set((data ?? []).map((row) => toDateKey(new Date(row.created_at as string)))))
+  const [logs, teacherDays] = await Promise.all([
+    supabase.from('practice_logs').select('created_at').eq('user_id', userId),
+    supabase.from('teacher_practice_days').select('day').eq('student_id', userId),
+  ])
+  if (logs.error) throw logs.error
+  const keys = (logs.data ?? []).map((row) => toDateKey(new Date(row.created_at as string)))
+  // Before migration 0057 the table isn't there: just the recordings then.
+  if (!teacherDays.error) keys.push(...(teacherDays.data ?? []).map((row) => String(row.day)))
+  return Array.from(new Set(keys))
 }
 
 // When and how long the pupil practised - all of it, for the calendar and
