@@ -32,20 +32,23 @@ export function PendingUploads({ userId, onSent, onMessage }: PendingUploadsProp
     setBusyId(upload.id)
     try {
       await submitRecording(upload)
-      await deletePendingUpload(upload.id)
-      onMessage('Nahrávka odeslána ke kontrole')
-      playSent()
-      onSent()
     } catch (err) {
       // Remember an upload that got through, so the next try doesn't repeat it.
       if (err instanceof SubmitError && err.audioUrl && !upload.audioUrl) {
         await savePendingUpload({ ...upload, audioUrl: err.audioUrl })
       }
       onMessage(getErrorMessage(err, 'Pořád se to nedaří odeslat. Zkus to, až budeš mít lepší signál.'))
-    } finally {
       setBusyId(undefined)
       load()
+      return
     }
+    // Sent: from here on it never reads as a failure.
+    await deletePendingUpload(upload.id)
+    onMessage('Nahrávka odeslána ke kontrole')
+    playSent()
+    setBusyId(undefined)
+    load()
+    onSent()
   }
 
   async function drop(id: string) {

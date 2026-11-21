@@ -13,6 +13,7 @@ import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { useAuth } from '../../lib/AuthProvider'
 import { fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { SubmitError, submitRecording } from '../../lib/submitRecording'
+import type { PracticeSessionResult } from '../../lib/data/practiceLogs'
 import { deletePendingUpload, savePendingUpload } from '../../lib/pendingUploads'
 import { isPerfectWeek } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
@@ -49,30 +50,15 @@ export function Recording() {
   // The sound already uploaded by a failed attempt: not uploaded again.
   const failedUploads = useRef(new WeakMap<Blob, string>())
 
-  async function handleRecorded(
-    blob: Blob,
-    durationSeconds: number | null,
-    format?: { extension: string; contentType: string },
-    note?: string,
-  ): Promise<boolean> {
-    if (!profile || uploading) return false
-    setUploading(true)
-    const pendingId = pendingIds.current.get(blob)
-    try {
-      const { session } = await submitRecording({
-        userId: profile.id,
-        blob,
-        durationSeconds,
-        format,
-        assignmentId,
-        ownPieceId,
-        note,
-        audioUrl: failedUploads.current.get(blob),
-      })
-      if (pendingId) await deletePendingUpload(pendingId)
-      setSent(true)
-      playSent()
+  // Set at once (state would only change on the next render): two quick taps
+  // on Odeslat must not send the take twice.
+  const sendingRef = useRef(false)
 
+  // After a successful send: new level or badge -> confetti. Only a bonus -
+  // if any of this fails, the recording still went through.
+  async function celebrate(session: PracticeSessionResult | null) {
+    if (!profile) return
+    try {
       const today = new Date()
       const [logsCount, weekly] = await Promise.all([
         fetchOwnLogsCount(profile.id),
@@ -86,13 +72,37 @@ export function Recording() {
         daysPlayedThisWeek: weekly.dateKeys.length,
         weeklyCount: weekly.weeklyCount,
       })
-      refreshProfile()
       if (result.newLevel || result.newBadgeIds.length > 0) {
         setCelebrating(true)
         setTimeout(() => setCelebrating(false), 2500)
       }
-      setTimeout(() => navigate('/student'), 2200)
-      return true
+    } catch {
+      // No celebration this time.
+    }
+  }
+
+  async function handleRecorded(
+    blob: Blob,
+    durationSeconds: number | null,
+    format?: { extension: string; contentType: string },
+    note?: string,
+  ): Promise<boolean> {
+    if (!profile || sendingRef.current) return false
+    sendingRef.current = true
+    setUploading(true)
+    const pendingId = pendingIds.current.get(blob)
+    let session: PracticeSessionResult | null
+    try {
+      ;({ session } = await submitRecording({
+        userId: profile.id,
+        blob,
+        durationSeconds,
+        format,
+        assignmentId,
+        ownPieceId,
+        note,
+        audioUrl: failedUploads.current.get(blob),
+      }))
     } catch (err) {
       // Keep the take in the phone, so it's not lost if the page is closed.
       const audioUrl = err instanceof SubmitError ? err.audioUrl : undefined
@@ -116,10 +126,19 @@ export function Recording() {
           ? 'Nahrávka se neodeslala, ale je uložená v telefonu. Zkus to znovu, nebo ji pošli později z Dashboardu.'
           : getErrorMessage(err, 'Nahrání se nepovedlo, zkus to znovu.'),
       )
-      return false
-    } finally {
+      sendingRef.current = false
       setUploading(false)
+      return false
     }
+
+    // Sent. Nothing from here on may turn it into "neodeslala".
+    if (pendingId) await deletePendingUpload(pendingId)
+    setSent(true)
+    playSent()
+    refreshProfile()
+    void celebrate(session)
+    setTimeout(() => navigate('/student'), 2200)
+    return true
   }
 
   return (
