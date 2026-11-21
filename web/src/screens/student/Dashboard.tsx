@@ -24,6 +24,7 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { countPracticeDays, flameProgress } from '../../lib/flames'
+import { fetchImportedFlames } from '../../lib/data/pupilFlames'
 import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
 import { playFanfare } from '../../lib/sounds'
 import { fetchStudentAssignments, fetchStudentClassrooms } from '../../lib/data/classrooms'
@@ -51,6 +52,10 @@ export function StudentDashboard() {
     [userId],
   )
   const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
+  // Flames brought over from Base44 (Migrace) count on top of the days here.
+  const importedFlames = useQuery(() => (userId ? fetchImportedFlames(userId) : Promise.resolve(0)), [userId])
+  const totalFlames =
+    dayKeys.data && importedFlames.data !== undefined ? countPracticeDays(dayKeys.data) + importedFlames.data : undefined
   const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
   const myClasses = useQuery(() => (userId ? fetchStudentClassrooms(userId).catch(() => []) : Promise.resolve([])), [userId])
@@ -93,14 +98,14 @@ export function StudentDashboard() {
 
   // A finished phase of the world (7, 14, 21, 28 flames): fanfare and confetti.
   useEffect(() => {
-    if (!userId || !dayKeys.data) return
-    const phase = detectFlameMilestone(userId, countPracticeDays(dayKeys.data))
+    if (!userId || totalFlames === undefined) return
+    const phase = detectFlameMilestone(userId, totalFlames)
     if (!phase) return
     playFanfare(phase)
     setCelebrating(true)
     show(phase === 4 ? 'Celý svět je hotový' : `Fáze ${phase} je hotová`)
     setTimeout(() => setCelebrating(false), 2500)
-  }, [userId, dayKeys.data, show])
+  }, [userId, totalFlames, show])
 
   if (!profile) return null
 
@@ -136,8 +141,8 @@ export function StudentDashboard() {
           </div>
         </div>
         <CleanupNoticeBanner />
-        {dayKeys.data && (
-          <WorldProgress world={profile.world} progress={flameProgress(countPracticeDays(dayKeys.data))} />
+        {totalFlames !== undefined && (
+          <WorldProgress world={profile.world} progress={flameProgress(totalFlames)} />
         )}
         <MailCard studentId={profile.id} />
         <AnnouncementsCard />
@@ -190,7 +195,7 @@ export function StudentDashboard() {
 
         {dayKeys.data && (
           <Card>
-            <Flames progress={flameProgress(countPracticeDays(dayKeys.data))} />
+            <Flames progress={flameProgress(totalFlames ?? countPracticeDays(dayKeys.data))} />
           </Card>
         )}
 

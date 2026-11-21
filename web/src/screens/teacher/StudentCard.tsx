@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PupilFlames } from '../../components/teacher/PupilFlames'
-import { fetchPupilFlameDays } from '../../lib/data/pupilFlames'
+import { fetchImportedFlames, fetchPupilFlameDays } from '../../lib/data/pupilFlames'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
 import { Avatar } from '../../components/ui/Avatar'
@@ -34,6 +34,7 @@ export function StudentCard() {
     [profile?.id, id],
   )
   const flameDays = useQuery(() => fetchPupilFlameDays(id).catch(() => null), [id])
+  const importedFlames = useQuery(() => fetchImportedFlames(id), [id])
   const [assignOpen, setAssignOpen] = useState(false)
 
   const pupil = students.data?.find((s) => s.id === id)
@@ -100,7 +101,7 @@ export function StudentCard() {
         {pupil && flameDays.data && (
           <div>
             <h2 className="text-sm font-heading font-semibold mb-2">Plamínky a svět</h2>
-            <PupilFlames world={pupil.world} dayKeys={flameDays.data} />
+            <PupilFlames world={pupil.world} dayKeys={flameDays.data} importedFlames={importedFlames.data ?? 0} />
           </div>
         )}
 

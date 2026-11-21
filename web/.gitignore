@@ -2,3 +2,7 @@ node_modules/
 dist/
 .env.local
 *.local
+
+# Base44 export and the generated import SQL (Migrace): personal data, never in git.
+/base44*.sql
+/scripts/*.sql

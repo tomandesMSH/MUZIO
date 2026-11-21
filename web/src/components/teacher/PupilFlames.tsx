@@ -4,9 +4,18 @@ import { FLAMES_PER_PHASE, PHASES_PER_CYCLE, countPracticeDays, flameProgress, f
 import { worldInfo, type WorldId } from '../../lib/world'
 
 // The pupil's flames and world, as the teacher sees them on the pupil card.
-export function PupilFlames({ world, dayKeys }: { world: WorldId | null | undefined; dayKeys: string[] }) {
+export function PupilFlames({
+  world,
+  dayKeys,
+  importedFlames = 0,
+}: {
+  world: WorldId | null | undefined
+  dayKeys: string[]
+  // Brought over from Base44 (migration 0055).
+  importedFlames?: number
+}) {
   const info = worldInfo(world)
-  const p = flameProgress(countPracticeDays(dayKeys))
+  const p = flameProgress(countPracticeDays(dayKeys) + importedFlames)
   return (
     <div className="rounded-2xl bg-bg-card shadow-clay-sm p-4 flex flex-col sm:flex-row gap-4">
       <WorldScene world={info.id} phase={p.phasesDone} className="w-full sm:w-56 shrink-0 rounded-xl" />
@@ -28,6 +37,7 @@ export function PupilFlames({ world, dayKeys }: { world: WorldId | null | undefi
         </ol>
         <p className="text-xs text-text-muted">
           Celkem {flamesLabel(p.total)} (dní s nahrávkou)
+          {importedFlames > 0 && `, z toho ${importedFlames} z Base44`}
           {p.completedCycles > 0 && `, hotové světy: ${p.completedCycles}`}.
         </p>
       </div>
