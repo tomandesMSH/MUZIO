@@ -14,8 +14,9 @@ import { isTeacherAdmin } from '../lib/roles'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
 import { NavIcon } from '../components/layout/NavIcon'
+import { MigrationForm } from '../components/auth/MigrationForm'
 
-type Mode = 'login' | 'register' | 'forgot'
+type Mode = 'login' | 'register' | 'forgot' | 'migrate'
 type Portal = 'student' | 'teacher'
 
 export function Login() {
@@ -106,8 +107,9 @@ export function Login() {
           tabs={[
             { id: 'login', label: 'Přihlásit se' },
             { id: 'register', label: 'Registrace' },
+            { id: 'migrate', label: 'Migrace' },
           ]}
-          value={mode === 'register' ? 'register' : 'login'}
+          value={mode === 'register' || mode === 'migrate' ? mode : 'login'}
           onChange={setMode}
         />
       </div>
@@ -135,7 +137,9 @@ export function Login() {
         </div>
       )}
 
-      {mode === 'forgot' ? (
+      {mode === 'migrate' ? (
+        <MigrationForm />
+      ) : mode === 'forgot' ? (
         <div className="space-y-4">
           <h2 className="font-heading font-semibold text-lg">Zapomněli jste heslo?</h2>
           <p className="text-sm text-text-muted">

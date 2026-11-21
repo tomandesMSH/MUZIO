@@ -11,7 +11,7 @@ vi.mock('react-router-dom', async (orig) => ({
 }))
 vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 't1' } }) }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
-vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameDays: async () => ['2026-11-20', '2026-11-21'] }))
+vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameDays: async () => ['2026-11-20', '2026-11-21'], fetchImportedFlames: async () => 0 }))
 vi.mock('../../components/teacher/StudentNotes', () => ({ StudentNotes: () => <div>poznámky</div> }))
 vi.mock('../../components/classrooms/AssignToStudentModal', () => ({ AssignToStudentModal: () => null }))
 vi.mock('../../lib/data/profiles', () => ({
