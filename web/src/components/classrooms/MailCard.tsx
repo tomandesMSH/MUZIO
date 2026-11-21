@@ -39,7 +39,7 @@ export function MailCard({ studentId }: { studentId: string }) {
             >
               <div className="flex items-baseline justify-between gap-2 text-xs text-text-muted">
                 <span className="font-heading font-semibold text-text-primary">
-                  {teachers.data?.get(m.teacher_id) ?? 'Učitel'}
+                  {m.teacher_id ? (teachers.data?.get(m.teacher_id) ?? 'Učitel') : 'Z předchozí aplikace'}
                 </span>
                 <span className="shrink-0">{new Date(m.created_at).toLocaleDateString('cs-CZ')}</span>
               </div>

@@ -48,6 +48,8 @@ export interface ImportSummary {
   flames: number
   stars: number
   badges: number
+  // Messages from the teacher in Base44 (migration 0059).
+  messages?: number
 }
 
 export interface MigrateDeps {

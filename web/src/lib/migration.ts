@@ -6,6 +6,7 @@ export interface MigrationSummary {
   flames: number
   stars: number
   badges: number
+  messages?: number
 }
 
 export interface MigrationDetails {

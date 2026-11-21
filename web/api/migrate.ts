@@ -101,8 +101,8 @@ export async function POST(request: Request): Promise<Response> {
     async applyImport(userId, hash) {
       const { data, error } = await sb.rpc('apply_base44_import', { p_user: userId, p_email_hash: hash })
       if (error) throw error
-      const d = data as { flames: number; stars: number; badges: number }
-      return { flames: Number(d.flames), stars: Number(d.stars), badges: Number(d.badges) }
+      const d = data as { flames: number; stars: number; badges: number; messages?: number }
+      return { flames: Number(d.flames), stars: Number(d.stars), badges: Number(d.badges), messages: Number(d.messages ?? 0) }
     },
   }
 
