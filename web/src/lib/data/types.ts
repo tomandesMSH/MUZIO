@@ -1,5 +1,4 @@
 import type { WorldId } from '../world'
-import type { StyleId } from '../style'
 import type { TeacherBadgeId } from '../game-logic'
 export type UserRole = 'student' | 'teacher' | 'moderator'
 
@@ -39,9 +38,6 @@ export interface Profile {
   // The pupil's musical world (lib/world.ts). Null until they pick one;
   // absent until migration 0043 is applied.
   world?: WorldId | null
-  // Pohádkový svět or Moderní studio (lib/style.ts). Null = pohádka; absent
-  // until migration 0044 is applied.
-  style?: StyleId | null
 }
 
 export interface Classroom {
