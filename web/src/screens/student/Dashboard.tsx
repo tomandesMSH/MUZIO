@@ -26,6 +26,8 @@ import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { countPracticeDays, flameProgress } from '../../lib/flames'
+import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
+import { playFanfare } from '../../lib/sounds'
 import { fetchStudentAssignments } from '../../lib/data/classrooms'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
@@ -86,6 +88,17 @@ export function StudentDashboard() {
       setTimeout(() => setCelebrating(false), 2500)
     }
   }, [userId, profile, logsCount.data, weekly.data, awards.loading, awards.data, today, show])
+
+  // A finished phase of the world (7, 14, 21, 28 flames): fanfare and confetti.
+  useEffect(() => {
+    if (!userId || !dayKeys.data) return
+    const phase = detectFlameMilestone(userId, countPracticeDays(dayKeys.data))
+    if (!phase) return
+    playFanfare(phase)
+    setCelebrating(true)
+    show(phase === 4 ? 'Celý svět je hotový' : `Fáze ${phase} je hotová`)
+    setTimeout(() => setCelebrating(false), 2500)
+  }, [userId, dayKeys.data, show])
 
   if (!profile) return null
 
