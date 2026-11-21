@@ -10,6 +10,7 @@ import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { DailyReminderBanner } from '../../components/gamification/DailyReminderBanner'
 import { Confetti } from '../../components/gamification/Confetti'
 import { Quests } from '../../components/gamification/Quests'
+import { WorldCard } from '../../components/world/WorldCard'
 import { LessonCard } from '../../components/lessons/LessonCard'
 import { dueLabel, sortByDue } from '../../lib/dueDate'
 import { AttachmentLink } from '../../components/lessons/AttachmentLink'
@@ -111,6 +112,7 @@ export function StudentDashboard() {
             <StarsDisplay stars={profile.stars} />
           </div>
         </div>
+        <WorldCard world={profile.world} />
         <AnnouncementsCard />
         <PendingUploads
           userId={profile.id}
