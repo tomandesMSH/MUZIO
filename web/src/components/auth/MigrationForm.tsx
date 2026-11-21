@@ -93,7 +93,8 @@ export function MigrationForm() {
       <div className="space-y-4">
         <h2 className="font-heading font-semibold text-lg">Hotovo, vítej v Muziu</h2>
         <p className="text-sm text-text-muted">
-          Přeneseno: {flamesLabel(summary.flames)}, hvězdy {summary.stars}, odznaky {summary.badges}. Přihlašuj se
+          Přeneseno: {flamesLabel(summary.flames)}, hvězdy {summary.stars}, odznaky {summary.badges}
+          {summary.messages ? `, zprávy od paní učitelky ${summary.messages}` : ''}. Přihlašuj se
           teď jménem <strong className="text-text-primary">{username.trim().toLowerCase()}</strong> a svým heslem.
         </p>
         {error && (

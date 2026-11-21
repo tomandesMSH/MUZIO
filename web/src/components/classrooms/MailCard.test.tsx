@@ -10,12 +10,14 @@ vi.mock('../../lib/data/pupilMessages', () => ({
   fetchMyMessages: async () => [
     { id: 'm1', teacher_id: 't1', student_id: 'p1', body: 'Starší, přečtená', created_at: '2026-11-20T10:00:00Z', read_at: '2026-11-20T11:00:00Z' },
     { id: 'm2', teacher_id: 't1', student_id: 'p1', body: 'Nová zpráva', created_at: '2026-11-19T10:00:00Z', read_at: null },
+    { id: 'm3', teacher_id: null, student_id: 'p1', body: 'Pochvala z Base44', created_at: '2026-11-17T10:00:00Z', read_at: '2026-11-17T10:00:00Z' },
   ],
 }))
 
 describe('MailCard', () => {
   it('puts unread first and marks one read', async () => {
     render(<MailCard studentId="p1" />)
+    expect(await screen.findByText('Z předchozí aplikace')).toBeInTheDocument()
     const bodies = await screen.findAllByText(/zpráva|přečtená/)
     expect(bodies[0]).toHaveTextContent('Nová zpráva')
     expect(await screen.findAllByText('Jana Nováková')).toHaveLength(2)

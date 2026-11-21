@@ -6,7 +6,8 @@ export const MESSAGE_MAX = 1000
 
 export interface PupilMessage {
   id: string
-  teacher_id: string
+  // Null for the messages brought over from Base44 (migration 0059).
+  teacher_id: string | null
   student_id: string
   body: string
   created_at: string

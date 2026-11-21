@@ -52,7 +52,7 @@ describe('badges and output', () => {
     ])
     expect(sql).toContain(emailHash('pavel@example.com'))
     expect(sql).not.toMatch(/example\.com/i)
-    expect(sql).toContain("'Pavel O''Brien', 4, 12, array['lovec-not']::text[]")
+    expect(sql).toContain("'Pavel O''Brien', 4, 12, array['lovec-not']::text[], '[]'::jsonb")
     expect(sql).not.toContain('bez-zavinace')
   })
 })
@@ -63,5 +63,15 @@ describe('Base44 badge keys', () => {
     expect(badgeId('brave_musician')).toBe('odvazny-muzikant')
     expect(badgeId('music_messenger')).toBeNull()
     expect(badgeId('days_7')).toBeNull()
+  })
+})
+
+describe('messages', () => {
+  it('carries the messages as JSON and copies them for pupils who already moved', () => {
+    const sql = importSql([
+      { email: 'a@b.cz', fullName: 'A', stars: 0, flames: 0, badges: [], messages: [{ body: "Výborně, jen tak dál", created_at: '2026-11-17T18:04:02Z', read: true }] },
+    ])
+    expect(sql).toContain(`'[{"body":"Výborně, jen tak dál","created_at":"2026-11-17T18:04:02Z","read":true}]'::jsonb`)
+    expect(sql).toContain('copy_base44_messages(claimed_by, messages)')
   })
 })

@@ -162,22 +162,33 @@ export function badgeId(name) {
 const sqlText = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`)
 const sqlInt = (v) => String(Math.max(0, Math.floor(Number(v) || 0)))
 
-// The SQL that fills base44_import. pupils: { email, fullName, stars, flames, badges: string[] }.
+// The SQL that fills base44_import. pupils: { email, fullName, stars, flames,
+// badges: string[], messages?: { body, created_at, read }[] }. Rows a pupil
+// already took over keep their numbers, but get the messages copied to their
+// mail (once) by the last statement.
 export function importSql(pupils) {
   const lines = pupils
     .filter((p) => typeof p.email === 'string' && p.email.includes('@'))
     .map((p) => {
       const badges = [...new Set((p.badges ?? []).map(badgeId).filter(Boolean))]
       const arr = badges.length ? `array[${badges.map(sqlText).join(', ')}]::text[]` : `'{}'::text[]`
-      return `  (${sqlText(emailHash(p.email))}, ${sqlText(p.fullName)}, ${sqlInt(p.stars)}, ${sqlInt(p.flames)}, ${arr})`
+      const messages = `${sqlText(JSON.stringify(p.messages ?? []))}::jsonb`
+      return `  (${sqlText(emailHash(p.email))}, ${sqlText(p.fullName)}, ${sqlInt(p.stars)}, ${sqlInt(p.flames)}, ${arr}, ${messages})`
     })
   if (lines.length === 0) return '-- Nothing to import.\n'
-  return `-- Base44 pupils for Migrace (migration 0055). E-mails are hashed.
--- Run in the Supabase SQL editor. Safe to run again: unclaimed rows are updated.
-insert into base44_import (email_hash, full_name, stars, flames, badges) values
+  return `-- Base44 pupils for Migrace (migrations 0055, 0059). E-mails are hashed.
+-- Run in the Supabase SQL editor. Safe to run again.
+insert into base44_import (email_hash, full_name, stars, flames, badges, messages) values
 ${lines.join(',\n')}
 on conflict (email_hash) do update set
-  full_name = excluded.full_name, stars = excluded.stars, flames = excluded.flames, badges = excluded.badges
-  where base44_import.claimed_by is null;
+  full_name = excluded.full_name,
+  stars = case when base44_import.claimed_by is null then excluded.stars else base44_import.stars end,
+  flames = case when base44_import.claimed_by is null then excluded.flames else base44_import.flames end,
+  badges = case when base44_import.claimed_by is null then excluded.badges else base44_import.badges end,
+  messages = excluded.messages;
+
+-- Pupils who already moved get the messages now (copy_base44_messages adds them once).
+select full_name, copy_base44_messages(claimed_by, messages) as copied_messages
+from base44_import where claimed_by is not null;
 `
 }

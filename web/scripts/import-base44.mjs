@@ -31,6 +31,16 @@ export function pupilsFrom(tables) {
   for (const d of rowsOf(tables, 'practice_days')) addDay(d.student_id, d.practice_date)
   for (const c of rowsOf(tables, 'completed_tasks')) addDay(c.created_by_id, c.completion_date)
 
+  // The teacher's messages and praise (mail_messages); voice files stay in
+  // Base44, only the text comes over.
+  const messages = new Map()
+  for (const m of rowsOf(tables, 'mail_messages')) {
+    if (!m.student_id || !m.body) continue
+    const body = m.recording_title ? `K nahrávce „${m.recording_title}“: ${m.body}` : String(m.body)
+    const created = m.created_date ? `${String(m.created_date).replace(/Z?$/, '')}Z` : null
+    messages.set(m.student_id, [...(messages.get(m.student_id) ?? []), { body, created_at: created, read: m.read === true }])
+  }
+
   const badges = new Map()
   for (const a of rowsOf(tables, 'badge_awards')) {
     if (a.awarded_by !== 'teacher' || !a.student_id) continue
@@ -45,6 +55,7 @@ export function pupilsFrom(tables) {
       stars: Number(u.stars) || 0,
       flames: Math.max(days.get(u.id)?.size ?? 0, Number(u.flames) || 0),
       badges: badges.get(u.id) ?? [],
+      messages: messages.get(u.id) ?? [],
     }))
 }
 
@@ -72,7 +83,8 @@ function main() {
   const pupils = pupilsFrom(tables)
   writeFileSync(out, importSql(pupils))
   const withBadges = pupils.filter((p) => p.badges.length > 0).length
-  console.log(`Hotovo: ${out}, žáků ${pupils.length}, s odznaky ${withBadges}. Spusť ho v Supabase SQL editoru.`)
+  const mail = pupils.reduce((n, p) => n + p.messages.length, 0)
+  console.log(`Hotovo: ${out}, žáků ${pupils.length}, s odznaky ${withBadges}, zpráv ${mail}. Spusť ho v Supabase SQL editoru.`)
 }
 
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('import-base44.mjs')) main()
