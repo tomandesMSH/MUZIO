@@ -116,7 +116,7 @@ export const BADGES: BadgeDef[] = [
   { id: 'stoleti-legenda', icon: '🏆', tier: '100', label: 'Stoletá legenda', description: 'Cvič 100 dní po sobě.', check: (ctx) => ctx.streak >= 100, progress: (ctx) => ({ current: ctx.streak, target: 100 }) },
   { id: 'deset-melodii', icon: '🎵', tier: '10', label: 'Deset melodií', description: 'Pošli 10 nahrávek.', check: (ctx) => ctx.totalRecordings >= 10, progress: (ctx) => ({ current: ctx.totalRecordings, target: 10 }) },
   { id: 'padesat-melodii', icon: '🎼', tier: '50', label: 'Padesát melodií', description: 'Pošli 50 nahrávek.', check: (ctx) => ctx.totalRecordings >= 50, progress: (ctx) => ({ current: ctx.totalRecordings, target: 50 }) },
-  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Zahraj skladbu bez chyb – dá ti ho učitel.', byTeacher: true, check: (ctx) => ctx.awardedCounts['maly-virtuoz'] >= 1, progress: (ctx) => ({ current: ctx.awardedCounts['maly-virtuoz'], target: 1 }) },
+  { id: 'maly-virtuoz', icon: '⭐', label: 'Malý virtuoz', description: 'Zahraj skladbu bez chyb. Dává ho učitel.', byTeacher: true, check: (ctx) => ctx.awardedCounts['maly-virtuoz'] >= 1, progress: (ctx) => ({ current: ctx.awardedCounts['maly-virtuoz'], target: 1 }) },
   { id: 'virtuoz', icon: '🌟', label: 'Virtuoz', description: 'Splň výzvu od učitele, třeba stupnici v tempu 80.', byTeacher: true, check: (ctx) => ctx.awardedCounts.virtuoz >= 1, progress: (ctx) => ({ current: ctx.awardedCounts.virtuoz, target: 1 }) },
   { id: 'perfektni-tyden', icon: '📅', label: 'Perfektní týden', description: 'Cvič každý den v týdnu.', check: (ctx) => !!ctx.perfectWeek, progress: (ctx) => ({ current: ctx.daysPlayedThisWeek, target: 7 }) },
   { id: 'tydenni-cil', icon: '🎯', tier: '3', label: 'Týdenní cíl', description: 'Pošli 3 nahrávky za týden.', check: (ctx) => ctx.weeklyCount >= 3, progress: (ctx) => ({ current: ctx.weeklyCount, target: 3 }) },
@@ -240,7 +240,6 @@ export interface QuestContext {
 export interface QuestResult {
   id: string
   label: string
-  icon: string
   current: number
   target: number
   completed: boolean
@@ -254,7 +253,6 @@ export function computeQuests(ctx: QuestContext): QuestResult[] {
     {
       id: 'daily-practice',
       label: 'Procvič dnes alespoň jednou',
-      icon: '🎯',
       current: ctx.playedToday ? 1 : 0,
       target: 1,
       completed: ctx.playedToday,
@@ -262,7 +260,6 @@ export function computeQuests(ctx: QuestContext): QuestResult[] {
     {
       id: 'weekly-stars',
       label: `Pošli ${WEEKLY_QUEST_TARGET} nahrávek tento týden`,
-      icon: '🎙️',
       current: Math.min(weeklyCount, WEEKLY_QUEST_TARGET),
       target: WEEKLY_QUEST_TARGET,
       completed: weeklyCount >= WEEKLY_QUEST_TARGET,

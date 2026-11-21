@@ -70,7 +70,7 @@ export function FeedbackImagesEditor({ items, onChange }: FeedbackImagesEditorPr
   return (
     <div>
       <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-        <span aria-hidden>🖼️</span> Obrázky <span className="font-body font-normal text-text-muted text-xs">(nejvýš {MAX_FEEDBACK_IMAGES}, nepovinné)</span>
+        Obrázky <span className="font-body font-normal text-text-muted text-xs">(nejvýš {MAX_FEEDBACK_IMAGES}, nepovinné)</span>
       </div>
       <div className="flex flex-wrap gap-2.5">
         {items.map((item, index) => {

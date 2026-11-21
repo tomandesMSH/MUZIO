@@ -34,8 +34,8 @@ function Meter({ label, used, limit }: { label: string; used: number; limit: num
       </div>
       <div className="text-xs text-text-muted">
         {Math.round(share * 100)} %
-        {tone === 'warn' && ' – blíží se limitu free tieru'}
-        {tone === 'full' && ' – skoro plno: uklid staré nahrávky nebo přejdi na Pro'}
+        {tone === 'warn' && ', blíží se limitu free tieru'}
+        {tone === 'full' && ', skoro plno: ukliď staré nahrávky nebo přejdi na Pro'}
       </div>
     </div>
   )

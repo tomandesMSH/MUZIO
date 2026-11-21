@@ -93,7 +93,7 @@ export function Feedback() {
                   {graded ? (
                     <span className="flex items-center gap-1.5">
                       {newIds.has(String(log.id)) && (
-                        <span className="rounded-full bg-coral px-2 py-0.5 text-[10px] font-heading font-bold uppercase tracking-wide text-white">
+                        <span className="rounded-full bg-coral px-2 py-0.5 text-[11px] font-heading font-semibold text-white">
                           Nové
                         </span>
                       )}
@@ -122,14 +122,14 @@ export function Feedback() {
                           key={award.id}
                           className="inline-flex items-center gap-1.5 mr-2 rounded-full bg-coral-tint text-coral-dark px-3 py-1 text-xs font-heading font-semibold"
                         >
-                          🏅 {badge?.icon} {badge?.label ?? award.badge_id}
+                          {badge?.icon} {badge?.label ?? award.badge_id}
                         </div>
                       )
                     })}
                     {log.feedback_good && (
                       <div>
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">
-                          <span aria-hidden>✅</span> Co se povedlo
+                          Co se povedlo
                         </div>
                         <p className="text-text-muted whitespace-pre-wrap break-words">
                           <TimedText text={log.feedback_good} onSeek={log.audio_url ? seekIn(String(log.id)) : undefined} />
@@ -139,7 +139,7 @@ export function Feedback() {
                     {log.feedback_audio && (
                       <div>
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-1">
-                          <span aria-hidden>🎙</span> Komentář od učitele
+                          Komentář od učitele
                         </div>
                         <SavedVoiceComment path={log.feedback_audio} />
                       </div>
@@ -150,7 +150,7 @@ export function Feedback() {
                     {log.feedback_improve && (
                       <div>
                         <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-0.5">
-                          <span aria-hidden>🎯</span> Co zlepšit
+                          Co zlepšit
                         </div>
                         <p className="text-text-muted whitespace-pre-wrap break-words">
                           <TimedText

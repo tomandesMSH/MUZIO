@@ -4,6 +4,7 @@ import { fetchAttachmentDownloadUrl } from '../../lib/data/classrooms'
 import { KEYBOARD_UTILS_DOWNLOAD_URL, keyboardUtilsOpenLink } from '../../lib/attachments'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment } from '../../lib/data/types'
+import { NavIcon } from '../layout/NavIcon'
 
 interface AttachmentLinkProps {
   assignment: Pick<Assignment, 'attachment_path' | 'attachment_name'>
@@ -45,7 +46,7 @@ export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLin
   return (
     <div className="text-xs space-y-2">
       <div className="flex items-center gap-2 min-w-0">
-        <span aria-hidden="true">🎼</span>
+        <NavIcon name="lessons" className="w-4 h-4 shrink-0 text-text-muted" />
         <span className="truncate font-semibold text-text-primary" title={fileName}>
           {assignment.attachment_name ?? 'Noty k úkolu'}
         </span>
@@ -98,7 +99,7 @@ export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLin
           disabled={busy}
           onClick={openInApp}
         >
-          <span aria-hidden="true">🎹</span> Otevřít v Keyboard Utils
+          Otevřít v Keyboard Utils
         </button>
       </div>
       {error && <p className="text-coral-dark">{error}</p>}

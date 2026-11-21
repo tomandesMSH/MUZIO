@@ -71,9 +71,9 @@ export function Profile() {
                 : 'Aktuální streak'
             }
           />
-          <StatCard value={`✨ ${profile.xp ?? 0}`} label="XP za ohodnocené nahrávky" />
+          <StatCard value={`${profile.xp ?? 0}`} label="XP za ohodnocené nahrávky" />
           <StatCard value={`⭐ ${profile.stars}`} label="Hvězdy od učitele" />
-          <StatCard value={`🎙️ ${logsCount.data ?? '-'}`} label="Odeslané nahrávky" />
+          <StatCard value={`${logsCount.data ?? '-'}`} label="Odeslané nahrávky" />
         </div>
 
         <div>

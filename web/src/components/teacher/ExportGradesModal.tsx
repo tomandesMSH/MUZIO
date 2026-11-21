@@ -63,7 +63,7 @@ export function ExportGradesModal({ students, onClose }: { students: Profile[]; 
         rows = detailRows(pupils, logs, ctx.titles, pieceTitles)
       }
       downloadCsv(exportFilename(kind, groupName, period), rows)
-      setMessage(`Staženo ✓ (${logs.length} nahrávek)`)
+      setMessage(`Staženo (${logs.length} nahrávek)`)
     } catch (err) {
       setMessage(getErrorMessage(err, 'Export se nepovedl, zkus to znovu.'))
     } finally {
@@ -120,7 +120,7 @@ export function ExportGradesModal({ students, onClose }: { students: Profile[]; 
                 onChange={(e) => setCustom({ ...custom, from: e.target.value })}
                 className="rounded-lg bg-bg-card-alt px-2 py-1.5 shadow-clay-press"
               />
-              –
+              až
               <input
                 type="date"
                 aria-label="Do"
@@ -131,7 +131,7 @@ export function ExportGradesModal({ students, onClose }: { students: Profile[]; 
             </div>
           ) : (
             <p className="mt-1 text-[11px] text-text-muted">
-              {new Date(period.from).toLocaleDateString('cs-CZ')} – {new Date(period.to).toLocaleDateString('cs-CZ')}
+              {new Date(period.from).toLocaleDateString('cs-CZ')} až {new Date(period.to).toLocaleDateString('cs-CZ')}
             </p>
           )}
         </div>
@@ -148,7 +148,7 @@ export function ExportGradesModal({ students, onClose }: { students: Profile[]; 
             {busy === 'detail' ? 'Připravuji…' : '⬇ Všechny nahrávky s komentáři'}
           </Button>
           <p className="text-[11px] text-text-muted">
-            Soubor CSV se otevře v Excelu (nebo Tabulkách Google). Noty jsou hodnocení 1–5 z Muzia, ne školní známky.
+            Soubor CSV se otevře v Excelu (nebo Tabulkách Google). Noty jsou hodnocení 1 až 5 z Muzia, ne školní známky.
           </p>
           {message && <p className="text-sm text-text-muted" role="status">{message}</p>}
         </div>

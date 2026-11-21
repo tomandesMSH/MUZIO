@@ -42,7 +42,7 @@ function what(log: PracticeLog, data: ExportData): string {
 
 export function recordingRows(data: ExportData): Cell[][] {
   const rows: Cell[][] = [
-    ['Datum', 'Úkol / skladba', 'Délka (s)', 'Noty (1–5)', 'Co se povedlo', 'Co zlepšit', 'Můj vzkaz učiteli', 'Soubor'],
+    ['Datum', 'Úkol / skladba', 'Délka (s)', 'Noty (1-5)', 'Co se povedlo', 'Co zlepšit', 'Můj vzkaz učiteli', 'Soubor'],
   ]
   for (const log of [...data.logs].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
     rows.push([
@@ -105,10 +105,10 @@ export async function buildArchive(
     'profil.json': encoder.encode(profileJson(data)),
     'PRECTI-ME.txt': encoder.encode(
       'Tvoje data z aplikace Muzio (ZUŠ Moravský Krumlov).\r\n\r\n' +
-        'nahravky.csv – všechny nahrávky s hodnocením a komentáři (otevře se v Excelu)\r\n' +
-        'profil.json – profil, XP, hvězdy, třídy, odznaky a souhlas\r\n' +
-        'nahravky/ – zvuk nahrávek\r\n' +
-        'komentare/ – hlasové komentáře a obrázky od učitele\r\n',
+        'nahravky.csv: všechny nahrávky s hodnocením a komentáři (otevře se v Excelu)\r\n' +
+        'profil.json: profil, XP, hvězdy, třídy, odznaky a souhlas\r\n' +
+        'nahravky/: zvuk nahrávek\r\n' +
+        'komentare/: hlasové komentáře a obrázky od učitele\r\n',
     ),
   }
   const missing: string[] = []

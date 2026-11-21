@@ -133,7 +133,7 @@ export function Recording() {
           rel="noopener noreferrer"
           className="mb-3 inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-heading font-semibold hover:bg-bg-card-alt"
         >
-          🔗 Otevřít odkaz ke skladbě
+          Otevřít odkaz ke skladbě
         </a>
       )}
       {attachmentPath && (
@@ -148,7 +148,7 @@ export function Recording() {
           onClick={() => setMetronomeOpen(!metronomeOpen)}
           className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-heading font-semibold"
         >
-          <span>🥁 Metronom</span>
+          <span>Metronom</span>
           <Chevron open={metronomeOpen} />
         </button>
         <Collapse open={metronomeOpen}>
@@ -167,7 +167,7 @@ export function Recording() {
           onClick={() => setTunerOpen(!tunerOpen)}
           className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-heading font-semibold"
         >
-          <span>🎼 Ladička</span>
+          <span>Ladička</span>
           <Chevron open={tunerOpen} />
         </button>
         <Collapse open={tunerOpen}>

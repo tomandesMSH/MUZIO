@@ -63,7 +63,7 @@ describe('rows', () => {
 
   it('detail per recording', () => {
     const rows = detailRows(pupils, logs, new Map([['as1', 'Stupnice C dur']]), new Map([['p1', 'Moje píseň']]))
-    expect(rows.slice(1).map((r) => r[2])).toEqual(['🎸 Moje píseň', 'Stupnice C dur', 'volné cvičení'])
+    expect(rows.slice(1).map((r) => r[2])).toEqual(['Moje píseň', 'Stupnice C dur', 'volné cvičení'])
     expect(rows[2][5]).toBe('Hezky')
     expect(rows[2][4]).toBe(1.5)
   })

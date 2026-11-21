@@ -20,7 +20,7 @@ describe('AnnouncementsCard', () => {
 
   it('"Rozumím" hides it, also next time', async () => {
     const { unmount } = render(<AnnouncementsCard />)
-    fireEvent.click(await screen.findByText('Rozumím ✓'))
+    fireEvent.click(await screen.findByText('Rozumím'))
     expect(screen.queryByText('V pátek koncert v 17:00')).toBeNull()
     unmount()
     render(<AnnouncementsCard />)

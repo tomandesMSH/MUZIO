@@ -22,7 +22,6 @@ export function PendingVerification() {
 
   return (
     <div className="max-w-sm md:max-w-md mx-auto p-6 pt-20 text-center space-y-5">
-      <div className="text-4xl">🔒</div>
       <h1 className="text-xl">Čekáš na ověření</h1>
       <p className="text-text-muted text-sm">
         Nový učitelský účet musí nejdřív ručně ověřit administrátor/moderátor, než získá přístup k žákům a jejich

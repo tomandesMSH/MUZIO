@@ -296,10 +296,10 @@ export function Grading() {
       const wasWaiting = !selectedLog.teacher_comment
       const next = wasWaiting ? pickNextToGrade(await fetchPendingReview().catch(() => []), selectedLog) : undefined
       if (next) {
-        show(`Odesláno ✓ Další nahrávka: ${nameFor(next.user_id)}`)
+        show(`Odesláno. Další nahrávka: ${nameFor(next.user_id)}`)
         selectLog(next)
       } else {
-        show(wasWaiting ? 'Vše ohodnoceno 🎉' : 'Hodnocení odesláno žákovi')
+        show(wasWaiting ? 'Vše ohodnoceno' : 'Hodnocení odesláno žákovi')
         setSelectedLog(undefined)
       }
     } catch (err) {
@@ -364,7 +364,7 @@ export function Grading() {
         {pieceOf(selectedLog) && (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
             <span>
-              🎸 Vlastní skladba: <b>{pieceOf(selectedLog)?.title}</b>
+              Vlastní skladba: <b>{pieceOf(selectedLog)?.title}</b>
             </span>
             {pieceOf(selectedLog)?.link && (
               <a
@@ -373,14 +373,14 @@ export function Grading() {
                 rel="noopener noreferrer"
                 className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary"
               >
-                🔗 odkaz
+                odkaz
               </a>
             )}
           </div>
         )}
         {selectedLog.student_note && (
           <div className="rounded-xl border-l-4 border-coral bg-bg-card-alt px-3 py-2">
-            <div className="text-xs font-semibold text-text-muted">💬 Vzkaz od žáka</div>
+            <div className="text-xs font-semibold text-text-muted">Vzkaz od žáka</div>
             <p className="text-sm whitespace-pre-wrap break-words">{selectedLog.student_note}</p>
           </div>
         )}
@@ -396,7 +396,7 @@ export function Grading() {
             className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-sm font-heading font-semibold"
           >
             <span>
-              📝 Moje poznámky k žákovi <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
+              Moje poznámky k žákovi <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
             </span>
             <Chevron open={notesOpen} />
           </button>
@@ -407,7 +407,7 @@ export function Grading() {
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
-              <span aria-hidden>✅</span> Co se povedlo
+              Co se povedlo
             </label>
             {selectedLog.audio_url && (
               <TimeButton time={playerTime} onClick={() => insertTime(goodRef.current, feedbackGood, setFeedbackGood)} />
@@ -437,7 +437,7 @@ export function Grading() {
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
-              <span aria-hidden>🎯</span> Co zlepšit
+              Co zlepšit
             </label>
             {selectedLog.audio_url && (
               <TimeButton time={playerTime} onClick={() => insertTime(improveRef.current, feedbackImprove, setFeedbackImprove)} />
@@ -466,26 +466,26 @@ export function Grading() {
         </div>
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>🎵</span> Hodnocení
+            Hodnocení
           </div>
           <RatingNotes rating={rating} onChange={setRating} />
           <p className="text-xs text-text-muted mt-1.5">
             {rating > 0
               ? `Za tuhle nahrávku: ${xpMinutes(selectedLog.duration_seconds)} min × ${rating} = ${xpForLog(rating, selectedLog.duration_seconds)} XP`
-              : 'Vyber 1–5 not. XP žák dostane až po ohodnocení.'}
+              : 'Vyber 1 až 5 not. XP žák dostane až po ohodnocení.'}
             {selectedLog.duration_seconds == null && rating > 0 ? ' (délka neznámá, počítá se 1 min)' : ''}
           </p>
         </div>
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>🎙</span> Hlasový komentář <span className="font-body font-normal text-xs text-text-muted">(nepovinné, do 1 min)</span>
+            Hlasový komentář <span className="font-body font-normal text-xs text-text-muted">(nepovinné, do 1 min)</span>
           </div>
           <VoiceCommentEditor value={voice} onChange={setVoice} />
         </div>
         <FeedbackImagesEditor items={imageItems} onChange={setImageItems} />
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
-            <span aria-hidden>🏅</span> Odznak za tuhle nahrávku
+            Odznak za tuhle nahrávku
           </div>
           <div className="flex flex-wrap gap-2">
             {TEACHER_BADGES.map((badge) => {
@@ -507,7 +507,7 @@ export function Grading() {
           </div>
         </div>
         <p className="hidden md:block text-center text-[11px] text-text-muted">
-          ⌨ Klávesy: <b>1–5</b> noty · <b>mezerník</b> přehrát / pauza · <b>Ctrl+Enter</b> odeslat a další
+          Klávesy: <b>1-5</b> noty · <b>mezerník</b> přehrát / pauza · <b>Ctrl+Enter</b> odeslat a další
         </p>
         <Button className="w-full" disabled={submitting} onClick={handleSubmit}>
           Odeslat hodnocení
@@ -543,8 +543,8 @@ export function Grading() {
               <div className="text-text-muted text-xs">
                 {new Date(log.created_at).toLocaleString('cs-CZ')}
                 {log.teacher_comment ? ' · ohodnoceno' : ' · čeká na hodnocení'}
-                {log.student_note ? ' · 💬 vzkaz' : ''}
-                {pieceOf(log) ? ` · 🎸 ${pieceOf(log)?.title}` : ''}
+                {log.student_note ? ' · vzkaz' : ''}
+                {pieceOf(log) ? ` · ${pieceOf(log)?.title}` : ''}
               </div>
             </button>
           ))}

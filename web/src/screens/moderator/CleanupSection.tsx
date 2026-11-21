@@ -58,7 +58,7 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
       setCandidates(undefined)
       onCleaned()
     } catch (err) {
-      setError(getErrorMessage(err, 'Úklid se nepovedl celý, zkus ho spustit znovu – pokračuje, kde skončil.'))
+      setError(getErrorMessage(err, 'Úklid se nepovedl celý, zkus ho spustit znovu. Pokračuje, kde skončil.'))
     } finally {
       setRunning(false)
     }
@@ -109,7 +109,7 @@ export function CleanupSection({ onCleaned }: { onCleaned: () => void }) {
       </div>
 
       {candidates && candidates.length === 0 && (
-        <p className="text-sm text-text-muted">Nic k úklidu – žádné ohodnocené nahrávky starší než {dateLabel}.</p>
+        <p className="text-sm text-text-muted">Nic k úklidu, žádné ohodnocené nahrávky starší než {dateLabel}.</p>
       )}
       {candidates && candidates.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2">

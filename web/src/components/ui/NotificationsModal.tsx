@@ -93,11 +93,11 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
     const result = await sendTestNotification()
     setNote(
       result.kind === 'sent'
-        ? `Odesláno ${result.devices === 1 ? 'na 1 zařízení' : `na ${result.devices} zařízení`} – mělo by přijít do pár vteřin.`
+        ? `Odesláno ${result.devices === 1 ? 'na 1 zařízení' : `na ${result.devices} zařízení`}. Mělo by přijít do pár vteřin.`
         : result.kind === 'wait'
           ? 'Zkušební jde poslat jednou za 15 vteřin. Zkus to za chvilku.'
           : result.kind === 'none'
-            ? 'Není kam poslat – na tomhle zařízení zapni notifikace (přepínač nahoře).'
+            ? 'Není kam poslat. Na tomhle zařízení zapni notifikace (přepínač nahoře).'
             : 'Odeslání se nepovedlo. Zkontroluj internet a zkus to znovu.',
     )
   }
@@ -144,7 +144,7 @@ export function NotificationsModal({ role, userId, onClose }: NotificationsModal
             <div className="min-w-0">
               <div className="text-sm font-semibold">Na tomhle zařízení</div>
               <div className="text-xs text-text-muted">
-                {enabled ? 'Zapnuté – notifikace sem chodí.' : 'Vypnuté. Zapni je na každém telefonu či počítači zvlášť.'}
+                {enabled ? 'Zapnuté, notifikace sem chodí.' : 'Vypnuté. Zapni je na každém telefonu či počítači zvlášť.'}
               </div>
             </div>
             <Switch checked={!!enabled} onChange={toggleDevice} disabled={busy || enabled === undefined} />

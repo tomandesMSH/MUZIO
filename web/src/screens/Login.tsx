@@ -13,6 +13,7 @@ import { ReportFormModal } from '../components/ui/ReportFormModal'
 import { isTeacherAdmin } from '../lib/roles'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
+import { NavIcon } from '../components/layout/NavIcon'
 
 type Mode = 'login' | 'register' | 'forgot'
 type Portal = 'student' | 'teacher'
@@ -93,7 +94,7 @@ export function Login() {
         className="absolute right-6 top-6 w-9 h-9 rounded-full bg-bg-card shadow-clay-sm flex items-center justify-center text-base"
         onClick={toggleDarkMode}
       >
-        {darkMode ? '☀️' : '🌙'}
+        <NavIcon name={darkMode ? 'sun' : 'moon'} className="w-[18px] h-[18px]" />
       </button>
       <h1 className="text-2xl font-heading font-bold mb-1">Muzio</h1>
       <p className="text-text-muted text-sm">Uč se hudbu hravě, každý den.</p>
@@ -204,7 +205,7 @@ export function Login() {
           <div className="flex items-center justify-between gap-3 -mt-2">
             <label className="flex items-center gap-2 text-xs text-text-muted cursor-pointer">
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-              <span title="Odškrtni na společném počítači ve škole – po zavření prohlížeče se odhlásíš.">
+              <span title="Odškrtni na společném počítači ve škole, po zavření prohlížeče se odhlásíš.">
                 Zapamatuj si mě
               </span>
             </label>
@@ -288,7 +289,7 @@ export function Login() {
           rel="noopener noreferrer"
           className="w-14 h-14 bg-white rounded-lg shadow-clay-sm opacity-90 hover:opacity-100 transition flex items-center justify-center"
           aria-label="Keyboard Utils"
-          title="Keyboard Utils – aplikace na cvičení klavíru"
+          title="Keyboard Utils, aplikace na cvičení klavíru"
         >
           <img src="/keyboard-utils-logo.png" alt="Keyboard Utils" className="h-10 w-10 object-contain" />
         </a>
@@ -307,7 +308,7 @@ export function Login() {
           rel="noopener noreferrer"
           className="w-14 h-14 bg-white rounded-lg shadow-clay-sm opacity-90 hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5"
           aria-label="Dokumentace Muzio"
-          title="Dokumentace – návody pro žáky a učitele"
+          title="Dokumentace: návody pro žáky a učitele"
         >
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="#181717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

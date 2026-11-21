@@ -35,7 +35,7 @@ describe('PreviousAttempts', () => {
       log(1, '2026-11-01T10:00:00Z', { rating: 3, teacher_comment: 'x', feedback_improve: 'V 0:12 zrychluješ' }),
     ]
     render(<PreviousAttempts log={log(3, '2026-11-10T10:00:00Z')} />)
-    fireEvent.click(await screen.findByText('🕘 Další pokusy u tohoto úkolu (2)'))
+    fireEvent.click(await screen.findByText('Další pokusy u tohoto úkolu (2)'))
     expect(screen.getByText(/novější/)).toBeInTheDocument()
     expect(screen.getByText('čeká na hodnocení')).toBeInTheDocument()
     expect(screen.getByLabelText('Hodnocení 3 z 5')).toBeInTheDocument()

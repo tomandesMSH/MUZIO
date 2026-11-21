@@ -70,11 +70,11 @@ export function StudentDashboard() {
 
     if (result.newLevel) {
       setCelebrating(true)
-      show(`LEVEL UP! Teď jsi level ${result.level} 🎉`)
+      show(`Nový level: ${result.level}`)
       setTimeout(() => setCelebrating(false), 2500)
     } else if (result.newBadgeIds.length > 0) {
       setCelebrating(true)
-      show('Nový odznak! 🏅')
+      show('Máš nový odznak')
       setTimeout(() => setCelebrating(false), 2500)
     }
   }, [userId, profile, logsCount.data, weekly.data, awards.loading, awards.data, today, show])
@@ -104,7 +104,7 @@ export function StudentDashboard() {
       <div className="space-y-5">
         {/* Phone: greeting on its own line, the counters in a row under it. */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-xl">Ahoj, {firstName}! 👋</h1>
+          <h1 className="text-xl">Ahoj, {firstName}</h1>
           <div className="flex flex-wrap items-center gap-2">
             <Streak count={profile.streak} freezesAvailable={profile.streak_freezes_available} />
             <XPDisplay xp={profile.xp ?? 0} />
@@ -141,7 +141,7 @@ export function StudentDashboard() {
                 return (
                   <LessonCard
                     key={assignment.id}
-                    icon="🎵"
+                    icon="lessons"
                     title={assignment.title}
                     meta={assignment.description ?? ''}
                     teacherName={assignment.teacher_name}

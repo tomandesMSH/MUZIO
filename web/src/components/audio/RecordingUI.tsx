@@ -93,14 +93,14 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
             <div className="font-heading font-semibold text-sm">Tvoje nahrávka</div>
             <div className="text-xs text-text-muted">{formatTime(takeSeconds)}</div>
           </div>
-          {trim.pending && <p className="text-xs text-text-muted">✂ Hledám ticho na začátku a na konci…</p>}
+          {trim.pending && <p className="text-xs text-text-muted">Hledám ticho na začátku a na konci…</p>}
           {previewUrl && <audio controls src={previewUrl} className="w-full" data-testid="take-preview" />}
           {trim.trimmed && (
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-text-muted">
               <span>
                 {useTrimmed
-                  ? `✂ Ticho uříznuto: ${cutText(trim.trimmed.cutStart, trim.trimmed.cutEnd)}`
-                  : '✂ Posíláš celou nahrávku i s tichem.'}
+                  ? `Ticho uříznuto: ${cutText(trim.trimmed.cutStart, trim.trimmed.cutEnd)}`
+                  : 'Posíláš celou nahrávku i s tichem.'}
               </span>
               <button
                 type="button"
@@ -191,7 +191,7 @@ export function RecordingUI({ onSend, sending, onReviewingChange }: RecordingUIP
             className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary"
             onClick={() => setCheckingMic(true)}
           >
-            🎚 Vyzkoušet mikrofon
+            Vyzkoušet mikrofon
           </button>
         )
       )}

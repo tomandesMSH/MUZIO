@@ -38,6 +38,6 @@ describe('ExportGradesModal', () => {
     const [filename, rows] = m.download.mock.calls[0]
     expect(filename).toMatch(/^znamky-prehled-housle-\d{4}-09-01-\d{4}-01-31\.csv$/)
     expect(rows[1][0]).toBe('Adam')
-    expect(await screen.findByText('Staženo ✓ (0 nahrávek)')).toBeInTheDocument()
+    expect(await screen.findByText('Staženo (0 nahrávek)')).toBeInTheDocument()
   })
 })

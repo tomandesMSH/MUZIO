@@ -86,14 +86,14 @@ export function StudentNotes({ studentId, autoFocus }: { studentId: string; auto
         }}
       />
       <div className="flex justify-between gap-2 text-[11px] text-text-muted" aria-live="polite">
-        <span>🔒 Vidíš jen ty.</span>
+        <span>Vidíš jen ty.</span>
         <span>
           {status === 'saving'
             ? 'Ukládám…'
             : status === 'error'
-              ? 'Neuloženo – zkontroluj připojení'
+              ? 'Neuloženo, zkontroluj připojení'
               : status === 'saved'
-                ? 'Uloženo ✓'
+                ? 'Uloženo'
                 : updatedAt
                   ? `Upraveno ${new Date(updatedAt).toLocaleDateString('cs-CZ')}`
                   : ''}

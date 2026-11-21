@@ -147,7 +147,7 @@ export function notifyPush(event: NotifyEvent): void {
 export function pushErrorText(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err)
   if ((err instanceof DOMException && err.name === 'AbortError') || /push service/i.test(message)) {
-    return 'Prohlížeč se nespojil se svou službou pro notifikace. V Brave zapni Nastavení → Soukromí a zabezpečení → „Použít služby Google pro zasílání push zpráv“ a restartuj ho. Jinak to může blokovat VPN, firewall nebo blokátor reklam – nebo zkus Chrome či Edge.'
+    return 'Prohlížeč se nespojil se svou službou pro notifikace. V Brave zapni Nastavení → Soukromí a zabezpečení → „Použít služby Google pro zasílání push zpráv“ a restartuj ho. Jinak to může blokovat VPN, firewall nebo blokátor reklam. Případně zkus Chrome nebo Edge.'
   }
   return getErrorMessage(err, 'Nepovedlo se to, zkus to znovu.')
 }

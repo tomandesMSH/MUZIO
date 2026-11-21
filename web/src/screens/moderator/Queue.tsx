@@ -151,7 +151,7 @@ export function Queue() {
           {reports.error && (
             <p className="text-sm text-coral-dark">Načtení se nepovedlo: {reports.error.message}</p>
           )}
-          {reports.data?.length === 0 && <p className="text-text-muted text-sm">Žádná otevřená nahlášení. 🎉</p>}
+          {reports.data?.length === 0 && <p className="text-text-muted text-sm">Žádná otevřená nahlášení.</p>}
 
           <div className="space-y-3">
             {reports.data?.map((report) => {

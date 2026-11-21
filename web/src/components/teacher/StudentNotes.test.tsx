@@ -31,7 +31,7 @@ describe('StudentNotes', () => {
       vi.advanceTimersByTime(1000)
     })
     expect(m.save).toHaveBeenCalledWith('t1', 's1', 'Legato, takt 8')
-    expect(screen.getByText('Uloženo ✓')).toBeInTheDocument()
+    expect(screen.getByText('Uloženo')).toBeInTheDocument()
   })
 
   it('saves what is left when closed early', async () => {

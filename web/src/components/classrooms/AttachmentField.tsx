@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { InfoTip } from '../ui/InfoTip'
 import { ATTACHMENT_ACCEPT, KEYBOARD_UTILS_URL, validateAttachment } from '../../lib/attachments'
+import { NavIcon } from '../layout/NavIcon'
 
 interface AttachmentFieldProps {
   file: File | null
@@ -56,7 +57,7 @@ export function AttachmentField({ file, onChange }: AttachmentFieldProps) {
       />
       {file ? (
         <div className="flex items-center gap-2 rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-2.5 text-sm">
-          <span aria-hidden="true">🎼</span>
+          <NavIcon name="lessons" className="w-4 h-4 shrink-0 text-text-muted" />
           <span className="truncate flex-1">{file.name}</span>
           <button type="button" className="text-text-muted text-xs hover:text-text-primary" onClick={clear}>
             Odebrat

@@ -14,6 +14,7 @@ import { fetchStudents } from '../../lib/data/profiles'
 import { fetchStudentLogs } from '../../lib/data/practiceLogs'
 import { fetchPupilAssignments } from '../../lib/data/classrooms'
 import { dueLabel } from '../../lib/dueDate'
+import { NavIcon } from '../../components/layout/NavIcon'
 
 const RECENT = 5
 
@@ -62,7 +63,7 @@ export function StudentCard() {
             <div className="min-w-0 flex-1">
               <h1 className="text-xl truncate">{pupil.full_name}</h1>
               <p className="text-xs text-text-muted">
-                🔥 {pupil.streak} · ✨ {pupil.xp ?? 0} XP · ⭐ {pupil.stars}
+                🔥 {pupil.streak} · {pupil.xp ?? 0} XP · ⭐ {pupil.stars}
                 {lastAt ? ` · naposledy ${new Date(lastAt).toLocaleDateString('cs-CZ')}` : ' · zatím bez nahrávky'}
               </p>
             </div>
@@ -104,7 +105,7 @@ export function StudentCard() {
                 const due = !done && assignment.due_date ? dueLabel(assignment.due_date, today) : undefined
                 return (
                   <li key={assignment.id} className="flex items-center gap-2 rounded-xl bg-bg-card px-3 py-2 shadow-clay-sm">
-                    <span aria-hidden>{done ? '✅' : '⏳'}</span>
+                    <NavIcon name={done ? 'check' : 'clock'} className={`w-4 h-4 shrink-0 ${done ? 'text-coral' : 'text-text-muted'}`} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-heading font-semibold">{assignment.title}</div>
                       <div className="text-[11px] text-text-muted">
@@ -135,7 +136,7 @@ export function StudentCard() {
                       {new Date(log.created_at).toLocaleDateString('cs-CZ')}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-xs text-text-muted">
-                      {log.feedback_good || log.feedback_improve || (log.student_note ? `💬 ${log.student_note}` : '')}
+                      {log.feedback_good || log.feedback_improve || (log.student_note ? `Vzkaz: ${log.student_note}` : '')}
                     </span>
                     {log.teacher_comment && log.rating ? (
                       <span className="shrink-0 text-xs">
@@ -155,7 +156,7 @@ export function StudentCard() {
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-2">
-            📝 Moje poznámky <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
+            Moje poznámky <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
           </h2>
           <StudentNotes studentId={id} />
         </div>

@@ -17,10 +17,9 @@ export function ConnectionProblem() {
 
   return (
     <div className="max-w-sm md:max-w-md mx-auto p-6 pt-20 text-center space-y-5">
-      <div className="text-4xl">📡</div>
       <h1 className="text-xl">Nelze se spojit se serverem</h1>
       <p className="text-text-muted text-sm">
-        Zůstáváš přihlášený(á). Zkontroluj připojení k internetu – zkouším to znovu sám, nebo klikni na tlačítko.
+        Zůstáváš přihlášený(á). Zkontroluj připojení k internetu. Zkouším to znovu sám, nebo klikni na tlačítko.
       </p>
       <Button className="w-full" onClick={refreshProfile}>
         Zkusit znovu

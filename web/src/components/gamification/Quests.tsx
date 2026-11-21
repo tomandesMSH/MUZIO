@@ -11,11 +11,10 @@ export function Quests({ quests }: { quests: QuestResult[] }) {
           <Card key={quest.id} className={quest.completed ? 'opacity-70' : undefined}>
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <span className="text-sm flex items-center gap-1.5">
-                <span aria-hidden>{quest.icon}</span>
                 {quest.label}
               </span>
               <span className="text-xs text-text-muted shrink-0">
-                {quest.completed ? 'Hotovo ✅' : `${quest.current}/${quest.target}`}
+                {quest.completed ? 'Hotovo' : `${quest.current}/${quest.target}`}
               </span>
             </div>
             <Progress value={quest.target === 0 ? 1 : quest.current / quest.target} />

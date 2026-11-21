@@ -41,12 +41,12 @@ function Attempt({ log, newer }: { log: PracticeLog; newer: boolean }) {
             <RecordingAudio src={log.audio_url} ref={player} />
             {log.feedback_good && (
               <p className="whitespace-pre-wrap break-words">
-                ✅ <TimedText text={log.feedback_good} onSeek={seek} />
+                <TimedText text={log.feedback_good} onSeek={seek} />
               </p>
             )}
             {log.feedback_improve && (
               <p className="whitespace-pre-wrap break-words">
-                🎯 <TimedText text={log.feedback_improve} onSeek={seek} />
+                <TimedText text={log.feedback_improve} onSeek={seek} />
               </p>
             )}
           </div>
@@ -72,7 +72,7 @@ export function PreviousAttempts({ log }: { log: PracticeLog }) {
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-sm font-heading font-semibold"
       >
-        <span>🕘 Další pokusy u tohoto úkolu ({list.length})</span>
+        <span>Další pokusy u tohoto úkolu ({list.length})</span>
         <Chevron open={open} />
       </button>
       <Collapse open={open}>

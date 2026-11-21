@@ -39,7 +39,7 @@ export function ChoosePanel() {
           className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"
           onClick={() => navigate('/moderator', { replace: true })}
         >
-          <div className="font-heading font-semibold">🛡️ Admin panel</div>
+          <div className="font-heading font-semibold">Admin panel</div>
           <div className="text-text-muted text-xs mt-1">
             Všichni uživatelé, resety hesel, bany, nahlášený obsah a nahrávky.
           </div>
@@ -49,7 +49,7 @@ export function ChoosePanel() {
           className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"
           onClick={() => navigate('/teacher', { replace: true })}
         >
-          <div className="font-heading font-semibold">🎓 Učitelský panel</div>
+          <div className="font-heading font-semibold">Učitelský panel</div>
           <div className="text-text-muted text-xs mt-1">Žáci, učebny, zadání a hodnocení nahrávek.</div>
         </button>
       </div>

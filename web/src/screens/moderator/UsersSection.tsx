@@ -97,7 +97,7 @@ export function UsersSection() {
       title: toTeacher ? 'Změnit roli na učitele?' : 'Změnit roli na žáka?',
       message: toTeacher
         ? `„${user.full_name}“ bude učitel (rovnou ověřený) a odejde ze tříd, ve kterých je jako žák. Nahrávky mu zůstanou.`
-        : `„${user.full_name}“ bude žák${user.is_moderator ? ' a přijde o práva admina' : ''}. Učitel, který má třídy, se změnit nedá – nejdřív třídy smaž nebo předej.`,
+        : `„${user.full_name}“ bude žák${user.is_moderator ? ' a přijde o práva admina' : ''}. Učitel, který má třídy, se změnit nedá. Nejdřív třídy smaž nebo předej.`,
       confirmLabel: toTeacher ? 'Změnit na učitele' : 'Změnit na žáka',
       run: () => setUserRole(user.id, toTeacher ? 'teacher' : 'student'),
       success: toTeacher ? `„${user.full_name}“ je teď učitel` : `„${user.full_name}“ je teď žák`,
@@ -125,7 +125,7 @@ export function UsersSection() {
       message:
         `„${user.full_name}“ se smaže úplně: přihlášení, nahrávky, hodnocení, XP, hvězdy, odznaky a členství ve třídách. ` +
         (user.role === 'teacher'
-          ? 'Učitel, který má třídy, smazat nejde – nejdřív je předej nebo smaž v záložce Třídy. Hodnocení a odznaky, které dal žákům, zůstanou. '
+          ? 'Učitel, který má třídy, smazat nejde. Nejdřív je předej nebo smaž v záložce Třídy. Hodnocení a odznaky, které dal žákům, zůstanou. '
           : '') +
         'Nejde to vrátit.',
       confirmLabel: 'Smazat natrvalo',
@@ -257,7 +257,7 @@ export function UsersSection() {
                 </div>
                 {user.role === 'student' && (
                   <div className="text-text-muted text-xs">
-                    🔥 {user.streak} · ✨ {user.xp ?? 0} XP (level {computeLevel(user.xp ?? 0).level}) · ⭐ {user.stars}
+                    🔥 {user.streak} · {user.xp ?? 0} XP (level {computeLevel(user.xp ?? 0).level}) · ⭐ {user.stars}
                   </div>
                 )}
               </div>
@@ -359,7 +359,7 @@ export function UsersSection() {
                       aria-label={`Přidat hvězdu: ${user.full_name}`}
                       disabled={busy === user.id}
                       onClick={() =>
-                        runAction(user.id, () => adjustStudentStars(user.id, 1).then(() => {}), `⭐ Hvězda pro ${user.full_name}`)
+                        runAction(user.id, () => adjustStudentStars(user.id, 1).then(() => {}), `Hvězda pro ${user.full_name}`)
                       }
                     >
                       ⭐ +

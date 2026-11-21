@@ -100,7 +100,7 @@ export function VoiceCommentEditor({ value, onChange }: { value: VoiceCommentSta
             onClick={() => void start()}
             className="rounded-full bg-bg-card-alt px-3 py-1.5 text-xs font-heading font-semibold shadow-clay-sm hover:text-coral-dark"
           >
-            🎙 Nahrát hlasový komentář
+            Nahrát hlasový komentář
           </button>
         ) : (
           <>

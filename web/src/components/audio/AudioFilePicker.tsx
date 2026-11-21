@@ -105,7 +105,6 @@ export function AudioFilePicker({ disabled, onSend }: AudioFilePickerProps) {
           className="flex items-center gap-2 text-sm text-text-muted underline underline-offset-2 hover:text-text-primary disabled:opacity-40"
           onClick={() => inputRef.current?.click()}
         >
-          <span aria-hidden="true">✉</span>
           Odeslat nahrávku ze souboru
         </button>
       )}

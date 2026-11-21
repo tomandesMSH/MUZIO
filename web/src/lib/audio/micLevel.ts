@@ -24,6 +24,6 @@ export function micVerdict(recentPeaksDb: number[], minSamples = 10): MicVerdict
 export const VERDICT_TEXT: Record<MicVerdict, string> = {
   waiting: 'Zahraj pár tónů tak nahlas, jak budeš hrát…',
   quiet: 'Je tě slabě slyšet. Přibliž telefon k nástroji nebo zesil hru.',
-  good: 'Zvuk je v pořádku 👍 Můžeš nahrávat.',
+  good: 'Zvuk je v pořádku, můžeš nahrávat.',
   loud: 'Zvuk se přebíjí (zkresluje). Oddal telefon od nástroje.',
 }

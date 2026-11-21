@@ -58,7 +58,7 @@ export function EditAccountModal({ user, onClose, onSaved }: EditAccountModalPro
         </label>
         {usernameChanged && (
           <p className="text-xs rounded-xl bg-coral-tint text-coral-dark p-3">
-            Pak se bude přihlašovat novým jménem <strong className="font-mono">{username.trim().toLowerCase()}</strong> –
+            Pak se bude přihlašovat novým jménem <strong className="font-mono">{username.trim().toLowerCase()}</strong>,
             nezapomeň mu to říct. Heslo zůstává stejné.
           </p>
         )}

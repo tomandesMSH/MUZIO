@@ -68,7 +68,7 @@ export function describeAction(entry: Pick<AdminAction, 'action' | 'details'>): 
     case 'move_student':
       return d.from ? `přesunul(a) žáka: ${d.from} → ${d.to}` : `přidal(a) žáka do třídy ${d.to}`
     case 'transfer_classroom':
-      return `předal(a) třídu ${d.classroom} (od: ${d.from ?? '–'})`
+      return `předal(a) třídu ${d.classroom} (od: ${d.from ?? '-'})`
     case 'remove_from_classroom':
       return `odebral(a) žáka ze třídy ${d.classroom ?? ''}`.trim()
     case 'cleanup_recordings':

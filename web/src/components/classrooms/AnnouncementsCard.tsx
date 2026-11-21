@@ -40,7 +40,7 @@ export function AnnouncementsCard() {
         <div key={a.id} className="rounded-2xl border-l-4 border-coral bg-bg-card shadow-clay-sm p-3.5" role="status">
           <div className="flex items-baseline justify-between gap-2 text-xs text-text-muted">
             <span className="font-heading font-semibold text-text-primary">
-              📢 {teachers.data?.get(a.teacher_id) ?? 'Oznámení'}
+              {teachers.data?.get(a.teacher_id) ?? 'Oznámení'}
               {a.classroom_name ? ` · ${a.classroom_name}` : ''}
             </span>
             <span className="shrink-0">{new Date(a.created_at).toLocaleDateString('cs-CZ')}</span>
@@ -52,7 +52,7 @@ export function AnnouncementsCard() {
               className="text-xs font-heading font-semibold text-coral-dark"
               onClick={() => dismiss(a.id)}
             >
-              Rozumím ✓
+              Rozumím
             </button>
           </div>
         </div>

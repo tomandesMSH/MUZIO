@@ -11,7 +11,7 @@ export interface CommentSnippet {
 
 // Offered until the teacher saves phrases of their own for that field.
 export const DEFAULT_SNIPPETS: Record<SnippetKind, string[]> = {
-  good: ['Krásný přednes', 'Čistě zahrané', 'Pěkně v rytmu', 'Velký pokrok!'],
+  good: ['Krásný přednes', 'Čistě zahrané', 'Pěkně v rytmu', 'Velký pokrok'],
   improve: ['Pozor na rytmus', 'Hlídej prstoklad', 'Zpomal a hraj rovnoměrně', 'Víc dynamiky (p / f)'],
 }
 

@@ -16,8 +16,8 @@ function loadA4(): number {
 }
 
 function hint(cents: number): string {
-  if (Math.abs(cents) <= IN_TUNE) return 'čistě ✓'
-  return cents < 0 ? `nízko o ${-cents} centů – zvyš ↑` : `vysoko o ${cents} centů – sniž ↓`
+  if (Math.abs(cents) <= IN_TUNE) return 'čistě'
+  return cents < 0 ? `nízko o ${-cents} centů, zvyš ↑` : `vysoko o ${cents} centů, sniž ↓`
 }
 
 // Tuner: listens through the microphone and shows the nearest note and how
@@ -100,7 +100,7 @@ export function Tuner() {
             !note ? 'text-text-muted' : inTune ? 'text-green-600 dark:text-green-400' : 'text-text-primary'
           }`}
         >
-          {note ? note.czech : '–'}
+          {note ? note.czech : '-'}
         </div>
         <div className="mt-1 text-xs text-text-muted tabular-nums">
           {note && hz

@@ -15,7 +15,7 @@ export function RecordingAudio({
   if (!src) {
     return (
       <p className="rounded-xl bg-bg-card-alt px-3 py-2 text-xs text-text-muted">
-        🗄️ Zvuk nahrávky byl archivován, aby se uvolnilo místo. Hodnocení zůstává.
+        Zvuk nahrávky byl archivován, aby se uvolnilo místo. Hodnocení zůstává.
       </p>
     )
   }

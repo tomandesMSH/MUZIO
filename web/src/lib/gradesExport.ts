@@ -40,7 +40,7 @@ const minutes = (seconds: number) => Math.round((seconds / 60) * 10) / 10
 
 // One row per pupil: recordings, graded, average notes, minutes, last practice.
 export function summaryRows(pupils: ExportPupil[], logs: PracticeLog[]): Cell[][] {
-  const rows: Cell[][] = [['Žák', 'Nahrávek', 'Ohodnoceno', 'Průměr not (1–5)', 'Minut nahráno', 'Poslední nahrávka']]
+  const rows: Cell[][] = [['Žák', 'Nahrávek', 'Ohodnoceno', 'Průměr not (1-5)', 'Minut nahráno', 'Poslední nahrávka']]
   const sorted = [...pupils].sort((a, b) => a.full_name.localeCompare(b.full_name, 'cs'))
   for (const pupil of sorted) {
     const own = logs.filter((l) => l.user_id === pupil.id)
@@ -60,7 +60,7 @@ export function detailRows(
   titles: Map<string, string>,
   pieces: Map<string, string>,
 ): Cell[][] {
-  const rows: Cell[][] = [['Žák', 'Datum', 'Úkol / skladba', 'Noty (1–5)', 'Délka (min)', 'Co se povedlo', 'Co zlepšit']]
+  const rows: Cell[][] = [['Žák', 'Datum', 'Úkol / skladba', 'Noty (1-5)', 'Délka (min)', 'Co se povedlo', 'Co zlepšit']]
   const names = new Map(pupils.map((p) => [p.id, p.full_name]))
   const sorted = logs
     .filter((l) => names.has(l.user_id))
@@ -72,7 +72,7 @@ export function detailRows(
     const what = log.assignment_id
       ? (titles.get(log.assignment_id) ?? 'úkol')
       : log.own_piece_id
-        ? `🎸 ${pieces.get(log.own_piece_id) ?? 'vlastní skladba'}`
+        ? `${pieces.get(log.own_piece_id) ?? 'vlastní skladba'}`
         : 'volné cvičení'
     rows.push([
       names.get(log.user_id),

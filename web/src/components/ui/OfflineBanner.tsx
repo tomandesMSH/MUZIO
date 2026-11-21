@@ -20,7 +20,7 @@ export function OfflineBanner() {
       className="fixed inset-x-0 top-0 z-50 bg-ink px-4 py-1.5 text-center text-xs text-cream"
       style={{ paddingTop: 'max(0.375rem, env(safe-area-inset-top))' }}
     >
-      📡 Jsi offline. Nahrávky se uloží v zařízení a pošleš je, až budeš online.
+      Jsi offline. Nahrávky se uloží v zařízení a pošleš je, až budeš online.
     </div>
   )
 }

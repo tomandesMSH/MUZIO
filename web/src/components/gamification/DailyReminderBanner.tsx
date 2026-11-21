@@ -6,9 +6,9 @@ interface DailyReminderBannerProps {
 export function DailyReminderBanner({ playedToday, onStart }: DailyReminderBannerProps) {
   return (
     <div className="rounded-3xl bg-coral-dark text-cream p-5 shadow-clay">
-      <div className="text-[11px] tracking-wider opacity-85 mb-1.5">DENNÍ ÚKOL</div>
+      <div className="text-xs opacity-85 mb-1.5">Denní úkol</div>
       <div className="font-heading font-semibold text-base mb-3">
-        {playedToday ? 'Dnešní cvičení splněno! 🎉' : 'Zahraj dnešní cvičení'}
+        {playedToday ? 'Dnešní cvičení máš splněné' : 'Zahraj dnešní cvičení'}
       </div>
       <div className="h-2 rounded-full bg-white/25 overflow-hidden mb-2">
         <div

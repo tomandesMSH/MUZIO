@@ -81,7 +81,7 @@ describe('UsersSection - roles and admin rights', () => {
   it('shows the counters of a pupil and gives a star', async () => {
     render(<UsersSection />)
     const pupil = await card('Pavla Žákyně')
-    expect(within(pupil).getByText(/✨ 0 XP \(level 1\) · ⭐ 0/)).toBeInTheDocument()
+    expect(within(pupil).getByText(/0 XP \(level 1\) · ⭐ 0/)).toBeInTheDocument()
     expect(within(pupil).getByRole('button', { name: 'Odebrat hvězdu: Pavla Žákyně' })).toBeDisabled()
     fireEvent.click(within(pupil).getByRole('button', { name: 'Přidat hvězdu: Pavla Žákyně' }))
     await waitFor(() => expect(adjustStudentStars).toHaveBeenCalledWith('p1', 1))

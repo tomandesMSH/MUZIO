@@ -47,7 +47,7 @@ export function ClassAnnouncements({ classroomId, teacherId }: { classroomId: st
 
   return (
     <div>
-      <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">📢 Oznámení pro třídu</h2>
+      <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Oznámení pro třídu</h2>
       <form onSubmit={send} className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5 space-y-2">
         <textarea
           aria-label="Text oznámení"

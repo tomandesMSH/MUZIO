@@ -33,7 +33,7 @@ export function BadgeTile({ badge }: { badge: BadgeResult }) {
         <div className="text-[11px] leading-snug text-text-muted">{badge.description}</div>
         <div className="text-[11px] font-semibold mt-0.5 text-text-muted">
           {badge.unlocked
-            ? `✓ Získáno${badge.count && badge.count > 1 ? ` ×${badge.count}` : ''}`
+            ? `Získáno${badge.count && badge.count > 1 ? ` ×${badge.count}` : ''}`
             : badge.progressLabel}
         </div>
       </div>

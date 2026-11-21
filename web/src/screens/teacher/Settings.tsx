@@ -38,7 +38,7 @@ export function Settings() {
           <h2 className="text-sm font-heading font-semibold mb-1">Aplikace</h2>
           <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
-          <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
+          <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
         </div>
 
         <div>

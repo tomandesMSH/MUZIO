@@ -53,7 +53,7 @@ export function MicCheck({ onClose }: { onClose: () => void }) {
   return (
     <div className="w-full rounded-2xl bg-bg-card shadow-clay-sm p-4 space-y-2.5">
       <div className="flex items-center justify-between">
-        <span className="font-heading font-semibold text-sm">🎚 Test mikrofonu</span>
+        <span className="font-heading font-semibold text-sm">Test mikrofonu</span>
         <button type="button" className="text-xs text-text-muted underline underline-offset-2" onClick={onClose}>
           Hotovo
         </button>

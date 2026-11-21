@@ -59,7 +59,7 @@ export function Settings() {
       link.click()
       link.remove()
       setTimeout(() => URL.revokeObjectURL(url), 5000)
-      show('Data jsou stažená ✓')
+      show('Data jsou stažená')
     } catch (err) {
       show(getErrorMessage(err, 'Stažení dat se nepovedlo, zkus to znovu.'))
     } finally {
@@ -92,7 +92,7 @@ export function Settings() {
           <h2 className="text-sm font-heading font-semibold mb-1">Aplikace</h2>
           <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
-          <InstallAppRow onInstalled={() => show('Muzio je na ploše 🎉')} />
+          <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
         </div>
 
         <div>

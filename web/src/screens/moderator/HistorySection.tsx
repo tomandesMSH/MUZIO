@@ -37,7 +37,7 @@ export function HistorySection() {
               {describeAction(entry)}
               {entry.target_user_id || entry.target_name ? (
                 <>
-                  {' – '}
+                  {' → '}
                   <span className="font-heading font-semibold">{entry.target_name ?? 'smazaný účet'}</span>
                 </>
               ) : null}

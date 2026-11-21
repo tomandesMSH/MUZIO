@@ -6,6 +6,7 @@ import { AttachmentField } from './AttachmentField'
 import { DueDateField } from './DueDateField'
 import type { Assignment } from '../../lib/data/types'
 import type { AssignmentUpdate } from '../../lib/data/classrooms'
+import { NavIcon } from '../layout/NavIcon'
 
 interface EditAssignmentModalProps {
   assignment: Assignment
@@ -67,7 +68,7 @@ export function EditAssignmentModal({ assignment, submitting, error, onClose, on
           <div>
             <div className="text-xs font-semibold text-text-muted mb-1.5">Noty pro Keyboard Utils</div>
             <div className="flex items-center gap-2 rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-2.5 text-sm">
-              <span aria-hidden="true">🎼</span>
+              <NavIcon name="lessons" className="w-4 h-4 shrink-0 text-text-muted" />
               <span className="truncate flex-1">{assignment.attachment_name}</span>
               <button type="button" className="text-text-muted text-xs hover:text-text-primary" onClick={() => setFileMode('replace')}>
                 Nahradit

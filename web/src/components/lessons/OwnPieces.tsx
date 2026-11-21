@@ -66,7 +66,7 @@ export function OwnPieces({ pieces, onAdd, onArchive, onOpen }: OwnPiecesProps) 
         <form onSubmit={submit} className="mb-2.5 rounded-2xl bg-bg-card shadow-clay-sm p-3.5 space-y-2.5">
           <Input
             aria-label="Název skladby"
-            placeholder="Název, např. Smells Like Teen Spirit – intro"
+            placeholder="Název, např. Smells Like Teen Spirit, intro"
             value={title}
             maxLength={OWN_PIECE_TITLE_MAX}
             onChange={(e) => setTitle(e.target.value)}
@@ -75,7 +75,7 @@ export function OwnPieces({ pieces, onAdd, onArchive, onOpen }: OwnPiecesProps) 
           />
           <Input
             aria-label="Odkaz (nepovinné)"
-            placeholder="Odkaz (nepovinné) – YouTube, noty…"
+            placeholder="Odkaz na YouTube nebo noty (nepovinné)"
             value={link}
             onChange={(e) => setLink(e.target.value)}
             inputMode="url"
@@ -103,7 +103,7 @@ export function OwnPieces({ pieces, onAdd, onArchive, onOpen }: OwnPiecesProps) 
         {pieces.map((piece) => (
           <LessonCard
             key={piece.id}
-            icon="🎸"
+            icon="note"
             title={piece.title}
             meta={piece.link ? hostOf(piece.link) : 'Vlastní skladba'}
             badge={{ label: 'Nahrát', tone: 'xp' }}

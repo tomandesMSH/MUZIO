@@ -117,7 +117,7 @@ export function TeacherDashboard() {
             </div>
           )}
           {pending.loading && !pending.data && <Skeleton rows={2} />}
-          {filteredPending?.length === 0 && <p className="text-text-muted text-sm">Vše zkontrolováno 🎉</p>}
+          {filteredPending?.length === 0 && <p className="text-text-muted text-sm">Vše zkontrolováno</p>}
           <div className="space-y-2">
             {filteredPending?.map((log) => (
               <button
@@ -135,7 +135,7 @@ export function TeacherDashboard() {
                         ? ` · ${context.data.titles.get(log.assignment_id)}`
                         : ''}
                       {log.own_piece_id && pieces.data?.get(log.own_piece_id)
-                        ? ` · 🎸 ${pieces.data.get(log.own_piece_id)?.title}`
+                        ? ` · ${pieces.data.get(log.own_piece_id)?.title}`
                         : ''}
                     </div>
                   </div>

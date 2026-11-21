@@ -48,7 +48,7 @@ export function Classes() {
       await joinClassroom(code)
       setCode('')
       classrooms.refetch()
-      show('Jsi ve třídě 🎉')
+      show('Jsi ve třídě')
     } catch (err) {
       setError(getErrorMessage(err, 'Připojení se nepovedlo. Zkontroluj kód.'))
     } finally {

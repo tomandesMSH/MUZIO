@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Badge } from '../ui/Badge'
 import type { DueLabel } from '../../lib/dueDate'
+import { NavIcon, type NavIconName } from '../layout/NavIcon'
 
 const DUE_CLASS: Record<DueLabel['tone'], string> = {
   late: 'text-coral-dark font-semibold',
@@ -10,7 +11,7 @@ const DUE_CLASS: Record<DueLabel['tone'], string> = {
 }
 
 interface LessonCardProps {
-  icon: string
+  icon: NavIconName
   title: string
   meta: string
   badge: { label: string; tone: 'success' | 'pending' | 'xp' }
@@ -32,8 +33,8 @@ export function LessonCard({ icon, title, meta, badge, teacherName, due, onClick
         disabled={!onClick}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 shrink-0 rounded-lg bg-bg-card-alt shadow-clay-sm flex items-center justify-center text-lg">
-            {icon}
+          <div className="w-10 h-10 shrink-0 rounded-lg bg-bg-card-alt shadow-clay-sm flex items-center justify-center text-text-muted">
+            <NavIcon name={icon} className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="font-heading font-semibold text-sm truncate">{title}</div>

@@ -27,7 +27,7 @@ describe('VoiceCommentEditor', () => {
 
   it('starts recording from the button', () => {
     render(<VoiceCommentEditor value={{ kind: 'none' }} onChange={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: '🎙 Nahrát hlasový komentář' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Nahrát hlasový komentář' }))
     expect(rec.start).toHaveBeenCalled()
   })
 

@@ -36,9 +36,6 @@ export class ScreenErrorBoundary extends Component<{ children: ReactNode }, Stat
     const offline = typeof navigator !== 'undefined' && !navigator.onLine
     return (
       <div className="mx-auto max-w-sm p-6 pt-16 text-center space-y-3">
-        <div className="text-3xl" aria-hidden>
-          {offline ? '📡' : '🔄'}
-        </div>
         <h1 className="text-lg font-heading font-semibold">
           {offline ? 'Tuhle stránku teď nejde otevřít' : 'Něco se nepovedlo načíst'}
         </h1>

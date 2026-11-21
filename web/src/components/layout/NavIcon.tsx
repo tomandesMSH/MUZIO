@@ -1,8 +1,57 @@
-// Line icons for the navigation (bottom bar and sidebar) - one stroke style,
-// they take the text colour, so active/inactive is just the colour change.
-export type NavIconName = 'home' | 'lessons' | 'recordings' | 'profile' | 'students' | 'classrooms' | 'settings' | 'docs'
+// Line icons for the navigation (bottom bar and sidebar) and the few other
+// places that need an icon - one stroke style, they take the text colour, so
+// active/inactive is just the colour change.
+export type NavIconName =
+  | 'home'
+  | 'lessons'
+  | 'recordings'
+  | 'profile'
+  | 'students'
+  | 'classrooms'
+  | 'settings'
+  | 'docs'
+  | 'note'
+  | 'search'
+  | 'sun'
+  | 'moon'
+  | 'pencil'
+  | 'check'
+  | 'clock'
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // A single eighth note.
+  note: (
+    <>
+      <circle cx="8" cy="17.5" r="2.75" />
+      <path d="M10.75 17.5V4l7 2.5" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>
+  ),
+  moon: <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />,
+  pencil: (
+    <>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+      <path d="m15 5 3 3" />
+    </>
+  ),
+  check: <path d="m5 12.5 4.5 4.5L19 7" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
   home: (
     <>
       <path d="M3 10.5 12 3l9 7.5" />

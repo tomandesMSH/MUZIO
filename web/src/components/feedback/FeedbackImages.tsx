@@ -10,7 +10,7 @@ export function FeedbackImages({ paths }: { paths: string[] }) {
   return (
     <div>
       <div className="font-heading font-semibold text-xs flex items-center gap-1.5 mb-1">
-        <span aria-hidden>🖼️</span> Obrázky od učitele
+        Obrázky od učitele
       </div>
       <div className="flex flex-wrap gap-2">
         {paths.map((path, index) => {

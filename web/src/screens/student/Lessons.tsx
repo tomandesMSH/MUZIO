@@ -69,8 +69,7 @@ export function Lessons() {
 
         {assignments.data && assignments.data.length > 0 && pending.length === 0 && (
           <div className="rounded-2xl bg-coral-dark text-cream p-5 shadow-clay text-center">
-            <div className="text-2xl mb-1">🎉</div>
-            <div className="font-heading font-semibold">Výborná práce, máš splněno!</div>
+            <div className="font-heading font-semibold">Všechny úkoly máš splněné</div>
           </div>
         )}
 
@@ -81,7 +80,7 @@ export function Lessons() {
               {pending.map((assignment) => (
                 <LessonCard
                   key={assignment.id}
-                  icon="🎵"
+                  icon="lessons"
                   title={assignment.title}
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}
@@ -114,7 +113,7 @@ export function Lessons() {
               {done.map((assignment) => (
                 <LessonCard
                   key={assignment.id}
-                  icon="🎵"
+                  icon="lessons"
                   title={assignment.title}
                   meta={assignment.description ?? ''}
                   teacherName={assignment.teacher_name}

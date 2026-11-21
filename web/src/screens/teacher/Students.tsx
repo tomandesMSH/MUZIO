@@ -19,6 +19,7 @@ import { useToast } from '../../lib/useToast'
 import { isReauthed } from '../../lib/reauth'
 import { getErrorMessage } from '../../lib/errors'
 import type { Profile } from '../../lib/data/types'
+import { NavIcon } from '../../components/layout/NavIcon'
 
 export function Students() {
   const navigate = useNavigate()
@@ -57,7 +58,7 @@ export function Students() {
     setStarring(student.id)
     try {
       await adjustStudentStars(student.id, delta)
-      show(delta > 0 ? `⭐ Hvězda pro ${student.full_name}` : 'Hvězda odebrána')
+      show(delta > 0 ? `Hvězda pro ${student.full_name}` : 'Hvězda odebrána')
       students.refetch()
     } catch (err) {
       show(getErrorMessage(err, 'Změna hvězd se nepovedla, zkus to znovu.'))
@@ -118,7 +119,7 @@ export function Students() {
       {notesFor && (
         <Modal open onClose={() => setNotesFor(undefined)}>
           <div className="space-y-3">
-            <h2 className="font-heading font-semibold text-lg">📝 Poznámky – {notesFor.full_name}</h2>
+            <h2 className="font-heading font-semibold text-lg">Poznámky: {notesFor.full_name}</h2>
             <StudentNotes studentId={notesFor.id} autoFocus />
             <Button variant="ghost" className="w-full" onClick={() => setNotesFor(undefined)}>
               Hotovo
@@ -218,7 +219,7 @@ export function Students() {
                   <div className="min-w-0">
                     <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
                     <div className="text-text-muted text-xs">
-                      🔥 {student.streak} · ✨ {student.xp ?? 0} XP
+                      🔥 {student.streak} · {student.xp ?? 0} XP
                     </div>
                   </div>
                 </button>
@@ -230,7 +231,7 @@ export function Students() {
                     title="Moje poznámky k žákovi"
                     onClick={() => setNotesFor(student)}
                   >
-                    📝
+                    <NavIcon name="pencil" className="w-4 h-4" />
                   </Button>
                   {renderResetButton(student)}
                   {renderDeleteButton(student)}
