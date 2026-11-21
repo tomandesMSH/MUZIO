@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { setStyleChoice, setThemeChoice, useTheme, type StyleChoice, type ThemeChoice } from '../../lib/theme'
+import { CustomStyleModal } from './CustomStyleModal'
 
 const OPTIONS: { id: ThemeChoice; label: string }[] = [
   { id: 'light', label: 'Světlý' },
@@ -32,27 +34,36 @@ export function ThemePicker() {
 const STYLE_OPTIONS: { id: StyleChoice; label: string }[] = [
   { id: 'classic', label: 'Classic' },
   { id: 'modern', label: 'Moderní' },
+  { id: 'custom', label: 'Custom' },
 ]
 
-// Settings > Styl: the original look or the quieter modern one.
+// Settings > Styl: the original look, the quieter modern one, or the
+// person's own ("Custom" opens the window to set it up).
 export function StylePicker() {
   const { style } = useTheme()
+  const [customOpen, setCustomOpen] = useState(false)
   return (
-    <div className="flex gap-1 rounded-xl bg-bg-card-alt p-1 shadow-clay-press" role="radiogroup" aria-label="Styl">
-      {STYLE_OPTIONS.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          role="radio"
-          aria-checked={style === o.id}
-          onClick={() => setStyleChoice(o.id)}
-          className={`rounded-lg px-2.5 py-1 text-xs font-heading font-semibold transition ${
-            style === o.id ? 'bg-bg-card text-text-primary shadow-clay-sm' : 'text-text-muted hover:text-text-primary'
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="flex gap-1 rounded-xl bg-bg-card-alt p-1 shadow-clay-press" role="radiogroup" aria-label="Styl">
+        {STYLE_OPTIONS.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={style === o.id}
+            onClick={() => {
+              setStyleChoice(o.id)
+              if (o.id === 'custom') setCustomOpen(true)
+            }}
+            className={`rounded-lg px-2.5 py-1 text-xs font-heading font-semibold transition ${
+              style === o.id ? 'bg-bg-card text-text-primary shadow-clay-sm' : 'text-text-muted hover:text-text-primary'
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      {customOpen && <CustomStyleModal open onClose={() => setCustomOpen(false)} />}
+    </>
   )
 }
