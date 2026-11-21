@@ -10,6 +10,7 @@ vi.mock('react-router-dom', async (orig) => ({
 }))
 vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 't1' } }) }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
+vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameDays: async () => ['2026-11-20', '2026-11-21'] }))
 vi.mock('../../components/teacher/StudentNotes', () => ({ StudentNotes: () => <div>poznámky</div> }))
 vi.mock('../../components/classrooms/AssignToStudentModal', () => ({ AssignToStudentModal: () => null }))
 vi.mock('../../lib/data/profiles', () => ({
@@ -46,6 +47,13 @@ describe('StudentCard', () => {
     expect(screen.getByText('Hezky')).toBeInTheDocument()
     expect(screen.getByText('Všechny nahrávky (1 čeká)')).toBeInTheDocument()
     expect(screen.getByText('poznámky')).toBeInTheDocument()
+  })
+
+  it('shows the flames and world of the pupil', async () => {
+    renderCard()
+    expect(await screen.findByText('Plamínky a svět')).toBeInTheDocument()
+    expect(screen.getByText(/Celkem 2 plamínky/)).toBeInTheDocument()
+    expect(screen.getByText('Hudební zahrádka')).toBeInTheDocument()
   })
 
   it('opens a recording for grading', async () => {

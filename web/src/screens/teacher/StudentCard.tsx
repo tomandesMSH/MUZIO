@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { PupilFlames } from '../../components/teacher/PupilFlames'
+import { fetchPupilFlameDays } from '../../lib/data/pupilFlames'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
 import { Avatar } from '../../components/ui/Avatar'
@@ -30,6 +32,7 @@ export function StudentCard() {
     () => (profile ? fetchPupilAssignments(profile.id, id).catch(() => []) : Promise.resolve([])),
     [profile?.id, id],
   )
+  const flameDays = useQuery(() => fetchPupilFlameDays(id).catch(() => null), [id])
   const [assignOpen, setAssignOpen] = useState(false)
 
   const pupil = students.data?.find((s) => s.id === id)
@@ -92,6 +95,13 @@ export function StudentCard() {
             Vidíš nahrávky k úkolům a vlastním skladbám. Samostatné cvičení jen tehdy, když ho žák sdílí.
           </p>
         </div>
+
+        {pupil && flameDays.data && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold mb-2">Plamínky a svět</h2>
+            <PupilFlames world={pupil.world} dayKeys={flameDays.data} />
+          </div>
+        )}
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
