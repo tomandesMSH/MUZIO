@@ -12,6 +12,7 @@ import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
 import { BugReportModal } from '../../components/ui/BugReportModal'
+import { WhatsNewModal } from '../../components/ui/WhatsNew'
 import { useToast } from '../../lib/useToast'
 
 // The teacher's settings: look, notifications, password, moderation, help.
@@ -20,6 +21,7 @@ export function Settings() {
   const { profile } = useAuth()
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [bugOpen, setBugOpen] = useState(false)
+  const [newsOpen, setNewsOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const { message, show } = useToast()
 
@@ -58,6 +60,8 @@ export function Settings() {
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nápověda</h2>
           <SettingsRow label="Dokumentace" onClick={openDocs} />
+          <SettingsRow label="Co je nového" onClick={() => setNewsOpen(true)} />
+          <WhatsNewModal role="teacher" open={newsOpen} onClose={() => setNewsOpen(false)} />
           <SettingsRow label="Nahlásit chybu" onClick={() => setBugOpen(true)} />
           <BugReportModal open={bugOpen} onClose={() => setBugOpen(false)} />
         </div>
