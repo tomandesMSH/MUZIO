@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Badge } from '../ui/Badge'
 import type { DueLabel } from '../../lib/dueDate'
 import { NavIcon, type NavIconName } from '../layout/NavIcon'
+import { starsLabel } from '../classrooms/StarsRewardField'
 
 const DUE_CLASS: Record<DueLabel['tone'], string> = {
   late: 'text-coral-dark font-semibold',
@@ -22,9 +23,11 @@ interface LessonCardProps {
   // Under the card's main row, outside its button (e.g. a file to download -
   // a link can't sit inside a button).
   footer?: ReactNode
+  // Stars for completing it (migration 0058), shown when > 0.
+  reward?: number
 }
 
-export function LessonCard({ icon, title, meta, badge, teacherName, due, onClick, footer }: LessonCardProps) {
+export function LessonCard({ icon, title, meta, badge, teacherName, due, onClick, footer, reward = 0 }: LessonCardProps) {
   return (
     <div className="rounded-2xl bg-bg-card shadow-clay-sm">
       <button
@@ -41,6 +44,7 @@ export function LessonCard({ icon, title, meta, badge, teacherName, due, onClick
             {teacherName && <div className="text-xs font-semibold truncate">Zadal(a): {teacherName}</div>}
             {meta && <div className="text-text-muted text-xs truncate">{meta}</div>}
             {due && <div className={`text-xs ${DUE_CLASS[due.tone]}`}>{due.text}</div>}
+            {reward > 0 && <div className="text-xs font-semibold text-coral-dark">Odměna: {starsLabel(reward)} ⭐</div>}
           </div>
         </div>
         <Badge tone={badge.tone}>{badge.label}</Badge>

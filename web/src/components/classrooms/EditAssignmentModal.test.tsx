@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { EditAssignmentModal } from './EditAssignmentModal'
+import { toDateKey } from '../../lib/game-logic'
+
+// Always ahead: the date field doesn't accept a day before today, and a fixed
+// date in the past made the form refuse to save once that day had passed.
+const DUE = toDateKey(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
 
 const assignment = {
   id: 'a1',
@@ -9,7 +14,8 @@ const assignment = {
   title: 'Stupnice',
   description: 'v tempu 80',
   created_at: '',
-  due_date: '2026-11-20',
+  due_date: DUE,
+  stars_reward: 2,
   attachment_path: 'a1/stara.mid',
   attachment_name: 'stara.mid',
 }
@@ -25,7 +31,8 @@ describe('EditAssignmentModal', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       title: 'Stupnice C dur',
       description: 'v tempu 80',
-      dueDate: '2026-11-20',
+      dueDate: DUE,
+      starsReward: 2,
       attachment: { kind: 'keep' },
     })
   })
@@ -47,5 +54,15 @@ describe('EditAssignmentModal', () => {
     expect(screen.getByRole('button', { name: 'Uložit' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Ponechat původní noty' }))
     expect(screen.getByRole('button', { name: 'Uložit' })).toBeEnabled()
+  })
+})
+
+describe('EditAssignmentModal stars', () => {
+  it('changes the reward for completing it', () => {
+    const onSubmit = vi.fn()
+    render(<EditAssignmentModal assignment={assignment} submitting={false} onClose={vi.fn()} onSubmit={onSubmit} />)
+    fireEvent.change(screen.getByLabelText(/Odměna za splnění/), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ starsReward: 5 }))
   })
 })

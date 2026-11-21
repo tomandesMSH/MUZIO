@@ -4,6 +4,7 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { AttachmentField } from './AttachmentField'
 import { DueDateField } from './DueDateField'
+import { StarsRewardField } from './StarsRewardField'
 import type { Assignment } from '../../lib/data/types'
 import type { AssignmentUpdate } from '../../lib/data/classrooms'
 import { NavIcon } from '../layout/NavIcon'
@@ -23,6 +24,7 @@ export function EditAssignmentModal({ assignment, submitting, error, onClose, on
   const [title, setTitle] = useState(assignment.title)
   const [description, setDescription] = useState(assignment.description ?? '')
   const [dueDate, setDueDate] = useState(assignment.due_date ?? '')
+  const [starsReward, setStarsReward] = useState(assignment.stars_reward ?? 0)
   // The current file: kept, removed, or being replaced by a new one.
   const [fileMode, setFileMode] = useState<'keep' | 'remove' | 'replace'>('keep')
   const [newFile, setNewFile] = useState<File | null>(null)
@@ -33,6 +35,7 @@ export function EditAssignmentModal({ assignment, submitting, error, onClose, on
       title,
       description,
       dueDate,
+      starsReward,
       attachment:
         fileMode === 'replace' && newFile
           ? { kind: 'replace', file: newFile }
@@ -63,6 +66,7 @@ export function EditAssignmentModal({ assignment, submitting, error, onClose, on
           />
         </div>
         <DueDateField value={dueDate} onChange={setDueDate} />
+        <StarsRewardField value={starsReward} onChange={setStarsReward} />
 
         {hasFile && fileMode === 'keep' ? (
           <div>
