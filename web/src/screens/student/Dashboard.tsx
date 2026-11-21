@@ -18,7 +18,10 @@ import { PendingUploads } from '../../components/audio/PendingUploads'
 import { AnnouncementsCard } from '../../components/classrooms/AnnouncementsCard'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, fetchWeeklyStats } from '../../lib/data/practiceLogs'
+import { countPracticeDays } from '../../lib/flames'
+import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
+import { playFanfare } from '../../lib/sounds'
 import { fetchStudentAssignments } from '../../lib/data/classrooms'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
@@ -40,6 +43,7 @@ export function StudentDashboard() {
     () => (userId ? fetchWeeklyStats(userId, today) : Promise.resolve({ dateKeys: [], weeklyCount: 0 })),
     [userId],
   )
+  const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
   const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
   const assignmentIds = (assignments.data ?? []).map((a) => a.id)
@@ -78,6 +82,17 @@ export function StudentDashboard() {
       setTimeout(() => setCelebrating(false), 2500)
     }
   }, [userId, profile, logsCount.data, weekly.data, awards.loading, awards.data, today, show])
+
+  // A finished phase of the world (7, 14, 21, 28 flames): fanfare and confetti.
+  useEffect(() => {
+    if (!userId || !dayKeys.data) return
+    const phase = detectFlameMilestone(userId, countPracticeDays(dayKeys.data))
+    if (!phase) return
+    playFanfare(phase)
+    setCelebrating(true)
+    show(phase === 4 ? 'Celý svět je hotový' : `Fáze ${phase} je hotová`)
+    setTimeout(() => setCelebrating(false), 2500)
+  }, [userId, dayKeys.data, show])
 
   if (!profile) return null
 
@@ -119,6 +134,7 @@ export function StudentDashboard() {
             refreshProfile()
             logsCount.refetch()
             weekly.refetch()
+            dayKeys.refetch()
             completed.refetch()
           }}
         />
