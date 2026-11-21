@@ -9,66 +9,43 @@
 //       the SQL to run in the Supabase SQL editor
 //
 // pupilsFrom() below maps the export to { email, fullName, stars, flames,
-// badges }. It guesses the usual column names; check --inspect first and
-// adjust it if the export looks different.
+// badges }; it follows the tables of the real Base44 export.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { importSql, maskEmail, parseDump, rowsOf } from './base44-dump.mjs'
 
-const pick = (row, names) => {
-  for (const name of names) {
-    const key = Object.keys(row).find((k) => k.toLowerCase() === name)
-    if (key && row[key] != null && row[key] !== '') return row[key]
-  }
-  return undefined
-}
-
-const listOf = (value) => {
-  if (Array.isArray(value)) return value
-  if (typeof value !== 'string') return []
-  const text = value.trim()
-  if (text.startsWith('[')) {
-    try {
-      return JSON.parse(text)
-    } catch {
-      return []
-    }
-  }
-  if (text.startsWith('{')) return text.slice(1, -1).split(',').map((s) => s.replace(/^"|"$/g, '').trim()).filter(Boolean)
-  return text ? text.split(/[,;]/).map((s) => s.trim()) : []
-}
-
+// The Base44 export (BASE44DB.sql, 2026-11-22): `users` holds the pupils
+// (role 'user'; 'admin' are the teacher and the developer), stars in
+// users.stars; flames are the distinct days in `practice_days` (recordings
+// and days the teacher added) and `completed_tasks`; badges are the
+// teacher-given rows of `badge_awards` (badge_key like note_hunter). The
+// automatic badges (first recording, days practised) Muzio counts by itself,
+// and Hudební posel has no Muzio counterpart, so those are skipped.
 export function pupilsFrom(tables) {
-  const names = Object.keys(tables)
-  const userTable = names.find((n) => (tables[n].columns ?? []).some((c) => c.toLowerCase() === 'email'))
-  if (!userTable) throw new Error('V dumpu není tabulka se sloupcem email. Spusť --inspect a uprav pupilsFrom().')
-  const users = rowsOf(tables, userTable)
+  if (!tables.users) throw new Error('V dumpu chybí tabulka users. Spusť --inspect a uprav pupilsFrom().')
+  const days = new Map()
+  const addDay = (who, date) => {
+    if (!who || !date) return
+    const key = String(date).slice(0, 10)
+    days.set(who, (days.get(who) ?? new Set()).add(key))
+  }
+  for (const d of rowsOf(tables, 'practice_days')) addDay(d.student_id, d.practice_date)
+  for (const c of rowsOf(tables, 'completed_tasks')) addDay(c.created_by_id, c.completion_date)
 
-  // Optional badge table: one row per awarded badge.
-  const badgeTable = names.find((n) => /badge|odznak|reward|achievement/i.test(n) && n !== userTable)
-  const badgesByUser = new Map()
-  for (const row of badgeTable ? rowsOf(tables, badgeTable) : []) {
-    const who = pick(row, ['user_id', 'student_id', 'created_by', 'user_email', 'student_email', 'email'])
-    const name = pick(row, ['name', 'badge', 'badge_name', 'title', 'type', 'badge_id'])
-    if (who == null || name == null) continue
-    const key = String(who).toLowerCase()
-    badgesByUser.set(key, [...(badgesByUser.get(key) ?? []), String(name)])
+  const badges = new Map()
+  for (const a of rowsOf(tables, 'badge_awards')) {
+    if (a.awarded_by !== 'teacher' || !a.student_id) continue
+    badges.set(a.student_id, [...(badges.get(a.student_id) ?? []), String(a.badge_key)])
   }
 
-  return users.map((u) => {
-    const email = String(pick(u, ['email']) ?? '')
-    const id = String(pick(u, ['id']) ?? '')
-    return {
-      email,
-      fullName: pick(u, ['full_name', 'fullname', 'name', 'display_name']) ?? null,
-      stars: pick(u, ['stars', 'hvezdy', 'star_count', 'total_stars']) ?? 0,
-      flames: pick(u, ['flames', 'plaminky', 'flame_count', 'total_flames', 'practice_days']) ?? 0,
-      badges: [
-        ...listOf(pick(u, ['badges', 'odznaky'])),
-        ...(badgesByUser.get(id.toLowerCase()) ?? []),
-        ...(badgesByUser.get(email.toLowerCase()) ?? []),
-      ],
-    }
-  })
+  return rowsOf(tables, 'users')
+    .filter((u) => u.role !== 'admin' && !u.disabled)
+    .map((u) => ({
+      email: String(u.email ?? ''),
+      fullName: u.full_name ?? null,
+      stars: Number(u.stars) || 0,
+      flames: Math.max(days.get(u.id)?.size ?? 0, Number(u.flames) || 0),
+      badges: badges.get(u.id) ?? [],
+    }))
 }
 
 function main() {

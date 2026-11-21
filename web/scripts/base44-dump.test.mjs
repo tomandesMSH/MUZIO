@@ -56,3 +56,12 @@ describe('badges and output', () => {
     expect(sql).not.toContain('bez-zavinace')
   })
 })
+
+describe('Base44 badge keys', () => {
+  it('maps the export keys, skips the ones without a Muzio badge', () => {
+    expect(badgeId('note_hunter')).toBe('lovec-not')
+    expect(badgeId('brave_musician')).toBe('odvazny-muzikant')
+    expect(badgeId('music_messenger')).toBeNull()
+    expect(badgeId('days_7')).toBeNull()
+  })
+})

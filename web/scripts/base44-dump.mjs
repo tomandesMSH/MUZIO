@@ -130,6 +130,15 @@ export function maskEmail(value) {
 // Base44 badge names -> Muzio teacher badge ids (migration 0045). The ones
 // Muzio counts by itself (first recording, days practised) are left out.
 export const BADGE_IDS = {
+  // The badge_key values of the Base44 export.
+  'note hunter': 'lovec-not',
+  'chord wizard': 'akordovy-kouzelnik',
+  'rhythm master': 'rytmicky-mistr',
+  'big progress': 'velky-pokrok',
+  'little composer': 'maly-skladatel',
+  'brave musician': 'odvazny-muzikant',
+  'concert star': 'koncertni-hvezda',
+  // The same badges by their Czech names.
   'lovec not': 'lovec-not',
   'akordovy kouzelnik': 'akordovy-kouzelnik',
   'rytmicky mistr': 'rytmicky-mistr',
