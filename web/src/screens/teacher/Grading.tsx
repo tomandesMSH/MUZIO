@@ -62,6 +62,8 @@ const TEACHER_BADGES = BADGES.filter((b) => b.byTeacher).map((b) => ({
   hint: TEACHER_BADGE_HINTS[b.id as TeacherBadgeId],
 }))
 
+const FEEDBACK_OPEN_KEY = 'muzio-grading-feedback-open'
+
 interface LocationState {
   studentId?: string
   // Open this recording straight away (from the dashboard's "Ke kontrole").
@@ -115,6 +117,24 @@ export function Grading() {
   const [imageItems, setImageItems] = useState<FeedbackImageItem[]>([])
   const [voice, setVoice] = useState<VoiceCommentState>({ kind: 'none' })
   const [notesOpen, setNotesOpen] = useState(false)
+  // "Zpětná vazba" (Co se povedlo, Co zlepšit): open unless the teacher closed
+  // it; remembered in this browser.
+  const [feedbackOpen, setFeedbackOpen] = useState(() => {
+    try {
+      return localStorage.getItem(FEEDBACK_OPEN_KEY) !== '0'
+    } catch {
+      return true
+    }
+  })
+  function toggleFeedback() {
+    const next = !feedbackOpen
+    setFeedbackOpen(next)
+    try {
+      localStorage.setItem(FEEDBACK_OPEN_KEY, next ? '1' : '0')
+    } catch {
+      // Private mode: just not remembered.
+    }
+  }
   // The player and where it is, for "⏱ Vložit čas" in the comments.
   const player = useRef<AudioPlayerHandle>(null)
   const [playerTime, setPlayerTime] = useState(0)
@@ -435,64 +455,79 @@ export function Grading() {
           </Collapse>
         </div>
         <div>
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
-              Co se povedlo
-            </label>
-            {selectedLog.audio_url && (
-              <TimeButton time={playerTime} onClick={() => insertTime(goodRef.current, feedbackGood, setFeedbackGood)} />
-            )}
-          </div>
-          <textarea
-            ref={goodRef}
-            className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
-            value={feedbackGood}
-            onChange={(e) => setFeedbackGood(e.target.value)}
-            rows={2}
-          />
-          {hasTimestamps(feedbackGood) && selectedLog.audio_url && (
-            <p className="mt-1 text-xs text-text-muted">
-              <TimedText text={feedbackGood} onSeek={(t) => player.current?.seek(t)} />
-            </p>
-          )}
-          <QuickPhrases
-            kind="good"
-            saved={snippets.data ?? []}
-            current={feedbackGood}
-            onInsert={(phrase) => setFeedbackGood((v) => appendPhrase(v, phrase))}
-            onSave={(text) => void saveSnippet('good', text)}
-            onDelete={(snippet) => void removeSnippet(snippet)}
-          />
-        </div>
-        <div>
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
-              Co zlepšit
-            </label>
-            {selectedLog.audio_url && (
-              <TimeButton time={playerTime} onClick={() => insertTime(improveRef.current, feedbackImprove, setFeedbackImprove)} />
-            )}
-          </div>
-          <textarea
-            ref={improveRef}
-            className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
-            value={feedbackImprove}
-            onChange={(e) => setFeedbackImprove(e.target.value)}
-            rows={2}
-          />
-          {hasTimestamps(feedbackImprove) && selectedLog.audio_url && (
-            <p className="mt-1 text-xs text-text-muted">
-              <TimedText text={feedbackImprove} onSeek={(t) => player.current?.seek(t)} />
-            </p>
-          )}
-          <QuickPhrases
-            kind="improve"
-            saved={snippets.data ?? []}
-            current={feedbackImprove}
-            onInsert={(phrase) => setFeedbackImprove((v) => appendPhrase(v, phrase))}
-            onSave={(text) => void saveSnippet('improve', text)}
-            onDelete={(snippet) => void removeSnippet(snippet)}
-          />
+          <button
+            type="button"
+            aria-expanded={feedbackOpen}
+            onClick={() => toggleFeedback()}
+            className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-sm font-heading font-semibold"
+          >
+            <span>Zpětná vazba</span>
+            <Chevron open={feedbackOpen} />
+          </button>
+          <Collapse open={feedbackOpen}>
+            <div className="space-y-4 pb-1 pt-1">
+              <div>
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
+                    Co se povedlo
+                  </label>
+                  {selectedLog.audio_url && (
+                    <TimeButton time={playerTime} onClick={() => insertTime(goodRef.current, feedbackGood, setFeedbackGood)} />
+                  )}
+                </div>
+                <textarea
+                  ref={goodRef}
+                  className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
+                  value={feedbackGood}
+                  onChange={(e) => setFeedbackGood(e.target.value)}
+                  rows={2}
+                />
+                {hasTimestamps(feedbackGood) && selectedLog.audio_url && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    <TimedText text={feedbackGood} onSeek={(t) => player.current?.seek(t)} />
+                  </p>
+                )}
+                <QuickPhrases
+                  kind="good"
+                  saved={snippets.data ?? []}
+                  current={feedbackGood}
+                  onInsert={(phrase) => setFeedbackGood((v) => appendPhrase(v, phrase))}
+                  onSave={(text) => void saveSnippet('good', text)}
+                  onDelete={(snippet) => void removeSnippet(snippet)}
+                />
+              </div>
+              <div>
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label className="text-sm font-heading font-semibold flex items-center gap-1.5">
+                    Co zlepšit
+                  </label>
+                  {selectedLog.audio_url && (
+                    <TimeButton time={playerTime} onClick={() => insertTime(improveRef.current, feedbackImprove, setFeedbackImprove)} />
+                  )}
+                </div>
+                <textarea
+                  ref={improveRef}
+                  className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
+                  value={feedbackImprove}
+                  onChange={(e) => setFeedbackImprove(e.target.value)}
+                  rows={2}
+                />
+                {hasTimestamps(feedbackImprove) && selectedLog.audio_url && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    <TimedText text={feedbackImprove} onSeek={(t) => player.current?.seek(t)} />
+                  </p>
+                )}
+                <QuickPhrases
+                  kind="improve"
+                  saved={snippets.data ?? []}
+                  current={feedbackImprove}
+                  onInsert={(phrase) => setFeedbackImprove((v) => appendPhrase(v, phrase))}
+                  onSave={(text) => void saveSnippet('improve', text)}
+                  onDelete={(snippet) => void removeSnippet(snippet)}
+                />
+              </div>
+            </div>
+          </Collapse>
         </div>
         <div>
           <div className="text-sm font-heading font-semibold mb-1.5 flex items-center gap-1.5">
