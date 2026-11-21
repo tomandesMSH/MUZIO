@@ -4,6 +4,7 @@ import { navItemsFor } from './navItems'
 import { NavIcon } from './NavIcon'
 import { NavBadge } from './NavBadge'
 import { DOCS_URL } from '../../lib/links'
+import { BugReportModal } from '../ui/BugReportModal'
 import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 interface Box {
@@ -30,6 +31,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
   const listRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [hovered, setHovered] = useState<number>()
+  const [bugOpen, setBugOpen] = useState(false)
   const [boxes, setBoxes] = useState<Box[]>([])
   const [shownIndex, setShownIndex] = useState(() => lastActiveIndex ?? activeIndex)
 
@@ -125,6 +127,14 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
         </span>
         Dokumentace
       </a>
+      <button
+        type="button"
+        onClick={() => setBugOpen(true)}
+        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-heading font-semibold text-text-muted transition-colors duration-200 hover:bg-bg-card-alt hover:text-text-primary"
+      >
+        Nahlásit chybu
+      </button>
+      <BugReportModal open={bugOpen} onClose={() => setBugOpen(false)} />
       <p className="px-3 pt-1 text-[11px] text-text-muted" title={__APP_VERSION__}>
         verze {__APP_VERSION__.slice(0, 7)}
       </p>

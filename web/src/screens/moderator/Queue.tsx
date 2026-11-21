@@ -22,6 +22,8 @@ import { SlidingTabs } from '../../components/ui/SlidingTabs'
 import { HistorySection } from './HistorySection'
 import { ClassroomsSection } from './ClassroomsSection'
 import { UsageSection } from './UsageSection'
+import { BugReportsSection } from './BugReportsSection'
+import { countOpenBugReports } from '../../lib/data/bugReports'
 import type { PracticeLog, Profile } from '../../lib/data/types'
 
 interface SuspendTarget {
@@ -30,11 +32,12 @@ interface SuspendTarget {
   name: string
 }
 
-type Tab = 'reports' | 'recordings' | 'users' | 'classrooms' | 'usage' | 'history'
+type Tab = 'reports' | 'bugs' | 'recordings' | 'users' | 'classrooms' | 'usage' | 'history'
 
 // The admin's sections; the bar scrolls sideways on a phone.
 const TABS: { id: Tab; label: string }[] = [
   { id: 'reports', label: 'Nahlášený obsah' },
+  { id: 'bugs', label: 'Chyby' },
   { id: 'recordings', label: 'Nahrávky' },
   { id: 'users', label: 'Uživatelé' },
   { id: 'classrooms', label: 'Třídy' },
@@ -47,6 +50,7 @@ export function Queue() {
   const { profile } = useAuth()
   const [tab, setTab] = useState<Tab>('reports')
   const reports = useQuery(() => fetchOpenReports(), [])
+  const openBugs = useQuery(() => countOpenBugReports().catch(() => 0), [])
 
   const userIds = Array.from(
     new Set((reports.data ?? []).flatMap((r) => [r.reporter_id, r.reported_user_id].filter((v): v is string => !!v))),
@@ -143,7 +147,9 @@ export function Queue() {
         </Button>
       </div>
 
-      <SlidingTabs tabs={TABS} value={tab} onChange={setTab} label="Sekce admina" />
+      <SlidingTabs
+        tabs={TABS.map((t) => (t.id === 'bugs' && openBugs.data ? { ...t, label: `Chyby (${openBugs.data})` } : t))}
+        value={tab} onChange={setTab} label="Sekce admina" />
 
       {tab === 'reports' && (
         <>
@@ -208,6 +214,7 @@ export function Queue() {
         </>
       )}
 
+      {tab === 'bugs' && <BugReportsSection onChanged={openBugs.refetch} />}
       {tab === 'recordings' && <RecordingsSection />}
       {tab === 'users' && <UsersSection />}
       {tab === 'classrooms' && <ClassroomsSection />}
