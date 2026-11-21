@@ -19,7 +19,7 @@ export function WorldProgress({ world, progress }: { world: WorldId | null | und
         </span>
       </div>
       <p className="text-sm mt-0.5">{phasesDone > 0 ? info.phases[phasesDone - 1] : 'Tvůj svět čeká na první plamínky'}</p>
-      <WorldScene world={info.id} phase={phasesDone} className="mt-3 w-full max-w-md mx-auto block rounded-xl" />
+      <WorldScene world={info.id} phase={phasesDone} flamesInCycle={progress.inCycle} className="mt-3 w-full max-w-md mx-auto block rounded-xl" />
       <p className="mt-2 text-xs text-text-muted">
         {finished
           ? 'Celý svět je hotový. Dalším dnem cvičení začneš nový.'

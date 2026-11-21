@@ -18,7 +18,7 @@ export function PupilFlames({
   const p = flameProgress(countPracticeDays(dayKeys) + importedFlames)
   return (
     <div className="rounded-2xl bg-bg-card shadow-clay-sm p-4 flex flex-col sm:flex-row gap-4">
-      <WorldScene world={info.id} phase={p.phasesDone} className="w-full sm:w-56 shrink-0 rounded-xl" />
+      <WorldScene world={info.id} phase={p.phasesDone} flamesInCycle={p.inCycle} className="w-full sm:w-56 shrink-0 rounded-xl" />
       <div className="min-w-0 space-y-2">
         <div>
           <div className="font-heading font-semibold">{info.name}</div>
