@@ -46,6 +46,7 @@ function setup(opts: {
   pupils?: string[]
   now?: Date
   gone?: string[]
+  autoNotice?: { noticeId: string; deleteAfter: string; owners: string[] } | null
 }) {
   const sent: { to: string; message: Message }[] = []
   const deleted: string[] = []
@@ -62,6 +63,7 @@ function setup(opts: {
       new Map(ids.filter((id) => opts.settings?.[id]).map((id) => [id, { ...DEFAULT_SETTINGS, ...opts.settings![id] }])),
     subscriptions: async (ids) => (opts.subs ?? []).filter((s) => ids.includes(s.user_id)),
     deleteSubscription: async (endpoint) => void deleted.push(endpoint),
+    autoCleanupNotice: async () => opts.autoNotice ?? null,
     reminderCandidates: async () => opts.candidates ?? [],
     dueOn: async (day) => opts.due?.[day] ?? [],
     digestTeachers: async () => opts.digest ?? [],
@@ -237,6 +239,25 @@ describe('notify', () => {
     const { deps } = setup({})
     expect((await handleNotify({ type: 'reminders' }, 'jwt', deps)).status).toBe(401)
     expect((await handleNotify({ type: 'reminders' }, null, deps)).status).toBe(401)
+  })
+
+  it('storage nearly full: the owners of the largest files hear once a day, from 9:00', async () => {
+    const autoNotice = { noticeId: 'N2', deleteAfter: '2026-11-17', owners: ['p1', 'p2'] }
+    const early = setup({ now: new Date('2026-11-16T06:10:00Z'), autoNotice, subs: [sub('p1'), sub('p2')] }) // 7:10
+    await handleNotify({ type: 'reminders' }, 'cron-secret', early.deps)
+    expect(early.sent).toHaveLength(0)
+
+    const { deps, sent } = setup({
+      now: new Date('2026-11-16T09:10:00Z'), // 10:10 in Prague
+      autoNotice,
+      settings: { p2: { reminder: false, assignments: false } },
+      subs: [sub('p1'), sub('p2'), sub('p3')],
+    })
+    await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
+    expect(sent.map((s) => s.to).sort()).toEqual(['p1', 'p2'])
+    expect(sent[0].message).toMatchObject({ url: '/student/feedback', body: expect.stringContaining('Od 17. 11.') })
+    await handleNotify({ type: 'reminders' }, 'cron-secret', deps)
+    expect(sent).toHaveLength(2)
   })
 
   it('reminders: at the chosen hour, to pupils who have not practised today, once a day', async () => {

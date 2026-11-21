@@ -25,6 +25,37 @@ export async function fetchCleanupCandidates(before: string): Promise<CleanupCan
   return ((data ?? []) as CleanupCandidate[]).map((c) => ({ ...c, id: Number(c.id), bytes: Number(c.bytes) }))
 }
 
+// The automatic warning about a nearly full storage (migration 0047): its
+// newest notice and the files in it that still have sound, if any.
+export interface NoticeCleanup {
+  noticeId: string
+  deleteAfter: string
+  candidates: CleanupCandidate[]
+}
+
+export async function fetchPendingNoticeCleanup(): Promise<NoticeCleanup | null> {
+  const { data: notice, error } = await supabase
+    .from('cleanup_notices')
+    .select('id, delete_after')
+    .eq('kind', 'largest')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  if (!notice) return null
+  const { data, error: listError } = await supabase.rpc('admin_notice_cleanup_candidates', { p_notice: notice.id })
+  if (listError) throw listError
+  const candidates = ((data ?? []) as CleanupCandidate[]).map((c) => ({ ...c, id: Number(c.id), bytes: Number(c.bytes) }))
+  return candidates.length > 0 ? { noticeId: notice.id as string, deleteAfter: notice.delete_after as string, candidates } : null
+}
+
+// A "before" date that covers every recording up to now (admin_mark_audio_removed
+// only clears recordings created before it).
+export function tomorrowKey(today: Date = new Date()): string {
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 // Which recordings may be marked as cleared after a storage remove: those
 // whose file was deleted now, and those that had no file any more (0 bytes -
 // nothing to delete). A file that failed to delete keeps its recording as is.

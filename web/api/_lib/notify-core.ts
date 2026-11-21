@@ -96,6 +96,9 @@ export interface Db {
   settings(userIds: string[]): Promise<Map<string, Settings>>
   subscriptions(userIds: string[]): Promise<Subscription[]>
   deleteSubscription(endpoint: string): Promise<void>
+  // Storage nearly full (migration 0047): a new notice about the largest
+  // files and the pupils who own them, or null when none is needed.
+  autoCleanupNotice(limitBytes: number): Promise<{ noticeId: string; deleteAfter: string; owners: string[] } | null>
   // Pupils who have at least one subscription.
   reminderCandidates(): Promise<ReminderCandidate[]>
   // Assignments due on that day (YYYY-MM-DD) with who still owes a recording.
@@ -254,6 +257,22 @@ export function reminderMessage(candidate: ReminderCandidate): Message {
   }
 }
 
+// Same as FREE_STORAGE_BYTES in src/lib/data/adminUsage.ts (Supabase free plan).
+export const STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024
+
+// The storage check runs once a day, from this hour (Czech time) on.
+export const STORAGE_CHECK_HOUR = 9
+
+export function largestFilesMessage(noticeId: string, deleteAfter: string): Message {
+  const [, m, d] = deleteAfter.split('-').map(Number)
+  return {
+    title: 'Ulož si své nahrávky',
+    body: `V aplikaci dochází místo. Od ${d}. ${m}. smažeme tvoje největší nahrávky, stáhni si je, jestli o ně stojíš.`,
+    url: '/student/feedback',
+    tag: `cleanup-${noticeId}`,
+  }
+}
+
 // A tag of its own each time: with the same tag the phone would just swap it
 // for the previous test quietly, and it would look like nothing came.
 export function testMessage(now: Date): Message {
@@ -341,6 +360,14 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
       if (!(await deps.db.claim('digest', `${teacher}:${pragueDay(deps.now)}`))) continue
       const pupils = new Set(waiting.map((w) => w.user_id)).size
       sent += await deliver(deps, [teacher], () => true, digestMessage(waiting.length, pupils))
+    }
+    // Storage nearly full: warn the owners of the largest files (once a day
+    // at most, and the database sends no second warning before a clean-up).
+    if (hour >= STORAGE_CHECK_HOUR && (await deps.db.claim('storage-check', pragueDay(deps.now)))) {
+      const notice = await deps.db.autoCleanupNotice(STORAGE_LIMIT_BYTES)
+      if (notice) {
+        sent += await deliver(deps, notice.owners, () => true, largestFilesMessage(notice.noticeId, notice.deleteAfter))
+      }
     }
     return { status: 200, body: { sent } }
   }
