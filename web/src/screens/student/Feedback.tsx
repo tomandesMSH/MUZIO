@@ -20,6 +20,7 @@ import { awardsByLog, fetchAwardedBadges } from '../../lib/data/badges'
 import { FeedbackImages } from '../../components/feedback/FeedbackImages'
 import { SavedVoiceComment } from '../../components/feedback/VoiceComment'
 import { RatingNotes } from '../../components/gamification/RatingNotes'
+import { canOfferDownload, downloadRecording, DOWNLOAD_OFFER_AFTER_DAYS } from '../../lib/recordingDownload'
 
 export function Feedback() {
   const { profile } = useAuth()
@@ -30,6 +31,20 @@ export function Feedback() {
   const [reporting, setReporting] = useState(false)
   const [reportError, setReportError] = useState<string>()
   const { message, show } = useToast()
+  const [now] = useState(() => new Date())
+  const [downloading, setDownloading] = useState<string>()
+  const hasOld = (logs.data ?? []).some((log) => canOfferDownload(log, now))
+
+  async function handleDownload(log: PracticeLog) {
+    setDownloading(String(log.id))
+    try {
+      await downloadRecording(log)
+    } catch (err) {
+      show(getErrorMessage(err, 'Stažení se nepovedlo, zkus to znovu.'))
+    } finally {
+      setDownloading(undefined)
+    }
+  }
   // Each recording's player, so a time in the comment ("0:42") can jump in it.
   const players = useRef(new Map<string, AudioPlayerHandle>())
   const seekIn = (logId: string) => (seconds: number) => players.current.get(logId)?.seek(seconds)
@@ -73,6 +88,15 @@ export function Feedback() {
       {message && <Toast message={message} />}
       <div className="space-y-4 flex-1">
         <h1 className="text-xl">Nahrávky</h1>
+        {hasOld && (
+          <div className="rounded-2xl bg-coral-tint text-coral-dark p-4 text-sm">
+            <p className="font-heading font-semibold">Starší nahrávky si můžeš stáhnout</p>
+            <p className="mt-0.5">
+              Nahrávky starší než {DOWNLOAD_OFFER_AFTER_DAYS} dní jednou z aplikace smažeme, aby bylo místo pro nové.
+              Ty, na kterých ti záleží, si ulož tlačítkem Stáhnout. Hodnocení a komentáře tu zůstanou.
+            </p>
+          </div>
+        )}
         {logs.loading && !logs.data && <Skeleton rows={2} height="h-40" />}
         {logs.error && (
           <p className="text-sm text-coral-dark">Načtení nahrávek se nepovedlo: {logs.error.message}</p>
@@ -111,6 +135,16 @@ export function Feedback() {
                     else players.current.delete(String(log.id))
                   }}
                 />
+                {canOfferDownload(log, now) && (
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-coral-dark disabled:opacity-50"
+                    disabled={downloading === String(log.id)}
+                    onClick={() => handleDownload(log)}
+                  >
+                    {downloading === String(log.id) ? 'Stahuji…' : 'Stáhnout nahrávku'}
+                  </button>
+                )}
 
                 {graded && (
                   <div className="space-y-2 text-sm">
