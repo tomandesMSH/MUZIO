@@ -1,5 +1,6 @@
 import type { WorldId } from '../world'
 import type { StyleId } from '../style'
+import type { TeacherBadgeId } from '../game-logic'
 export type UserRole = 'student' | 'teacher' | 'moderator'
 
 export interface Profile {
@@ -103,7 +104,7 @@ export interface AwardedBadge {
   id: string
   student_id: string
   practice_log_id: string | number
-  badge_id: 'maly-virtuoz' | 'virtuoz'
+  badge_id: TeacherBadgeId
   awarded_by: string
   created_at: string
 }

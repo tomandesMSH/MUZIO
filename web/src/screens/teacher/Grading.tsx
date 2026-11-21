@@ -47,6 +47,13 @@ import { refreshNavBadges } from '../../lib/navBadges'
 const TEACHER_BADGE_HINTS: Record<TeacherBadgeId, string> = {
   'maly-virtuoz': 'bez chyb',
   virtuoz: 'splněná výzva',
+  'lovec-not': 'noty správně',
+  'akordovy-kouzelnik': 'plynulé akordy',
+  'rytmicky-mistr': 'lepší rytmus',
+  'velky-pokrok': 'pokrok',
+  'maly-skladatel': 'vlastní nápad',
+  'odvazny-muzikant': 'těžké místo',
+  'koncertni-hvezda': 'vystoupení',
 }
 const TEACHER_BADGES = BADGES.filter((b) => b.byTeacher).map((b) => ({
   id: b.id as TeacherBadgeId,

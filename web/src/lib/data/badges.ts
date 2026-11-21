@@ -1,5 +1,5 @@
 import { supabase } from '../supabase'
-import type { TeacherBadgeId } from '../game-logic'
+import { teacherBadgeCounts, type TeacherBadgeId } from '../game-logic'
 import type { AwardedBadge, PracticeLog } from './types'
 
 // Badges the teacher awards on a recording (migration 0025). Who may award,
@@ -17,7 +17,7 @@ export async function fetchAwardedBadges(studentId: string): Promise<AwardedBadg
 }
 
 export function countAwards(awards: AwardedBadge[]): Record<TeacherBadgeId, number> {
-  const counts: Record<TeacherBadgeId, number> = { 'maly-virtuoz': 0, virtuoz: 0 }
+  const counts = teacherBadgeCounts()
   for (const award of awards) counts[award.badge_id] += 1
   return counts
 }

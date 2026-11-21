@@ -25,7 +25,7 @@ const award = (id: string, badge_id: AwardedBadge['badge_id'], practice_log_id: 
 describe('countAwards / awardsByLog', () => {
   it('counts each badge and groups them by recording', () => {
     const awards = [award('a', 'maly-virtuoz', 7), award('b', 'maly-virtuoz', 8), award('c', 'virtuoz', 7)]
-    expect(countAwards(awards)).toEqual({ 'maly-virtuoz': 2, virtuoz: 1 })
+    expect(countAwards(awards)).toMatchObject({ 'maly-virtuoz': 2, virtuoz: 1, 'lovec-not': 0 })
     expect(awardsByLog(awards).get('7')?.map((a) => a.id)).toEqual(['a', 'c'])
     expect(awardsByLog(awards).get('8')?.map((a) => a.id)).toEqual(['b'])
   })
