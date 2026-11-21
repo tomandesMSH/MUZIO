@@ -29,6 +29,7 @@ import {
 } from '../../lib/data/classrooms'
 import { fetchProfilesByIds } from '../../lib/data/profiles'
 import { ClassAnnouncements } from '../../components/classrooms/ClassAnnouncements'
+import { WeeklyGoalPicker } from '../../components/classrooms/WeeklyGoalPicker'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment, Classroom } from '../../lib/data/types'
@@ -277,7 +278,10 @@ function ClassroomDetail({
         </div>
 
         {profile && profile.id === classroom.teacher_id && (
-          <ClassAnnouncements classroomId={classroom.id} teacherId={profile.id} />
+          <>
+            <WeeklyGoalPicker classroomId={classroom.id} value={classroom.weekly_goal_days} />
+            <ClassAnnouncements classroomId={classroom.id} teacherId={profile.id} />
+          </>
         )}
 
         <div>

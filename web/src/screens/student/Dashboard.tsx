@@ -25,7 +25,9 @@ import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, f
 import { countPracticeDays, flameProgress } from '../../lib/flames'
 import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
 import { playFanfare } from '../../lib/sounds'
-import { fetchStudentAssignments } from '../../lib/data/classrooms'
+import { fetchStudentAssignments, fetchStudentClassrooms } from '../../lib/data/classrooms'
+import { weeklyGoalFor } from '../../lib/weeklyGoal'
+import { WeeklyGoalCard } from '../../components/gamification/WeeklyGoalCard'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
 import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
@@ -49,6 +51,7 @@ export function StudentDashboard() {
   const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
   const awards = useQuery(() => (userId ? fetchAwardedBadges(userId) : Promise.resolve([])), [userId])
   const assignments = useQuery(() => fetchStudentAssignments(), [])
+  const myClasses = useQuery(() => (userId ? fetchStudentClassrooms(userId).catch(() => []) : Promise.resolve([])), [userId])
   const assignmentIds = (assignments.data ?? []).map((a) => a.id)
   const completed = useQuery(
     () => (userId ? fetchCompletedAssignmentIds(userId, assignmentIds) : Promise.resolve(new Set<string>())),
@@ -101,6 +104,7 @@ export function StudentDashboard() {
 
   const playedToday = weekly.data ? hasPlayedToday(weekly.data.dateKeys, today) : false
   const firstName = profile.full_name?.split(' ')[0] || 'žáku'
+  const goal = weeklyGoalFor(myClasses.data ?? [])
   const quests = computeQuests({ playedToday, weeklyCount: weekly.data?.weeklyCount ?? 0 })
 
   function openAssignment(assignment: Assignment) {
@@ -190,6 +194,8 @@ export function StudentDashboard() {
         <Card>
           <LevelProgress xp={profile.xp ?? 0} />
         </Card>
+
+        {goal && <WeeklyGoalCard goal={goal} daysThisWeek={weekly.data?.dateKeys.length ?? 0} />}
 
         <Quests quests={quests} />
       </div>

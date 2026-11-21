@@ -46,6 +46,8 @@ export interface Classroom {
   name: string
   join_code: string
   created_at: string
+  // Days a week the pupils should practise (migration 0053), null = no goal.
+  weekly_goal_days?: number | null
 }
 
 export interface Assignment {
