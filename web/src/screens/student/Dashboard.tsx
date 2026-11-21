@@ -29,6 +29,7 @@ import { playFanfare } from '../../lib/sounds'
 import { fetchStudentAssignments, fetchStudentClassrooms } from '../../lib/data/classrooms'
 import { weeklyGoalFor } from '../../lib/weeklyGoal'
 import { WeeklyGoalCard } from '../../components/gamification/WeeklyGoalCard'
+import { ClassLeague } from '../../components/gamification/ClassLeague'
 import { isPerfectWeek, hasPlayedToday, computeQuests } from '../../lib/game-logic'
 import { detectNewUnlocks } from '../../lib/gamification/detectNewUnlocks'
 import { countAwards, fetchAwardedBadges } from '../../lib/data/badges'
@@ -200,6 +201,10 @@ export function StudentDashboard() {
         {goal && <WeeklyGoalCard goal={goal} daysThisWeek={weekly.data?.dateKeys.length ?? 0} />}
 
         <Quests quests={quests} />
+
+        {(myClasses.data ?? []).map((c) => (
+          <ClassLeague key={c.id} classroomId={c.id} classroomName={(myClasses.data ?? []).length > 1 ? c.name : undefined} />
+        ))}
       </div>
     </AppShell>
   )
