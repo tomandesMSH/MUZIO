@@ -135,6 +135,11 @@ export async function removeClassroomMember(classroomId: string, studentId: stri
 
 // A student never sees the roster (see 0009 migration) - only the
 // classrooms they belong to.
+export async function updateWeeklyGoal(classroomId: string, days: number | null): Promise<void> {
+  const { error } = await supabase.from('classrooms').update({ weekly_goal_days: days }).eq('id', classroomId)
+  if (error) throw error
+}
+
 export async function fetchStudentClassrooms(studentId: string): Promise<Classroom[]> {
   const { data, error } = await supabase
     .from('classrooms')
