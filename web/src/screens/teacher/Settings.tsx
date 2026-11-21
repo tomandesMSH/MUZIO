@@ -13,6 +13,7 @@ import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
 import { BugReportModal } from '../../components/ui/BugReportModal'
 import { WhatsNewModal } from '../../components/ui/WhatsNew'
+import { appVersionLabel } from '../../lib/appVersion'
 import { useToast } from '../../lib/useToast'
 
 // The teacher's settings: look, notifications, password, moderation, help.
@@ -69,6 +70,9 @@ export function Settings() {
         <Button variant="ghost" className="w-full" onClick={handleLogout}>
           Odhlásit se
         </Button>
+        <p className="text-center text-[11px] text-text-muted" title={__APP_VERSION__}>
+          Muzio beta · {appVersionLabel()}
+        </p>
       </div>
       {passwordOpen && (
         <ChangePasswordModal

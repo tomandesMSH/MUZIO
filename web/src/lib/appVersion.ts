@@ -18,3 +18,8 @@ export async function fetchDeployedVersion(fetcher: typeof fetch = fetch): Promi
 export function isNewVersion(running: string, deployed: string | undefined): boolean {
   return running !== 'dev' && !!deployed && deployed !== running
 }
+
+// "verze a5a9d6c": the build's short id, as shown in the menu and Settings.
+export function appVersionLabel(version: string = __APP_VERSION__): string {
+  return `verze ${version.slice(0, 7)}`
+}

@@ -5,6 +5,7 @@ import { NavIcon } from './NavIcon'
 import { NavBadge } from './NavBadge'
 import { DOCS_URL } from '../../lib/links'
 import { BugReportModal } from '../ui/BugReportModal'
+import { appVersionLabel } from '../../lib/appVersion'
 import { useNavBadges, type NavBadgeKey } from '../../lib/navBadges'
 
 interface Box {
@@ -136,7 +137,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
       </button>
       <BugReportModal open={bugOpen} onClose={() => setBugOpen(false)} />
       <p className="px-3 pt-1 text-[11px] text-text-muted" title={__APP_VERSION__}>
-        verze {__APP_VERSION__.slice(0, 7)}
+        {appVersionLabel()}
       </p>
     </div>
   )
