@@ -13,6 +13,7 @@ import { ThemePicker } from '../../components/ui/ThemePicker'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { openDocs } from '../../lib/links'
+import { WhatsNewModal } from '../../components/ui/WhatsNew'
 import { ReportFormModal } from '../../components/ui/ReportFormModal'
 import { useToast } from '../../lib/useToast'
 import { updateShareBasicProgress } from '../../lib/data/profiles'
@@ -28,6 +29,7 @@ export function Settings() {
     setSounds(on)
   }
   const [passwordOpen, setPasswordOpen] = useState(false)
+  const [newsOpen, setNewsOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [savingShare, setSavingShare] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
@@ -141,6 +143,8 @@ export function Settings() {
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nápověda</h2>
           <SettingsRow label="Dokumentace" onClick={openDocs} />
+          <SettingsRow label="Co je nového" onClick={() => setNewsOpen(true)} />
+          <WhatsNewModal role="student" open={newsOpen} onClose={() => setNewsOpen(false)} />
           <SettingsRow
             label="Nahlásit problém nebo nápad"
             onClick={() => setReportOpen(true)}
