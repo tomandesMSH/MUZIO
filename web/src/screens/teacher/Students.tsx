@@ -10,6 +10,7 @@ import { PasswordReauthModal } from '../../components/ui/PasswordReauthModal'
 import { ResetPasswordModal } from '../../components/ui/ResetPasswordModal'
 import { AppShell } from '../../components/layout/AppShell'
 import { ExportGradesModal } from '../../components/teacher/ExportGradesModal'
+import { Base44Overview } from '../../components/teacher/Base44Overview'
 import { StudentNotes } from '../../components/teacher/StudentNotes'
 import { Modal } from '../../components/ui/Modal'
 import { useQuery } from '../../lib/data/useQuery'
@@ -172,6 +173,7 @@ export function Students() {
           </Button>
         </div>
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
+        <Base44Overview />
         {students.loading && !students.data && <Skeleton rows={4} height="h-20" />}
 
         {pending.length > 0 && (
