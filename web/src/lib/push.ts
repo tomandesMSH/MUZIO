@@ -95,6 +95,7 @@ export type NotifyEvent =
   | { type: 'recording'; logId: string }
   | { type: 'assignment'; assignmentId: string }
   | { type: 'announcement'; announcementId: string }
+  | { type: 'message'; messageId: string }
   | { type: 'cleanup'; noticeId: string }
   | { type: 'test' }
 

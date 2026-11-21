@@ -16,6 +16,7 @@ Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
 })
 Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, get: () => 44 })
 
+vi.mock('../../lib/data/pupilMessages', () => ({ countUnreadMessages: async () => 0 }))
 vi.mock('../../lib/data/practiceLogs', () => ({
   countPendingReview: vi.fn(async () => 5),
   countUnseenFeedback: vi.fn(async () => 0),

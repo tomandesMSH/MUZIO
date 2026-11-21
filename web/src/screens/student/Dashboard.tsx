@@ -18,6 +18,7 @@ import { AttachmentLink } from '../../components/lessons/AttachmentLink'
 import { AppShell } from '../../components/layout/AppShell'
 import { PendingUploads } from '../../components/audio/PendingUploads'
 import { AnnouncementsCard } from '../../components/classrooms/AnnouncementsCard'
+import { MailCard } from '../../components/classrooms/MailCard'
 import { CleanupNoticeBanner } from '../../components/cleanup/CleanupNoticeBanner'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
@@ -133,6 +134,7 @@ export function StudentDashboard() {
         {dayKeys.data && (
           <WorldProgress world={profile.world} progress={flameProgress(countPracticeDays(dayKeys.data))} />
         )}
+        <MailCard studentId={profile.id} />
         <AnnouncementsCard />
         <PendingUploads
           userId={profile.id}

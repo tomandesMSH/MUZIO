@@ -14,6 +14,7 @@ import {
   type Db,
   type Deps,
   type LogRow,
+  type MessageRow,
   type Message,
   type ReminderCandidate,
   type Settings,
@@ -31,6 +32,7 @@ function setup(opts: {
   logs?: LogRow[]
   assignments?: AssignmentRow[]
   announcements?: AnnouncementRow[]
+  messages?: MessageRow[]
   recipients?: Record<string, string[]>
   members?: Record<string, string[]>
   teachers?: Record<string, string[]>
@@ -55,6 +57,7 @@ function setup(opts: {
     getLog: async (id) => opts.logs?.find((l) => l.id === id) ?? null,
     getAssignment: async (id) => opts.assignments?.find((a) => a.id === id) ?? null,
     getAnnouncement: async (id) => opts.announcements?.find((a) => a.id === id) ?? null,
+    getMessage: async (id) => opts.messages?.find((m) => m.id === id) ?? null,
     getName: async (id) => ({ p1: 'Pavel', t1: 'Jana Nováková' })[id] ?? null,
     assignmentRecipients: async (id) => opts.recipients?.[id] ?? [],
     classroomMembers: async (id) => opts.members?.[id] ?? [],
@@ -204,6 +207,17 @@ describe('notify', () => {
     expect(ownSent[0].message).toMatchObject({ title: '📢 Oznámení od Jana Nováková', body: 'V pátek koncert v 17:00', url: '/student' })
     await handleNotify({ type: 'announcement', announcementId: 'N1' }, 'jwt', own)
     expect(ownSent).toHaveLength(1)
+  })
+
+  it('message: from its teacher to that one pupil, once', async () => {
+    const message: MessageRow = { id: 'M1', teacher_id: 't1', student_id: 'p1', body: 'Zítra přines noty  na koncert.' }
+    const { deps, sent } = setup({ caller: 't1', messages: [message], subs: [sub('p1'), sub('p2')] })
+    expect(parseRequest({ type: 'message', messageId: 'M1' })).toEqual({ type: 'message', messageId: 'M1' })
+    expect((await handleNotify({ type: 'message', messageId: 'M1' }, 'jwt', deps)).body.sent).toBe(1)
+    expect(sent[0]).toMatchObject({ to: 'p1', message: { title: 'Zpráva od Jana Nováková', body: 'Zítra přines noty na koncert.' } })
+    expect((await handleNotify({ type: 'message', messageId: 'M1' }, 'jwt', deps)).body.sent).toBe(0)
+    const other = setup({ caller: 't2', messages: [message], subs: [sub('p1')] })
+    expect((await handleNotify({ type: 'message', messageId: 'M1' }, 'jwt', other.deps)).status).toBe(403)
   })
 
   it('a long announcement is shortened', () => {
