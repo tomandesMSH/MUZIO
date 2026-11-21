@@ -3,9 +3,12 @@
 //
 // Vercel environment variables:
 //   SUPABASE_URL (or VITE_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY,
-//   RESEND_API_KEY, MIGRATION_FROM (e.g. "Muzio <muzio@tomandes.eu>", a
-//   sender on a domain verified in Resend).
+//   SMTP_HOST, SMTP_PORT (465 = TLS, 587 = STARTTLS), SMTP_USER, SMTP_PASS:
+//   the mailbox that sends the code, e.g. muzio@tomandes.eu at the domain's
+//   mail provider (or Gmail: smtp.gmail.com, 465, an app password),
+//   MIGRATION_FROM (optional, default "Muzio <SMTP_USER>").
 import { createClient } from '@supabase/supabase-js'
+import nodemailer from 'nodemailer'
 import { handleMigrate, parseMigrateRequest, type MigrateDeps } from './_lib/migrate-core.js'
 
 function codeEmail(code: string): { subject: string; text: string; html: string } {
@@ -26,11 +29,20 @@ export async function POST(request: Request): Promise<Response> {
   const env = process.env
   const url = env.SUPABASE_URL ?? env.VITE_SUPABASE_URL
   const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY
-  const resendKey = env.RESEND_API_KEY
-  const from = env.MIGRATION_FROM
-  if (!url || !serviceKey || !resendKey || !from) {
+  const smtpHost = env.SMTP_HOST
+  const smtpUser = env.SMTP_USER
+  const smtpPass = env.SMTP_PASS
+  if (!url || !serviceKey || !smtpHost || !smtpUser || !smtpPass) {
     return Response.json({ error: 'Migrace zatím není nastavená.' }, { status: 503 })
   }
+  const smtpPort = Number(env.SMTP_PORT ?? 465)
+  const from = env.MIGRATION_FROM ?? `Muzio <${smtpUser}>`
+  const mailer = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+  })
   const sb = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
 
   const deps: MigrateDeps = {
@@ -55,12 +67,7 @@ export async function POST(request: Request): Promise<Response> {
     },
     async sendCode(to, code) {
       const mail = codeEmail(code)
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to: [to], subject: mail.subject, text: mail.text, html: mail.html }),
-      })
-      if (!response.ok) throw new Error(`Resend ${response.status}`)
+      await mailer.sendMail({ from, to, subject: mail.subject, text: mail.text, html: mail.html })
     },
     async createUser({ email, password, fullName, dateOfBirth }) {
       const { data, error } = await sb.auth.admin.createUser({

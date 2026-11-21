@@ -1,5 +1,5 @@
 // What /api/migrate does (Migrace z Base44, migration 0055), with Supabase,
-// Resend and the clock passed in as `deps` so it can be tested.
+// the mailer and the clock passed in as `deps` so it can be tested.
 //
 //   request:  e-mail -> is it in the Base44 data? -> mail a one-time code
 //   complete: e-mail + code + the new account's details -> create the account,
