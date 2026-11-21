@@ -6,6 +6,7 @@ import { Toast } from '../../components/ui/Toast'
 import { Streak } from '../../components/gamification/Streak'
 import { XPDisplay } from '../../components/gamification/XPDisplay'
 import { StarsDisplay } from '../../components/gamification/StarsDisplay'
+import { FlamesDisplay } from '../../components/gamification/FlamesDisplay'
 import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { DailyReminderBanner } from '../../components/gamification/DailyReminderBanner'
 import { Confetti } from '../../components/gamification/Confetti'
@@ -136,6 +137,7 @@ export function StudentDashboard() {
           <h1 className="text-xl">Ahoj, {firstName}</h1>
           <div className="flex flex-wrap items-center gap-2">
             <Streak count={profile.streak} freezesAvailable={profile.streak_freezes_available} />
+            {totalFlames !== undefined && <FlamesDisplay flames={totalFlames} />}
             <XPDisplay xp={profile.xp ?? 0} />
             <StarsDisplay stars={profile.stars} />
           </div>
