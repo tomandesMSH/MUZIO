@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PupilFlames } from '../../components/teacher/PupilFlames'
+import { TeacherDaysEditor } from '../../components/teacher/TeacherDaysEditor'
 import { fetchImportedFlames, fetchPupilFlameDays } from '../../lib/data/pupilFlames'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
@@ -102,6 +103,13 @@ export function StudentCard() {
           <div>
             <h2 className="text-sm font-heading font-semibold mb-2">Plamínky a svět</h2>
             <PupilFlames world={pupil.world} dayKeys={flameDays.data} importedFlames={importedFlames.data ?? 0} />
+          </div>
+        )}
+
+        {pupil && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold mb-2">Připsat den cvičení</h2>
+            <TeacherDaysEditor studentId={id} onChanged={flameDays.refetch} />
           </div>
         )}
 

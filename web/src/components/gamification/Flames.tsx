@@ -18,7 +18,7 @@ export function FlameIcon({ lit, className = 'h-7 w-7' }: { lit: boolean; classN
 }
 
 // The row of seven flames for the current phase and the round of 28 under it.
-export function Flames({ progress }: { progress: FlameProgress }) {
+export function Flames({ progress, teacherDays = 0 }: { progress: FlameProgress; teacherDays?: number }) {
   const { filled, toNextPhase, atMilestone, inCycle, total, completedCycles } = progress
   return (
     <div>
@@ -45,6 +45,7 @@ export function Flames({ progress }: { progress: FlameProgress }) {
       <p className="mt-2 text-xs text-text-muted">
         Plamínek dostaneš za každý den, kdy pošleš nahrávku. Dny nemusí jít po sobě.
         {total > 0 && ` Celkem ${flamesLabel(total)}`}
+        {teacherDays > 0 && ` (z toho ${teacherDays} ${teacherDays === 1 ? 'den připsal' : teacherDays <= 4 ? 'dny připsal' : 'dní připsal'} učitel)`}
         {completedCycles > 0 && `, hotové světy: ${completedCycles}`}
         {total > 0 && '.'}
       </p>

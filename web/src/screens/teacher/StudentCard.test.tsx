@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { StudentCard } from './StudentCard'
 
 const nav = vi.hoisted(() => ({ to: vi.fn() }))
+vi.mock('../../components/teacher/TeacherDaysEditor', () => ({ TeacherDaysEditor: () => <div>pripsat den</div> }))
 vi.mock('../../components/teacher/MessageToPupil', () => ({ MessageToPupil: () => <div>pošta</div> }))
 vi.mock('react-router-dom', async (orig) => ({
   ...(await orig<typeof import('react-router-dom')>()),

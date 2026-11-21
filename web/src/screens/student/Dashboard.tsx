@@ -26,6 +26,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchCompletedAssignmentIds, fetchOwnLogsCount, fetchPracticeDayKeys, fetchWeeklyStats } from '../../lib/data/practiceLogs'
 import { countPracticeDays, flameProgress } from '../../lib/flames'
 import { fetchImportedFlames } from '../../lib/data/pupilFlames'
+import { fetchTeacherDays } from '../../lib/data/teacherDays'
 import { detectFlameMilestone } from '../../lib/gamification/detectFlameMilestone'
 import { playFanfare } from '../../lib/sounds'
 import { fetchStudentAssignments, fetchStudentClassrooms } from '../../lib/data/classrooms'
@@ -54,6 +55,7 @@ export function StudentDashboard() {
   )
   const dayKeys = useQuery(() => (userId ? fetchPracticeDayKeys(userId) : Promise.resolve([])), [userId])
   // Flames brought over from Base44 (Migrace) count on top of the days here.
+  const teacherDays = useQuery(() => (userId ? fetchTeacherDays(userId) : Promise.resolve([])), [userId])
   const importedFlames = useQuery(() => (userId ? fetchImportedFlames(userId) : Promise.resolve(0)), [userId])
   const totalFlames =
     dayKeys.data && importedFlames.data !== undefined ? countPracticeDays(dayKeys.data) + importedFlames.data : undefined
@@ -197,7 +199,7 @@ export function StudentDashboard() {
 
         {dayKeys.data && (
           <Card>
-            <Flames progress={flameProgress(totalFlames ?? countPracticeDays(dayKeys.data))} />
+            <Flames progress={flameProgress(totalFlames ?? countPracticeDays(dayKeys.data))} teacherDays={teacherDays.data?.length ?? 0} />
           </Card>
         )}
 
