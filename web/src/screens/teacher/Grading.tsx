@@ -42,7 +42,7 @@ import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { isReviewed, pickNextToGrade, reviewLabel } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
-import { refreshNavBadges } from '../../lib/navBadges'
+import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
 
 // The badges a teacher gives by hand, with the reason shown on the toggle.
 const TEACHER_BADGE_HINTS: Record<TeacherBadgeId, string> = {
@@ -130,6 +130,11 @@ export function Grading() {
     () => (state.studentId ? fetchStudentLogs(state.studentId) : fetchPendingReview()),
     [state.studentId],
   )
+  // The list "Ke kontrole" here is the menu number too.
+  const waitingCount = state.studentId ? undefined : logs.data?.length
+  useEffect(() => {
+    if (waitingCount !== undefined) setNavBadgeCount('pending-review', waitingCount)
+  }, [waitingCount])
 
   const [selectedLog, setSelectedLog] = useState<PracticeLog>()
   // Own pieces behind the recordings (migration 0039).

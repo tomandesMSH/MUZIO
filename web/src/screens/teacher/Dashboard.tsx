@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '../../components/ui/Badge'
@@ -8,7 +8,7 @@ import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchPendingReview, markReviewed } from '../../lib/data/practiceLogs'
-import { refreshNavBadges } from '../../lib/navBadges'
+import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
 import { getErrorMessage } from '../../lib/errors'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { fetchStudents } from '../../lib/data/profiles'
@@ -50,6 +50,11 @@ export function TeacherDashboard() {
   const { message, show } = useToast()
   const [marking, setMarking] = useState<string | undefined>()
   const [confirmAll, setConfirmAll] = useState(false)
+  // The menu number follows the list on this page.
+  const pendingCount = pending.data?.length
+  useEffect(() => {
+    if (pendingCount !== undefined) setNavBadgeCount('pending-review', pendingCount)
+  }, [pendingCount])
 
   // "Označit jako ohodnocené": off the list without a grade - one recording,
   // or every one shown (filters and search apply).

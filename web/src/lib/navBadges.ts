@@ -51,6 +51,30 @@ export function refreshNavBadges() {
   for (const key of fetchedAt.keys()) load(key, true)
 }
 
+// A screen that has just loaded the full list (e.g. "Ke kontrole") sets the
+// number straight away, so the menu never disagrees with the page.
+export function setNavBadgeCount(key: NavBadgeKey, n: number) {
+  fetchedAt.set(key, Date.now())
+  if (counts[key] === n) return
+  counts = { ...counts, [key]: n }
+  emit()
+}
+
+// While a menu is on screen and the tab is visible, the numbers are checked
+// every minute (a recording sent meanwhile, or graded on another device).
+const POLL_MS = 60_000
+let poll: ReturnType<typeof setInterval> | undefined
+function startPolling() {
+  if (poll || typeof window === 'undefined' || import.meta.env.MODE === 'test') return
+  poll = setInterval(() => {
+    if (document.visibilityState === 'visible') refreshNavBadges()
+  }, POLL_MS)
+}
+function stopPolling() {
+  if (poll) clearInterval(poll)
+  poll = undefined
+}
+
 // For tests.
 export function resetNavBadges() {
   counts = {}
@@ -66,7 +90,11 @@ export function useNavBadges(keys: NavBadgeKey[]): Counts {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      startPolling()
+      return () => {
+        listeners.delete(listener)
+        if (listeners.size === 0) stopPolling()
+      }
     },
     () => counts,
   )

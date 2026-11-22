@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { TeacherDashboard } from './Dashboard'
 import { markReviewed } from '../../lib/data/practiceLogs'
-import { refreshNavBadges } from '../../lib/navBadges'
+import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
 
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
@@ -17,7 +17,7 @@ vi.mock('../../lib/data/practiceLogs', () => ({
   markReviewed: vi.fn(async () => {}),
 }))
 vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameCounts: async () => new Map([['4', 9]]) }))
-vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn() }))
+vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn(), setNavBadgeCount: vi.fn() }))
 vi.mock('../../lib/data/classrooms', () => ({
   fetchReviewContext: async () => ({
     classrooms: [
@@ -123,5 +123,14 @@ describe('TeacherDashboard', () => {
     )
     expect(await screen.findByText('9 plamínků')).toBeInTheDocument()
     expect(screen.queryByText(/Streak/)).toBeNull()
+  })
+
+  it('sets the menu number to the recordings waiting on the page', async () => {
+    render(
+      <MemoryRouter>
+        <TeacherDashboard />
+      </MemoryRouter>,
+    )
+    await vi.waitFor(() => expect(setNavBadgeCount).toHaveBeenCalledWith('pending-review', 3))
   })
 })
