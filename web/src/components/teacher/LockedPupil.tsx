@@ -61,11 +61,11 @@ function FakeCard() {
 const TITLE = 'K informacím tohoto žáka nemáš přístup'
 const TEXT = 'Žák není v žádné z tvých tříd. Až ho do některé přidáš, uvidíš jeho cvičení, plamínky, úkoly i nahrávky.'
 
-function Action({ hasClassrooms, className = '' }: { hasClassrooms: boolean; className?: string }) {
+function Action({ hasClassrooms, className = '', linkClassName = '' }: { hasClassrooms: boolean; className?: string; linkClassName?: string }) {
   return (
     <p className={className}>
       {hasClassrooms ? 'Přidej ho do třídy ' : 'Založ si třídu '}
-      <Link to="/teacher/classrooms" className="font-semibold text-coral-dark underline underline-offset-4">
+      <Link to="/teacher/classrooms" className={`font-semibold text-coral-dark underline underline-offset-4 ${linkClassName}`}>
         tady
       </Link>
       .
@@ -88,10 +88,10 @@ export function LockedPupil({ hasClassrooms }: { hasClassrooms: boolean }) {
         </div>
       </div>
       <div className="locked-modern absolute inset-0 items-start justify-center pt-8 px-4">
-        <div className="max-w-xl text-center space-y-4">
-          <h2 className="font-heading font-extralight text-3xl md:text-5xl leading-tight tracking-tight">{TITLE}</h2>
-          <p className="font-light text-base md:text-lg text-text-muted">{TEXT}</p>
-          <Action hasClassrooms={hasClassrooms} className="font-light text-base md:text-lg" />
+        <div className="max-w-4xl text-center">
+          <h2 className="font-heading font-extralight text-2xl md:text-4xl leading-tight tracking-tight md:whitespace-nowrap">{TITLE}</h2>
+          <p className="mt-10 mx-auto max-w-xl font-light text-base md:text-lg text-text-muted">{TEXT}</p>
+          <Action hasClassrooms={hasClassrooms} className="mt-4 font-light text-base md:text-lg" linkClassName="italic" />
         </div>
       </div>
     </div>
