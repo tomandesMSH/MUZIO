@@ -217,14 +217,6 @@ export function Playground() {
           </Control>
           <Control label="Akcentová barva">
             <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setAccent(null)}
-                aria-pressed={accent === null}
-                className={`rounded-lg px-2 py-1 text-[11px] ${accent === null ? 'bg-bg-card-alt font-semibold text-text-primary' : 'text-text-muted'}`}
-              >
-                Moje
-              </button>
               {[{ hex: '#f95c4b', label: 'Korálová' }, ...ACCENTS].map((a) => (
                 <button
                   key={a.hex}
@@ -237,13 +229,6 @@ export function Playground() {
                   style={{ background: a.hex }}
                 />
               ))}
-              <input
-                type="color"
-                aria-label="Vlastní barva"
-                value={accent ?? '#f95c4b'}
-                onChange={(e) => setAccent(e.target.value)}
-                className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
-              />
             </div>
           </Control>
           <Control label="Téma">
