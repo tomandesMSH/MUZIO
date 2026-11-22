@@ -62,6 +62,15 @@ export function worthCutting(bounds: SoundBounds | undefined, total: number): bo
   return bounds.start + (total - bounds.end) >= MIN_CUT_S && bounds.end - bounds.start >= 1
 }
 
+// Is the cut take believable? Its decoded length close to the asked-for one,
+// and its size in proportion to the whole take's (an empty or broken file
+// fails one or the other).
+export function usableCut(decoded: number, expected: number, cutBytes: number, wholeBytes: number, wholeSeconds: number): boolean {
+  if (!(decoded > 0) || Math.abs(decoded - expected) > Math.max(1, expected * 0.1)) return false
+  const expectedBytes = wholeSeconds > 0 ? (wholeBytes * expected) / wholeSeconds : 0
+  return cutBytes >= expectedBytes * 0.5
+}
+
 export interface TrimmedTake {
   blob: Blob
   // Seconds cut off the start and the end, and the length now.
@@ -109,11 +118,14 @@ export async function trimSilence(blob: Blob): Promise<TrimmedTake | undefined> 
     await conversion.execute()
     if (!target.buffer) return undefined
     const trimmed = new Blob([target.buffer], { type: blob.type || format.mimeType })
-    // The cut lands on packet edges, so its real length is read back.
-    const duration = await decodeMono(trimmed)
-      .then((d) => d.total)
-      .catch(() => bounds.end - bounds.start)
-    return { blob: trimmed, cutStart: bounds.start, cutEnd: total - bounds.end, duration }
+    // The cut lands on packet edges, so its real length is read back - and
+    // the cut take must really play: once (a Chrome WebM take) it came out as
+    // an empty file with only the header, and that empty file was sent.
+    // Anything doubtful = the whole take goes instead.
+    const expected = bounds.end - bounds.start
+    const check = await decodeMono(trimmed).catch(() => undefined)
+    if (!check || !usableCut(check.total, expected, trimmed.size, blob.size, total)) return undefined
+    return { blob: trimmed, cutStart: bounds.start, cutEnd: total - bounds.end, duration: check.total }
   } catch {
     return undefined
   }

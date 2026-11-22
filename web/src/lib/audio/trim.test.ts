@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LEAD_S, TAIL_S, findSoundBounds, worthCutting } from './trim'
+import { LEAD_S, TAIL_S, findSoundBounds, worthCutting, usableCut } from './trim'
 
 const RATE = 8000
 
@@ -58,5 +58,21 @@ describe('worthCutting', () => {
 
   it('not when almost nothing would be left', () => {
     expect(worthCutting({ start: 4, end: 4.5 }, 10)).toBe(false)
+  })
+})
+
+describe('usableCut', () => {
+  it('takes a cut that plays as long as asked and is in proportion', () => {
+    // 30 s take of 240 kB cut to 24 s, 190 kB
+    expect(usableCut(24.1, 24, 190_000, 240_000, 30)).toBe(true)
+  })
+
+  it('refuses the empty header-only file it once produced', () => {
+    expect(usableCut(24.177, 24, 340, 240_000, 30)).toBe(false)
+  })
+
+  it('refuses a cut that decodes to the wrong length or not at all', () => {
+    expect(usableCut(3, 24, 190_000, 240_000, 30)).toBe(false)
+    expect(usableCut(0, 24, 190_000, 240_000, 30)).toBe(false)
   })
 })
