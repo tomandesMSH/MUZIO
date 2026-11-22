@@ -8,9 +8,10 @@ import { Toast } from '../../components/ui/Toast'
 import { AppShell } from '../../components/layout/AppShell'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchPendingReview, markReviewed } from '../../lib/data/practiceLogs'
-import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
+import { refreshNavBadges } from '../../lib/navBadges'
 import { getErrorMessage } from '../../lib/errors'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { ReviewNotificationsButton } from '../../components/teacher/ReviewNotifications'
 import { fetchStudents } from '../../lib/data/profiles'
 import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
 import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
@@ -53,7 +54,7 @@ export function TeacherDashboard() {
   // The menu number follows the list on this page.
   const pendingCount = pending.data?.length
   useEffect(() => {
-    if (pendingCount !== undefined) setNavBadgeCount('pending-review', pendingCount)
+    if (pendingCount !== undefined) refreshNavBadges()
   }, [pendingCount])
 
   // "Označit jako ohodnocené": off the list without a grade - one recording,
@@ -97,7 +98,10 @@ export function TeacherDashboard() {
     <AppShell role="teacher">
       {message && <Toast message={message} />}
       <div className="space-y-4 flex-1">
-        <h1 className="text-xl">Přehled žáků</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-xl">Přehled žáků</h1>
+          <ReviewNotificationsButton />
+        </div>
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
 
         <div>

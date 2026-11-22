@@ -42,7 +42,7 @@ import { Collapse, Chevron } from '../../components/ui/Collapse'
 import { isReviewed, pickNextToGrade, reviewLabel } from '../../lib/grading'
 import { fetchPiecesByIds, type OwnPiece } from '../../lib/data/ownPieces'
 import { gradingKeyAction, isTextField } from '../../lib/gradingKeys'
-import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
+import { refreshNavBadges } from '../../lib/navBadges'
 
 // The badges a teacher gives by hand, with the reason shown on the toggle.
 const TEACHER_BADGE_HINTS: Record<TeacherBadgeId, string> = {
@@ -133,7 +133,7 @@ export function Grading() {
   // The list "Ke kontrole" here is the menu number too.
   const waitingCount = state.studentId ? undefined : logs.data?.length
   useEffect(() => {
-    if (waitingCount !== undefined) setNavBadgeCount('pending-review', waitingCount)
+    if (waitingCount !== undefined) refreshNavBadges()
   }, [waitingCount])
 
   const [selectedLog, setSelectedLog] = useState<PracticeLog>()

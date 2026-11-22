@@ -5,6 +5,7 @@ import { toDateKey } from '../game-logic'
 import type { PracticeLog } from './types'
 import { FEEDBACK_IMAGES_BUCKET } from '../feedbackImages'
 import { myPupilScope } from './teacherScope'
+import { fetchReviewSeenAt } from './reviewSeen'
 
 export async function fetchOwnLogs(userId: string): Promise<PracticeLog[]> {
   const { data, error } = await supabase
@@ -104,12 +105,14 @@ export async function markFeedbackSeen(ids: (string | number)[]): Promise<void> 
   if (error) throw error
 }
 
-// How many recordings wait for a grade (for the badge in the teacher's menu).
+// How many recordings wait for a grade (for the badge in the teacher's menu):
+// only those sent after "Označit jako přečtené" (reviewSeen.ts).
 export async function countPendingReview(): Promise<number> {
-  const scope = await myPupilScope()
+  const [scope, seenAt] = await Promise.all([myPupilScope(), fetchReviewSeenAt().catch(() => null)])
   if (scope?.size === 0) return 0
   let query = supabase.from('practice_logs').select('id', { count: 'exact', head: true }).is('teacher_comment', null)
   if (scope) query = query.in('user_id', [...scope])
+  if (seenAt) query = query.gt('created_at', seenAt)
   const { count, error } = await query
   if (error) throw error
   return count ?? 0

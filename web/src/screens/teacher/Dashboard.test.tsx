@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { TeacherDashboard } from './Dashboard'
 import { markReviewed } from '../../lib/data/practiceLogs'
-import { refreshNavBadges, setNavBadgeCount } from '../../lib/navBadges'
+import { refreshNavBadges } from '../../lib/navBadges'
 
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../components/layout/AppShell', () => ({ AppShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
@@ -17,7 +17,8 @@ vi.mock('../../lib/data/practiceLogs', () => ({
   markReviewed: vi.fn(async () => {}),
 }))
 vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameCounts: async () => new Map([['4', 9]]) }))
-vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn(), setNavBadgeCount: vi.fn() }))
+vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn(), useNavBadges: () => ({}) }))
+vi.mock('../../components/teacher/ReviewNotifications', () => ({ ReviewNotificationsButton: () => <button>Oznámení</button> }))
 vi.mock('../../lib/data/classrooms', () => ({
   fetchReviewContext: async () => ({
     classrooms: [
@@ -125,12 +126,13 @@ describe('TeacherDashboard', () => {
     expect(screen.queryByText(/Streak/)).toBeNull()
   })
 
-  it('sets the menu number to the recordings waiting on the page', async () => {
+  it('re-counts the menu number when the waiting list loads', async () => {
+    vi.mocked(refreshNavBadges).mockClear()
     render(
       <MemoryRouter>
         <TeacherDashboard />
       </MemoryRouter>,
     )
-    await vi.waitFor(() => expect(setNavBadgeCount).toHaveBeenCalledWith('pending-review', 3))
+    await vi.waitFor(() => expect(refreshNavBadges).toHaveBeenCalled())
   })
 })
