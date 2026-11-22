@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { artFrame, worldArtUrl, worldCoverUrl } from './worldArt'
+import { artFrame, worldArt, worldCover } from './worldArt'
 
 describe('artFrame', () => {
   it('first picture before any flame, last for a finished world', () => {
@@ -14,12 +14,20 @@ describe('artFrame', () => {
   })
 })
 
-describe('worldArtUrl', () => {
-  it('the castle has pictures, worlds without artwork get none', () => {
-    expect(worldArtUrl('hrad', 4, 28)).toMatch(/worlds\/hrad\/hrad-7\.svg$/)
-    expect(worldArtUrl('hrad', 2)).toMatch(/hrad-4\.svg$/)
-    expect(worldArtUrl('vesmir', 2)).toBeUndefined()
-    expect(worldCoverUrl('hrad')).toMatch(/hrad-7\.svg$/)
-    expect(worldCoverUrl('zahradka')).toBeUndefined()
+describe('worldArt', () => {
+  it('the castle: a line drawing for every picture', () => {
+    expect(worldArt('hrad', 4, 28)).toMatchObject({ kind: 'lines', reveal: 1 })
+    expect(worldArt('hrad', 4, 28)?.url).toMatch(/worlds\/hrad\/hrad-7\.svg$/)
+    expect(worldArt('hrad', 2)?.url).toMatch(/hrad-4\.svg$/)
+    expect(worldCover('hrad')?.url).toMatch(/hrad-7\.svg$/)
+  })
+
+  it('a world with only its last picture: that one stands in, filling in with the flames', () => {
+    const start = worldArt('zahradka', 0, 0)
+    expect(start).toMatchObject({ kind: 'picture', reveal: 0 })
+    expect(start?.url).toMatch(/worlds\/zahradka\/zahradka-7\.webp$/)
+    expect(worldArt('vesmir', 2, 14)?.reveal).toBe(0.5)
+    expect(worldArt('podium', 4, 28)).toMatchObject({ reveal: 1 })
+    expect(worldCover('podium')?.url).toMatch(/podium-7\.webp$/)
   })
 })

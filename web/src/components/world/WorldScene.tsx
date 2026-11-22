@@ -1,5 +1,5 @@
 import { worldInfo, type WorldId } from '../../lib/world'
-import { maskStyle, worldArtUrl } from './worldArt'
+import { maskStyle, revealStyle, worldArt } from './worldArt'
 
 // The pupil's world at its phase: 0 = nothing yet, 1-4 = after 7, 14, 21 and
 // 28 flames. A placeholder until the designer's artwork (160 x 110 SVG, five
@@ -20,14 +20,19 @@ export function WorldScene({
 }) {
   const p = Math.max(0, Math.min(4, Math.floor(phase)))
   const info = worldInfo(world)
-  const art = worldArtUrl(world, p, flamesInCycle)
+  const art = worldArt(world, p, flamesInCycle)
+  const label = `${info.name}: ${p === 0 ? 'začátek' : info.phases[p - 1]}`
+  if (art?.kind === 'lines') {
+    return <div role="img" aria-label={label} className={`${className} aspect-[4/3] bg-coral`} style={{ ...maskStyle(art.url), ...revealStyle(art.reveal) }} />
+  }
   if (art) {
     return (
-      <div
-        role="img"
-        aria-label={`${info.name}: ${p === 0 ? 'začátek' : info.phases[p - 1]}`}
-        className={`${className} aspect-[4/3] bg-coral`}
-        style={maskStyle(art)}
+      <img
+        src={art.url}
+        alt={label}
+        loading="lazy"
+        className={`${className} aspect-[4/3] rounded-xl object-cover transition-[filter] duration-500`}
+        style={revealStyle(art.reveal)}
       />
     )
   }

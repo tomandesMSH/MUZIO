@@ -9,7 +9,7 @@ import { LevelProgress } from '../../components/gamification/LevelProgress'
 import { WorldProgress } from '../../components/world/WorldProgress'
 import { WorldScene } from '../../components/world/WorldScene'
 import { WorldCover } from '../../components/world/WorldCover'
-import { artFrameCount } from '../../components/world/worldArt'
+import { artFrameCount, artFramesReady } from '../../components/world/worldArt'
 import { PupilFlames } from '../../components/teacher/PupilFlames'
 import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
 import { LockedPupil } from '../../components/teacher/LockedPupil'
@@ -191,7 +191,7 @@ export function Playground() {
               {WORLDS.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
-                  {artFrameCount(w.id) ? ` (${artFrameCount(w.id)} obrázků)` : ' (bez grafiky)'}
+                  {artFrameCount(w.id) ? ` (${artFramesReady(w.id).length} z ${artFrameCount(w.id)} obrázků)` : ' (bez grafiky)'}
                 </option>
               ))}
             </select>
