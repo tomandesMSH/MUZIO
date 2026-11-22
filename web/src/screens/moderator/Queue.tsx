@@ -144,6 +144,13 @@ export function Queue() {
           ← Změnit panel
         </button>
       )}
+      <button
+        type="button"
+        onClick={() => navigate('/moderator/playground')}
+        className="fixed bottom-4 left-4 z-30 rounded-xl border border-border bg-bg-card px-3 py-2 text-xs font-heading font-semibold text-text-primary shadow-clay-sm hover:bg-bg-card-alt"
+      >
+        🧪 Dev Playground
+      </button>
       <div className="flex items-center justify-between">
         <h1 className="text-xl">Admin dashboard</h1>
         <Button variant="ghost" onClick={handleLogout}>

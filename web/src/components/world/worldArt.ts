@@ -9,6 +9,11 @@ const ART: Partial<Record<WorldId, number>> = {
   hrad: 7,
 }
 
+// How many pictures the world has (0 = none yet).
+export function artFrameCount(world: WorldId): number {
+  return ART[world] ?? 0
+}
+
 // Which picture (1..count) belongs to the flames in this round (0..28): the
 // first one before any flame, the last one for a finished world, the rest
 // spread evenly in between.

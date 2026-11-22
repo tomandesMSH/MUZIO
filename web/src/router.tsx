@@ -4,7 +4,7 @@ import { ChoosePanel } from './screens/ChoosePanel'
 import { JoinByLink } from './screens/JoinByLink'
 import { RequireRole } from './components/routing/RequireRole'
 import { RequireModerator } from './components/routing/RequireModerator'
-import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, WorldPicker, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Classes, StudentCard, Queue } from './screens.lazy'
+import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, WorldPicker, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Classes, StudentCard, Queue, Playground } from './screens.lazy'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -136,6 +136,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireModerator>
         <Screen><Queue /></Screen>
+      </RequireModerator>
+    ),
+  },
+  {
+    path: '/moderator/playground',
+    element: (
+      <RequireModerator>
+        <Screen><Playground /></Screen>
       </RequireModerator>
     ),
   },
