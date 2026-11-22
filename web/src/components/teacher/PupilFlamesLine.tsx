@@ -4,7 +4,10 @@ import { worldInfo, type WorldId } from '../../lib/world'
 
 // A pupil's flames and world phase in one short line, the way the pupil sees
 // them - for the teacher's and admin's lists (instead of the old streak).
-export function PupilFlamesLine({ flames, world }: { flames: number | undefined; world?: WorldId | null }) {
+// flames: undefined = still loading, null = not this teacher's pupil (the
+// database doesn't give their flames until they are in one of the classrooms).
+export function PupilFlamesLine({ flames, world }: { flames: number | undefined | null; world?: WorldId | null }) {
+  if (flames === null) return null
   if (flames === undefined) return <span className="inline-flex items-center gap-1">…</span>
   const { phasesDone } = flameProgress(flames)
   return (

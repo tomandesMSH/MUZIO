@@ -263,9 +263,9 @@ export function TeacherDashboard() {
                   <Avatar name={student.full_name} size={38} />
                   <div>
                     <div className="font-heading font-semibold text-sm">{student.full_name}</div>
-                    {flameCounts.data !== null && (
+                    {flameCounts.data !== null && !(flameCounts.data && !flameCounts.data.has(student.id)) && (
                       <div className="text-text-muted text-xs">
-                        <PupilFlamesLine flames={flameCounts.data?.get(student.id) ?? (flameCounts.data ? 0 : undefined)} world={student.world} />
+                        <PupilFlamesLine flames={flameCounts.data ? (flameCounts.data.get(student.id) ?? null) : undefined} world={student.world} />
                       </div>
                     )}
                   </div>

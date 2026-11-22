@@ -19,7 +19,8 @@ import { fetchStudentLogs } from '../../lib/data/practiceLogs'
 import { isReviewed, isSkipped } from '../../lib/grading'
 import { BeforeAfter } from '../../components/feedback/BeforeAfter'
 import { fetchPiecesByIds } from '../../lib/data/ownPieces'
-import { fetchPupilAssignments } from '../../lib/data/classrooms'
+import { fetchPupilAssignments, fetchStudentClassroomsForTeacher, fetchTeacherClassrooms } from '../../lib/data/classrooms'
+import { LockedPupil } from '../../components/teacher/LockedPupil'
 import { dueLabel } from '../../lib/dueDate'
 import { NavIcon } from '../../components/layout/NavIcon'
 
@@ -42,6 +43,18 @@ export function StudentCard() {
   const flameDays = useQuery(() => fetchPupilFlameDays(id).catch(() => null), [id])
   const importedFlames = useQuery(() => fetchImportedFlames(id), [id])
   const [assignOpen, setAssignOpen] = useState(false)
+  // Not in any of the teacher's classrooms = no access to their practice
+  // (RLS); the card says so instead of showing empty sections. A failed
+  // check (null) leaves the card as it is.
+  const memberOf = useQuery(
+    () => (profile ? fetchStudentClassroomsForTeacher(profile.id, id).catch(() => null) : Promise.resolve(null)),
+    [profile?.id, id],
+  )
+  const ownClassrooms = useQuery(
+    () => (profile ? fetchTeacherClassrooms(profile.id).catch(() => null) : Promise.resolve(null)),
+    [profile?.id],
+  )
+  const locked = memberOf.data?.length === 0
 
   const pupil = students.data?.find((s) => s.id === id)
   const list = logs.data ?? []
@@ -74,11 +87,11 @@ export function StudentCard() {
             <div className="min-w-0 flex-1">
               <h1 className="text-xl truncate">{pupil.full_name}</h1>
               <p className="text-xs text-text-muted">
-                {pupil.xp ?? 0} XP · ⭐ {pupil.stars}
-                {lastAt ? ` · naposledy ${new Date(lastAt).toLocaleDateString('cs-CZ')}` : ' · zatím bez nahrávky'}
+                {locked ? 'Není v žádné z tvých tříd' : `${pupil.xp ?? 0} XP · ⭐ ${pupil.stars}`}
+                {locked ? '' : lastAt ? ` · naposledy ${new Date(lastAt).toLocaleDateString('cs-CZ')}` : ' · zatím bez nahrávky'}
               </p>
             </div>
-            <div className="flex gap-2">
+            {!locked && (<div className="flex gap-2">
               <Button className="!px-3 !py-1.5 text-xs" onClick={() => setAssignOpen(true)}>
                 Zadat úkol
               </Button>
@@ -89,9 +102,14 @@ export function StudentCard() {
               >
                 Všechny nahrávky{waiting > 0 ? ` (${waiting} čeká)` : ''}
               </Button>
-            </div>
+            </div>)}
           </div>
         )}
+
+        {locked ? (
+          <LockedPupil hasClassrooms={(ownClassrooms.data?.length ?? 0) > 0} />
+        ) : (
+        <>
 
         <div>
           <h2 className="text-sm font-heading font-semibold mb-2">Kalendář cvičení</h2>
@@ -207,6 +225,8 @@ export function StudentCard() {
           </h2>
           <StudentNotes studentId={id} />
         </div>
+        </>
+        )}
       </div>
       {pupil && (
         <AssignToStudentModal

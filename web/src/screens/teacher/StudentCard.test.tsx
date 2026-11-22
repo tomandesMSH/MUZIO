@@ -25,7 +25,10 @@ vi.mock('../../lib/data/practiceLogs', () => ({
     { id: 8, user_id: 's1', created_at: '2026-11-10T10:00:00Z', duration_seconds: 60, teacher_comment: 'x', rating: 4, feedback_good: 'Hezky' },
   ],
 }))
+let memberOf = [{ id: 'c1', name: 'Housle' }]
 vi.mock('../../lib/data/classrooms', () => ({
+  fetchStudentClassroomsForTeacher: async () => memberOf,
+  fetchTeacherClassrooms: async () => [{ id: 'c1', name: 'Housle' }],
   fetchPupilAssignments: async () => [
     { assignment: { id: 'a1', title: 'Stupnice C dur', due_date: null }, classroomName: 'Housle', done: true },
     { assignment: { id: 'a2', title: 'Etuda 3', due_date: null }, classroomName: 'Housle', done: false },
@@ -63,5 +66,14 @@ describe('StudentCard', () => {
     renderCard()
     fireEvent.click(await screen.findByText('Ohodnotit'))
     expect(nav.to).toHaveBeenCalledWith('/teacher/grading', { state: { studentId: 's1', logId: '9' } })
+  })
+
+  it('a pupil outside the teacher classrooms is locked, with the way to get access', async () => {
+    memberOf = []
+    renderCard()
+    expect(await screen.findByText('K informacím tohoto žáka nemáš přístup')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'tady' })).toHaveAttribute('href', '/teacher/classrooms')
+    expect(screen.queryByRole('button', { name: 'Zadat úkol' })).toBeNull()
+    memberOf = [{ id: 'c1', name: 'Housle' }]
   })
 })

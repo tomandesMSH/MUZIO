@@ -227,9 +227,9 @@ export function Students() {
                   <div className="min-w-0">
                     <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
                     <div className="text-text-muted text-xs">
-                      {flameCounts.data !== null && (
+                      {flameCounts.data !== null && !(flameCounts.data && !flameCounts.data.has(student.id)) && (
                         <>
-                          <PupilFlamesLine flames={flameCounts.data?.get(student.id) ?? (flameCounts.data ? 0 : undefined)} world={student.world} />
+                          <PupilFlamesLine flames={flameCounts.data ? (flameCounts.data.get(student.id) ?? null) : undefined} world={student.world} />
                           {' · '}
                         </>
                       )}

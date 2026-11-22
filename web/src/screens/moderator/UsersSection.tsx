@@ -262,9 +262,9 @@ export function UsersSection() {
                 </div>
                 {user.role === 'student' && (
                   <div className="text-text-muted text-xs">
-                    {flameCounts.data !== null && (
+                    {flameCounts.data !== null && !(flameCounts.data && !flameCounts.data.has(user.id)) && (
                       <>
-                        <PupilFlamesLine flames={flameCounts.data?.get(user.id) ?? (flameCounts.data ? 0 : undefined)} />
+                        <PupilFlamesLine flames={flameCounts.data ? (flameCounts.data.get(user.id) ?? null) : undefined} />
                         {' · '}
                       </>
                     )}
