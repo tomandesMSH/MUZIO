@@ -10,6 +10,7 @@ import { useQuery } from '../../lib/data/useQuery'
 import { fetchPendingReview, markReviewed } from '../../lib/data/practiceLogs'
 import { refreshNavBadges } from '../../lib/navBadges'
 import { getErrorMessage } from '../../lib/errors'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { fetchStudents } from '../../lib/data/profiles'
 import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
@@ -40,15 +41,17 @@ export function TeacherDashboard() {
   )
   const { message, show } = useToast()
   const [marking, setMarking] = useState<string | undefined>()
+  const [confirmAll, setConfirmAll] = useState(false)
 
-  // "Označit jako ohodnocené": off the list without a grade.
-  async function markAsReviewed(logId: string) {
-    setMarking(logId)
+  // "Označit jako ohodnocené": off the list without a grade - one recording,
+  // or every one shown (filters and search apply).
+  async function markAsReviewed(logIds: string[]) {
+    setMarking(logIds.length === 1 ? logIds[0] : 'all')
     try {
-      await markReviewed([logId])
+      await markReviewed(logIds)
       refreshNavBadges()
       pending.refetch()
-      show('Označeno jako ohodnocené')
+      show(logIds.length === 1 ? 'Označeno jako ohodnocené' : `Označeno ${logIds.length} nahrávek`)
     } catch (err) {
       show(getErrorMessage(err, 'Nepovedlo se, zkus to znovu.'))
     } finally {
@@ -85,9 +88,32 @@ export function TeacherDashboard() {
         <SearchBar value={search} onChange={setSearch} placeholder="Hledat žáka" />
 
         <div>
-          <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">
-            Ke kontrole ({filteredPending?.length ?? 0})
-          </h2>
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h2 className="text-sm font-heading font-semibold text-text-muted">
+              Ke kontrole ({filteredPending?.length ?? 0})
+            </h2>
+            {(filteredPending?.length ?? 0) > 1 && (
+              <button
+                type="button"
+                disabled={marking === 'all'}
+                onClick={() => setConfirmAll(true)}
+                className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary disabled:opacity-40"
+              >
+                Označit vše ({filteredPending?.length})
+              </button>
+            )}
+          </div>
+          <ConfirmDialog
+            open={confirmAll}
+            title="Označit vše jako ohodnocené?"
+            message={`${filteredPending?.length ?? 0} zobrazených nahrávek zmizí z kontroly bez hodnocení. Žáci za ně nedostanou XP.`}
+            confirmLabel="Označit vše"
+            onConfirm={() => {
+              setConfirmAll(false)
+              void markAsReviewed((filteredPending ?? []).map((l) => String(l.id)))
+            }}
+            onCancel={() => setConfirmAll(false)}
+          />
           {(pending.data?.length ?? 0) > 1 && (
             <div className="mb-2.5 flex flex-wrap items-center gap-2">
               {(context.data?.classrooms.length ?? 0) > 1 && (
@@ -164,7 +190,7 @@ export function TeacherDashboard() {
                   <button
                     type="button"
                     disabled={marking === String(log.id)}
-                    onClick={() => void markAsReviewed(String(log.id))}
+                    onClick={() => void markAsReviewed([String(log.id)])}
                     className="text-xs text-text-muted underline underline-offset-2 hover:text-text-primary disabled:opacity-40"
                   >
                     Označit jako ohodnocené

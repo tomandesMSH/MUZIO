@@ -99,4 +99,18 @@ describe('TeacherDashboard', () => {
     await vi.waitFor(() => expect(refreshNavBadges).toHaveBeenCalled())
     expect(markReviewed).toHaveBeenCalledWith(['11'])
   })
+
+  it('marks every recording shown at once, after confirming', async () => {
+    vi.mocked(markReviewed).mockClear()
+    render(
+      <MemoryRouter>
+        <TeacherDashboard />
+      </MemoryRouter>,
+    )
+    fireEvent.click(await screen.findByRole('button', { name: 'Označit vše (3)' }))
+    expect(markReviewed).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Označit vše' }))
+    await vi.waitFor(() => expect(markReviewed).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(markReviewed).mock.calls[0][0]).toEqual(expect.arrayContaining(['11', '12', '13']))
+  })
 })

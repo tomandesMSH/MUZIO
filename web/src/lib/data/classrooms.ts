@@ -325,11 +325,16 @@ async function attachToAssignment(assignmentId: string, file: File): Promise<voi
 
 // A short-lived link that downloads the assignment's file under its original
 // name. Signed, because the bucket is private (see migration 0023).
-export async function fetchAttachmentDownloadUrl(assignment: Pick<Assignment, 'attachment_path' | 'attachment_name'>): Promise<string> {
+// { download: false } = a link that shows the file in the browser (a PDF or a
+// photo of the score) instead of downloading it.
+export async function fetchAttachmentDownloadUrl(
+  assignment: Pick<Assignment, 'attachment_path' | 'attachment_name'>,
+  { download = true }: { download?: boolean } = {},
+): Promise<string> {
   if (!assignment.attachment_path) throw new Error('Úkol nemá přiložený soubor.')
   const { data, error } = await supabase.storage
     .from(ASSIGNMENT_FILES_BUCKET)
-    .createSignedUrl(assignment.attachment_path, 60 * 5, { download: assignment.attachment_name ?? true })
+    .createSignedUrl(assignment.attachment_path, 60 * 5, download ? { download: assignment.attachment_name ?? true } : undefined)
   if (error) throw error
   return data.signedUrl
 }

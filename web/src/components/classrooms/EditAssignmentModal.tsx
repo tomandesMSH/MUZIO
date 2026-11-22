@@ -70,7 +70,7 @@ export function EditAssignmentModal({ assignment, submitting, error, onClose, on
 
         {hasFile && fileMode === 'keep' ? (
           <div>
-            <div className="text-xs font-semibold text-text-muted mb-1.5">Noty pro Keyboard Utils</div>
+            <div className="text-xs font-semibold text-text-muted mb-1.5">Noty</div>
             <div className="flex items-center gap-2 rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-2.5 text-sm">
               <NavIcon name="lessons" className="w-4 h-4 shrink-0 text-text-muted" />
               <span className="truncate flex-1">{assignment.attachment_name}</span>

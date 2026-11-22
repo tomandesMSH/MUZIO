@@ -8,7 +8,7 @@ interface AttachmentFieldProps {
   onChange: (file: File | null) => void
 }
 
-// Optional: a score (MIDI / MusicXML) attached to a new assignment, for the
+// Optional: a score (PDF / photo, or MIDI / MusicXML) attached to a new assignment, for the
 // student to practise in Keyboard Utils.
 export function AttachmentField({ file, onChange }: AttachmentFieldProps) {
   const input = useRef<HTMLInputElement>(null)
@@ -30,10 +30,13 @@ export function AttachmentField({ file, onChange }: AttachmentFieldProps) {
   return (
     <div>
       <div className="text-xs font-semibold text-text-muted mb-1.5 flex items-center gap-1.5">
-        Noty pro Keyboard Utils (nepovinné)
-        <InfoTip label="Co je soubor pro Keyboard Utils">
+        Noty (nepovinné)
+        <InfoTip label="Jaké noty jde přiložit">
           <span className="block mb-1.5">
-            Nepovinné. Můžeš přiložit noty skladby, kterou má žák cvičit: soubor <b>MIDI</b> (.mid) nebo{' '}
+            <b>PDF</b> nebo <b>fotka not</b> (JPG, PNG): žák si je otevře v telefonu nebo počítači a cvičí podle nich.
+          </span>
+          <span className="block mb-1.5">
+            Nebo soubor <b>MIDI</b> (.mid) či{' '}
             <b>MusicXML</b> (.musicxml, .mxl) - třeba export z MuseScore nebo Sibelia, nebo skladbu stáhnutou
             z Mutopia Project.
           </span>
@@ -69,7 +72,7 @@ export function AttachmentField({ file, onChange }: AttachmentFieldProps) {
           className="w-full rounded-xl border border-dashed border-border px-4 py-2.5 text-sm text-text-muted hover:text-text-primary hover:bg-bg-card-alt transition text-left"
           onClick={() => input.current?.click()}
         >
-          + Přiložit soubor MIDI nebo MusicXML
+          + Přiložit noty (PDF, foto, MIDI, MusicXML)
         </button>
       )}
       {error && <p className="text-xs text-coral-dark mt-1.5">{error}</p>}

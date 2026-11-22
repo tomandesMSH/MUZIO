@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { attachmentContentType, attachmentPath, MAX_ATTACHMENT_BYTES, validateAttachment } from './attachments'
+import { attachmentContentType, attachmentKind, attachmentPath, MAX_ATTACHMENT_BYTES, validateAttachment } from './attachments'
 
 describe('validateAttachment', () => {
-  it('accepts MIDI and MusicXML files', () => {
-    for (const name of ['skladba.mid', 'SKLADBA.MIDI', 'noty.musicxml', 'noty.mxl', 'export.xml']) {
+  it('accepts MIDI, MusicXML, PDF and photos of the score', () => {
+    for (const name of ['skladba.mid', 'SKLADBA.MIDI', 'noty.musicxml', 'noty.mxl', 'export.xml', 'noty.pdf', 'foto.JPG', 'foto.jpeg', 'sken.png']) {
       expect(validateAttachment({ name, size: 1000 })).toBeNull()
     }
   })
 
   it('rejects other files', () => {
-    for (const name of ['nahravka.mp3', 'noty.pdf', 'bez-pripony', 'skladba.mid.exe']) {
+    for (const name of ['nahravka.mp3', 'noty.docx', 'bez-pripony', 'skladba.mid.exe', 'noty.pdf.exe']) {
       expect(validateAttachment({ name, size: 1000 })).not.toBeNull()
     }
   })
@@ -37,5 +37,17 @@ describe('attachmentContentType', () => {
     expect(attachmentContentType('a.mid')).toBe('audio/midi')
     expect(attachmentContentType('a.mxl')).toBe('application/vnd.recordare.musicxml')
     expect(attachmentContentType('a.musicxml')).toBe('application/vnd.recordare.musicxml+xml')
+    expect(attachmentContentType('a.pdf')).toBe('application/pdf')
+    expect(attachmentContentType('a.JPG')).toBe('image/jpeg')
+    expect(attachmentContentType('a.png')).toBe('image/png')
+  })
+})
+
+describe('attachmentKind', () => {
+  it('PDF and pictures are to look at, MIDI and MusicXML go to Keyboard Utils', () => {
+    expect(attachmentKind('noty.pdf')).toBe('document')
+    expect(attachmentKind('foto.PNG')).toBe('document')
+    expect(attachmentKind('skladba.mid')).toBe('score-app')
+    expect(attachmentKind('noty.mxl')).toBe('score-app')
   })
 })

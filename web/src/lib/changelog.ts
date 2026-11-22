@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-22-noty-ucitel',
+    date: '2026-11-22',
+    title: 'Noty v PDF a hromadné označení',
+    role: 'teacher',
+    items: [
+      'K úkolu můžete přiložit i noty v PDF nebo jako fotku. Žáci si je otevřou v telefonu.',
+      'Na Přehledu žáků jde všechny zobrazené nahrávky najednou označit jako ohodnocené.',
+    ],
+  },
+  {
+    id: '2026-11-22-noty',
+    date: '2026-11-22',
+    title: 'Noty v telefonu',
+    role: 'student',
+    items: ['Když učitel přiloží k úkolu noty v PDF nebo jako fotku, otevřeš si je přímo v telefonu.'],
+  },
+  {
     id: '2026-11-22-pokrok',
     date: '2026-11-22',
     title: 'Tvůj pokrok',

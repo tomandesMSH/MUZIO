@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { InfoTip } from '../ui/InfoTip'
 import { fetchAttachmentDownloadUrl } from '../../lib/data/classrooms'
-import { KEYBOARD_UTILS_DOWNLOAD_URL, keyboardUtilsOpenLink } from '../../lib/attachments'
+import { KEYBOARD_UTILS_DOWNLOAD_URL, attachmentKind, keyboardUtilsOpenLink } from '../../lib/attachments'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment } from '../../lib/data/types'
 import { NavIcon } from '../layout/NavIcon'
@@ -42,6 +42,65 @@ export function AttachmentLink({ assignment, forTeacher = false }: AttachmentLin
 
   const download = () => go((url) => url, 'Stažení se nepovedlo.')
   const openInApp = () => go((url) => keyboardUtilsOpenLink(url, fileName), 'Otevření se nepovedlo.')
+  const isDocument = attachmentKind(fileName) === 'document'
+
+  // A PDF or photo opens in a new tab. The tab is opened right on the tap
+  // (before waiting for the link), otherwise phones block it as a pop-up.
+  async function openDocument() {
+    setBusy(true)
+    setError(undefined)
+    const tab = window.open('', '_blank')
+    try {
+      const url = await fetchAttachmentDownloadUrl(assignment, { download: false })
+      if (tab) tab.location.href = url
+      else window.location.assign(url)
+    } catch (err) {
+      tab?.close()
+      setError(getErrorMessage(err, 'Otevření se nepovedlo.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (isDocument) {
+    return (
+      <div className="text-xs space-y-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <NavIcon name="lessons" className="w-4 h-4 shrink-0 text-text-muted" />
+          <span className="truncate font-semibold text-text-primary" title={fileName}>
+            {assignment.attachment_name ?? 'Noty k úkolu'}
+          </span>
+          <InfoTip label="Co s tímhle souborem">
+            <span className="block">
+              {forTeacher
+                ? 'Noty, které jsi k úkolu přiložil(a). Žáci si je otevřou v telefonu nebo počítači.'
+                : 'Učitel ti k úkolu přiložil noty. Otevři si je při cvičení, třeba na telefonu nebo tabletu na klavíru.'}
+            </span>
+          </InfoTip>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={`${actionButton} border-coral/40 text-coral-dark hover:bg-coral/10`}
+            disabled={busy}
+            onClick={() => void openDocument()}
+          >
+            Otevřít noty
+          </button>
+          <button
+            type="button"
+            className={`${actionButton} border-border text-text-primary hover:bg-bg-card-alt`}
+            disabled={busy}
+            onClick={download}
+            aria-label={`Stáhnout ${fileName}`}
+          >
+            <span aria-hidden="true">⬇</span> Stáhnout
+          </button>
+        </div>
+        {error && <p className="text-coral-dark">{error}</p>}
+      </div>
+    )
+  }
 
   return (
     <div className="text-xs space-y-2">

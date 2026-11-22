@@ -1,12 +1,16 @@
-// Assignment attachments: a score (MIDI / MusicXML) the teacher adds to an
-// assignment, for the student to practise in the Keyboard Utils desktop app.
+// Assignment attachments: a score the teacher adds to an assignment. MIDI /
+// MusicXML is for the Keyboard Utils desktop app; a PDF or a photo of the
+// score just opens on the pupil's phone.
 
 export const ASSIGNMENT_FILES_BUCKET = 'assignment-files'
 
 // Same limit as the bucket's file_size_limit (migration 0023).
 export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
 
-export const ATTACHMENT_EXTENSIONS = ['.mid', '.midi', '.musicxml', '.mxl', '.xml'] as const
+const SCORE_APP_EXTENSIONS = ['.mid', '.midi', '.musicxml', '.mxl', '.xml']
+const DOCUMENT_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png']
+
+export const ATTACHMENT_EXTENSIONS = [...SCORE_APP_EXTENSIONS, ...DOCUMENT_EXTENSIONS] as const
 
 // For <input type="file" accept=...>.
 export const ATTACHMENT_ACCEPT = ATTACHMENT_EXTENSIONS.join(',')
@@ -29,7 +33,7 @@ function extensionOf(name: string): string {
 // Null when the file can be attached, otherwise why not (shown to the teacher).
 export function validateAttachment(file: { name: string; size: number }): string | null {
   if (!(ATTACHMENT_EXTENSIONS as readonly string[]).includes(extensionOf(file.name))) {
-    return 'Přiložit jde jen soubor MIDI (.mid, .midi) nebo MusicXML (.musicxml, .mxl, .xml).'
+    return 'Přiložit jde noty v PDF, fotku (JPG, PNG), MIDI (.mid) nebo MusicXML (.musicxml, .mxl, .xml).'
   }
   if (file.size > MAX_ATTACHMENT_BYTES) {
     return 'Soubor je moc velký - nejvýš 5 MB.'
@@ -55,8 +59,20 @@ export function attachmentPath(assignmentId: string, fileName: string): string {
   return `${assignmentId}/${safeBase}${extension}`
 }
 
+// 'score-app' = for Keyboard Utils, 'document' = a PDF or picture to look at.
+export function attachmentKind(fileName: string): 'score-app' | 'document' {
+  return DOCUMENT_EXTENSIONS.includes(extensionOf(fileName)) ? 'document' : 'score-app'
+}
+
 export function attachmentContentType(fileName: string): string {
   switch (extensionOf(fileName)) {
+    case '.pdf':
+      return 'application/pdf'
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg'
+    case '.png':
+      return 'image/png'
     case '.mid':
     case '.midi':
       return 'audio/midi'

@@ -53,7 +53,7 @@ describe('AttachmentField', () => {
   it('is optional and explains itself behind the "i"', () => {
     render(<Field />)
     expect(screen.getByText(/nepovinné/i)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Co je soubor pro Keyboard Utils' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Jaké noty jde přiložit' }))
     expect(screen.getByText(/MusicXML/, { selector: 'b' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Keyboard Utils' })).toHaveAttribute('href', 'https://github.com/tomandesMSH/Keyboard-Utils')
   })
@@ -68,9 +68,9 @@ describe('AttachmentField', () => {
 
   it('turns away other files', () => {
     render(<Field />)
-    choose('noty.pdf')
-    expect(screen.queryByText('noty.pdf')).toBeNull()
-    expect(screen.getByText(/jen soubor MIDI/)).toBeInTheDocument()
+    choose('noty.docx')
+    expect(screen.queryByText('noty.docx')).toBeNull()
+    expect(screen.getByText(/noty v PDF, fotku/)).toBeInTheDocument()
   })
 })
 
