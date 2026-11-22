@@ -118,12 +118,22 @@ export async function countPendingReview(): Promise<number> {
 // Already graded recordings are left alone.
 export async function markReviewed(logIds: string[]): Promise<void> {
   if (logIds.length === 0) return
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('practice_logs')
     .update({ teacher_comment: '' })
     .in('id', logIds)
     .is('teacher_comment', null)
+    .select('id')
   if (error) throw error
+  // A row the user may see but not change (RLS) is skipped without an error.
+  const changed = data?.length ?? 0
+  if (changed < logIds.length) {
+    throw new Error(
+      changed === 0
+        ? 'Nepovedlo se: k téhle nahrávce nemáš oprávnění (není to tvůj žák nebo úkol).'
+        : `Označeno jen ${changed} z ${logIds.length}. Ke zbytku nemáš oprávnění (nejsou to tví žáci nebo úkoly).`,
+    )
+  }
 }
 
 export async function fetchLogsByIds(ids: string[]): Promise<PracticeLog[]> {
@@ -198,7 +208,7 @@ export interface GradingInput {
 export async function submitGrading(logId: string, input: GradingInput, gradedBy: string): Promise<void> {
   // Also fill teacher_comment for backward compatibility with the old
   // single-field model, in case anything still reads it.
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('practice_logs')
     .update({
       rating: input.rating,
@@ -210,7 +220,10 @@ export async function submitGrading(logId: string, input: GradingInput, gradedBy
       ...(input.feedback_audio !== undefined ? { feedback_audio: input.feedback_audio } : {}),
     })
     .eq('id', logId)
+    .select('id')
   if (error) throw error
+  // RLS skips a row the teacher may see but not change - without an error.
+  if (!data?.length) throw new Error('Hodnocení se neuložilo: k téhle nahrávce nemáš oprávnění (není to tvůj žák nebo úkol).')
   notifyPush({ type: 'graded', logId })
 }
 
