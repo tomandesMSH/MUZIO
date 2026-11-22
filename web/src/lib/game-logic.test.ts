@@ -39,17 +39,27 @@ describe('computeLevel', () => {
     expect(KHGame.computeLevel(25).level).toBe(2)
   })
 
-  it('60 XP is level 3, mid-progress', () => {
+  it('each level costs 5 XP more than the one before', () => {
+    expect(KHGame.computeLevel(54).level).toBe(2)
+    expect(KHGame.computeLevel(55).level).toBe(3) // 25 + 30
+    expect(KHGame.computeLevel(89).level).toBe(3)
+    expect(KHGame.computeLevel(90).level).toBe(4) // + 35
+    expect(KHGame.levelCost(1)).toBe(25)
+    expect(KHGame.levelCost(10)).toBe(70)
+  })
+
+  it('60 XP is level 3, a little way in', () => {
     const result = KHGame.computeLevel(60)
     expect(result.level).toBe(3)
     expect(result.title).toBe('Talent')
-    expect(result.xpInLevel).toBe(10)
-    expect(result.xpToNext).toBe(15)
-    expect(result.progress).toBe(0.4)
+    expect(result.xpInLevel).toBe(5)
+    expect(result.levelXp).toBe(35)
+    expect(result.xpToNext).toBe(30)
+    expect(result.progress).toBeCloseTo(5 / 35)
   })
 
   it('beyond named levels appends +N', () => {
-    const result = KHGame.computeLevel(175) // level 8, only 7 named titles
+    const result = KHGame.computeLevel(280) // level 8 (25+30+...+55), only 7 named titles
     expect(result.level).toBe(8)
     expect(result.title).toBe('Legenda +1')
   })

@@ -1,4 +1,4 @@
-import { computeLevel, XP_PER_LEVEL } from '../../lib/game-logic'
+import { computeLevel } from '../../lib/game-logic'
 import { Progress } from '../ui/Progress'
 
 export function LevelProgress({ xp }: { xp: number }) {
@@ -10,7 +10,7 @@ export function LevelProgress({ xp }: { xp: number }) {
           Level {info.level} · {info.title}
         </span>
         <span className="text-text-muted font-body font-normal text-xs">
-          {info.xpInLevel}/{XP_PER_LEVEL} XP
+          {info.xpInLevel}/{info.levelXp} XP
         </span>
       </div>
       <Progress value={info.progress} />

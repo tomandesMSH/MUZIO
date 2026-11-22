@@ -5,7 +5,7 @@ import { Badge } from './Badge'
 import { Progress } from './Progress'
 import { DEFAULT_CUSTOM_STYLE, getCustomStyle, setCustomStyle, type CustomStyle } from '../../lib/theme'
 
-const ACCENTS: { hex: string; label: string }[] = [
+export const ACCENTS: { hex: string; label: string }[] = [
   { hex: '#e14432', label: 'Červená' },
   { hex: '#2f6fdb', label: 'Modrá' },
   { hex: '#2e9e5b', label: 'Zelená' },

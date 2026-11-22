@@ -15,6 +15,8 @@ import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
 import { LockedPupil } from '../../components/teacher/LockedPupil'
 import { FLAMES_PER_CYCLE, FLAMES_PER_PHASE, flameProgress } from '../../lib/flames'
 import { WORLDS, type WorldId } from '../../lib/world'
+import { accentShades } from '../../lib/accent'
+import { ACCENTS } from '../../components/ui/CustomStyleModal'
 
 // Admin -> Dev Playground: real parts of the app fed with made-up numbers,
 // to try out how things look (a world's artwork at every flame, the
@@ -33,23 +35,75 @@ function fakeDayKeys(n: number): string[] {
   })
 }
 
-// The look of the page while the playground is open, put back afterwards.
-function useTemporaryLook(look: Look, dark: boolean) {
+const ACCENT_PROPS = ['--color-coral', '--color-coral-dark', '--color-coral-tint'] as const
+
+// The look of the page while the playground is open, put back afterwards
+// (style, theme and the accent colour; accent null = the person's own).
+function useTemporaryLook(look: Look, dark: boolean, accent: string | null) {
+  const [before] = useState(() => {
+    const root = document.documentElement
+    return {
+      style: root.dataset.style,
+      dark: root.classList.contains('dark'),
+      accent: ACCENT_PROPS.map((prop) => root.style.getPropertyValue(prop)),
+    }
+  })
   useEffect(() => {
     const root = document.documentElement
-    const before = { style: root.dataset.style, dark: root.classList.contains('dark') }
     return () => {
       if (before.style) root.dataset.style = before.style
       else delete root.dataset.style
       root.classList.toggle('dark', before.dark)
+      ACCENT_PROPS.forEach((prop, i) => {
+        if (before.accent[i]) root.style.setProperty(prop, before.accent[i])
+        else root.style.removeProperty(prop)
+      })
     }
-  }, [])
+  }, [before])
   useEffect(() => {
     const root = document.documentElement
     if (look === 'modern') root.dataset.style = 'modern'
     else delete root.dataset.style
     root.classList.toggle('dark', dark)
-  }, [look, dark])
+    if (accent) {
+      const shades = accentShades(accent, { dark, base: look })
+      root.style.setProperty('--color-coral', shades.fill)
+      root.style.setProperty('--color-coral-dark', shades.strong)
+      root.style.setProperty('--color-coral-tint', shades.tint)
+    } else {
+      ACCENT_PROPS.forEach((prop, i) => {
+        if (before.accent[i]) root.style.setProperty(prop, before.accent[i])
+        else root.style.removeProperty(prop)
+      })
+    }
+  }, [look, dark, accent, before])
+}
+
+// A number you can type or slide.
+function NumberField({ value, min, max, step = 1, onChange }: { value: number; min: number; max: number; step?: number; onChange: (v: number) => void }) {
+  const clamp = (v: number) => Math.max(min, Math.min(max, Number.isFinite(v) ? v : min))
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(clamp(Number(e.target.value)))}
+        className="min-w-0 flex-1 accent-coral"
+      />
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(clamp(Number(e.target.value)))}
+        className="w-20 rounded-lg bg-bg-card-alt px-2 py-1 text-sm text-text-primary outline-none focus:ring-2 focus:ring-coral"
+      />
+    </div>
+  )
 }
 
 function Control({ label, children }: { label: string; children: ReactNode }) {
@@ -100,7 +154,9 @@ export function Playground() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
   const [xp, setXp] = useState(240)
   const [streak, setStreak] = useState(3)
-  useTemporaryLook(look, dark)
+  const [stars, setStars] = useState(3)
+  const [accent, setAccent] = useState<string | null>(null)
+  useTemporaryLook(look, dark, accent)
 
   // `flames` is within the round; earlier finished worlds come on top.
   const total = cycles * FLAMES_PER_CYCLE + flames
@@ -139,14 +195,7 @@ export function Playground() {
             </select>
           </Control>
           <Control label={`Plamínky v kole: ${flames} z ${FLAMES_PER_CYCLE} (fáze ${progress.phasesDone})`}>
-            <input
-              type="range"
-              min={0}
-              max={FLAMES_PER_CYCLE}
-              value={flames}
-              onChange={(e) => setFlames(Number(e.target.value))}
-              className="w-full accent-coral"
-            />
+            <NumberField value={flames} min={0} max={FLAMES_PER_CYCLE} onChange={setFlames} />
             <div className="flex gap-1">
               {[0, 1, 2, 3, 4].map((phase) => (
                 <button
@@ -160,11 +209,42 @@ export function Playground() {
               ))}
             </div>
           </Control>
-          <Control label={`Hotové světy: ${cycles}`}>
-            <input type="range" min={0} max={5} value={cycles} onChange={(e) => setCycles(Number(e.target.value))} className="w-full accent-coral" />
+          <Control label="Hotové světy">
+            <NumberField value={cycles} min={0} max={50} onChange={setCycles} />
           </Control>
           <Control label="Styl">
             <Segmented value={look} onChange={setLook} options={[{ id: 'classic', label: 'Klasický' }, { id: 'modern', label: 'Moderní' }]} />
+          </Control>
+          <Control label="Akcentová barva">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setAccent(null)}
+                aria-pressed={accent === null}
+                className={`rounded-lg px-2 py-1 text-[11px] ${accent === null ? 'bg-bg-card-alt font-semibold text-text-primary' : 'text-text-muted'}`}
+              >
+                Moje
+              </button>
+              {[{ hex: '#f95c4b', label: 'Korálová' }, ...ACCENTS].map((a) => (
+                <button
+                  key={a.hex}
+                  type="button"
+                  title={a.label}
+                  aria-label={a.label}
+                  aria-pressed={accent === a.hex}
+                  onClick={() => setAccent(a.hex)}
+                  className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-bg-card ${accent === a.hex ? 'ring-2 ring-text-primary' : ''}`}
+                  style={{ background: a.hex }}
+                />
+              ))}
+              <input
+                type="color"
+                aria-label="Vlastní barva"
+                value={accent ?? '#f95c4b'}
+                onChange={(e) => setAccent(e.target.value)}
+                className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+            </div>
           </Control>
           <Control label="Téma">
             <Segmented
@@ -175,11 +255,14 @@ export function Playground() {
           </Control>
           {role === 'student' && (
             <>
-              <Control label={`XP: ${xp}`}>
-                <input type="range" min={0} max={3000} step={10} value={xp} onChange={(e) => setXp(Number(e.target.value))} className="w-full accent-coral" />
+              <Control label="XP">
+                <NumberField value={xp} min={0} max={20000} step={1} onChange={setXp} />
               </Control>
-              <Control label={`Série: ${streak} dní`}>
-                <input type="range" min={0} max={60} value={streak} onChange={(e) => setStreak(Number(e.target.value))} className="w-full accent-coral" />
+              <Control label="Série (dní)">
+                <NumberField value={streak} min={0} max={365} onChange={setStreak} />
+              </Control>
+              <Control label="Hvězdy">
+                <NumberField value={stars} min={0} max={100} onChange={setStars} />
               </Control>
             </>
           )}
@@ -193,7 +276,7 @@ export function Playground() {
                   <Streak count={streak} freezesAvailable={1} />
                   <FlamesDisplay flames={total} />
                   <XPDisplay xp={xp} />
-                  <StarsDisplay stars={3} />
+                  <StarsDisplay stars={stars} />
                 </div>
                 <LevelProgress xp={xp} />
               </Preview>

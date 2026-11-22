@@ -28,31 +28,50 @@ export function xpForLog(rating: number | null | undefined, durationSeconds: num
 
 // The level comes from XP, i.e. from practice the teacher has graded. Stars
 // are a separate award from the teacher and don't move it.
-export const XP_PER_LEVEL = 25
+// Every level costs a little more than the one before: 25 XP to level 2,
+// 30 more to level 3, 35 more to level 4...
+export const XP_FIRST_LEVEL = 25
+export const XP_LEVEL_STEP = 5
+
+// XP needed to get from `level` to the next one.
+export function levelCost(level: number): number {
+  return XP_FIRST_LEVEL + XP_LEVEL_STEP * (Math.max(1, level) - 1)
+}
+
+// Total XP at which `level` starts (level 1 = 0).
+export function levelStartXp(level: number): number {
+  const n = Math.max(1, level) - 1
+  return n * XP_FIRST_LEVEL + (XP_LEVEL_STEP * n * (n - 1)) / 2
+}
 
 export interface LevelInfo {
   level: number
   title: string
   xpInLevel: number
+  // XP the current level takes in all.
+  levelXp: number
   xpToNext: number
   progress: number
 }
 
 export function computeLevel(xp: number | undefined): LevelInfo {
   const safeCount = Math.max(0, xp || 0)
-  const level = 1 + Math.floor(safeCount / XP_PER_LEVEL)
+  let level = 1
+  while (levelStartXp(level + 1) <= safeCount) level++
   const titleIndex = Math.min(level - 1, LEVEL_TITLES.length - 1)
   let title: string = LEVEL_TITLES[titleIndex]
   if (level > LEVEL_TITLES.length) {
     title = `${LEVEL_TITLES[LEVEL_TITLES.length - 1]} +${level - LEVEL_TITLES.length}`
   }
-  const xpInLevel = safeCount % XP_PER_LEVEL
+  const levelXp = levelCost(level)
+  const xpInLevel = safeCount - levelStartXp(level)
   return {
     level,
     title,
     xpInLevel,
-    xpToNext: XP_PER_LEVEL - xpInLevel,
-    progress: xpInLevel / XP_PER_LEVEL,
+    levelXp,
+    xpToNext: levelXp - xpInLevel,
+    progress: xpInLevel / levelXp,
   }
 }
 
