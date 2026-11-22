@@ -1,12 +1,17 @@
+import { useId } from 'react'
 import { toDateKey } from '../../lib/game-logic'
 
 // "Termín (nepovinné)" when assigning a task: a day, or none.
 export function DueDateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const id = useId()
   return (
-    <label className="block">
-      <span className="text-xs font-semibold text-text-muted">Termín odevzdání (nepovinné)</span>
+    <div>
+      <label htmlFor={id} className="text-xs font-semibold text-text-muted">
+        Termín odevzdání (nepovinné)
+      </label>
       <div className="mt-1.5 flex items-center gap-2">
         <input
+          id={id}
           type="date"
           value={value}
           min={toDateKey(new Date())}
@@ -19,6 +24,6 @@ export function DueDateField({ value, onChange }: { value: string; onChange: (va
           </button>
         )}
       </div>
-    </label>
+    </div>
   )
 }

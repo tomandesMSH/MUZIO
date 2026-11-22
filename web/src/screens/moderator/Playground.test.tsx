@@ -33,4 +33,11 @@ describe('Playground', () => {
     unmount()
     expect(document.documentElement.dataset.style).toBeUndefined()
   })
+
+  it('a click next to a control title does not change anything (no <label> passing it on)', () => {
+    document.documentElement.classList.add('dark')
+    renderIt()
+    fireEvent.click(screen.getByText('Téma'))
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+  })
 })

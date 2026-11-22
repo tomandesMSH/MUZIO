@@ -106,12 +106,14 @@ function NumberField({ value, min, max, step = 1, onChange }: { value: number; m
   )
 }
 
+// A group, not a <label>: a label passes a click anywhere inside it to its
+// first control, so a click next to "Téma" switched the theme to light.
 function Control({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block space-y-1">
-      <span className="text-xs font-heading font-semibold text-text-muted">{label}</span>
+    <div role="group" aria-label={label} className="space-y-1">
+      <div className="text-xs font-heading font-semibold text-text-muted">{label}</div>
       {children}
-    </label>
+    </div>
   )
 }
 
