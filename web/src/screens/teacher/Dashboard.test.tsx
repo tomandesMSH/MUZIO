@@ -16,6 +16,7 @@ vi.mock('../../lib/data/practiceLogs', () => ({
   ],
   markReviewed: vi.fn(async () => {}),
 }))
+vi.mock('../../lib/data/pupilFlames', () => ({ fetchPupilFlameCounts: async () => new Map([['4', 9]]) }))
 vi.mock('../../lib/navBadges', () => ({ refreshNavBadges: vi.fn() }))
 vi.mock('../../lib/data/classrooms', () => ({
   fetchReviewContext: async () => ({
@@ -112,5 +113,15 @@ describe('TeacherDashboard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Označit vše' }))
     await vi.waitFor(() => expect(markReviewed).toHaveBeenCalledTimes(1))
     expect(vi.mocked(markReviewed).mock.calls[0][0]).toEqual(expect.arrayContaining(['11', '12', '13']))
+  })
+
+  it('shows flames instead of the old streak among the other pupils', async () => {
+    render(
+      <MemoryRouter>
+        <TeacherDashboard />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('9 plamínků')).toBeInTheDocument()
+    expect(screen.queryByText(/Streak/)).toBeNull()
   })
 })

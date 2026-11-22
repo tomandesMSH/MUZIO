@@ -74,7 +74,7 @@ export function StudentCard() {
             <div className="min-w-0 flex-1">
               <h1 className="text-xl truncate">{pupil.full_name}</h1>
               <p className="text-xs text-text-muted">
-                🔥 {pupil.streak} · {pupil.xp ?? 0} XP · ⭐ {pupil.stars}
+                {pupil.xp ?? 0} XP · ⭐ {pupil.stars}
                 {lastAt ? ` · naposledy ${new Date(lastAt).toLocaleDateString('cs-CZ')}` : ' · zatím bez nahrávky'}
               </p>
             </div>

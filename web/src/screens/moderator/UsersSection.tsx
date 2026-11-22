@@ -11,6 +11,8 @@ import { SearchBar } from '../../components/ui/SearchBar'
 import { Toast } from '../../components/ui/Toast'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
+import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
+import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
 import { approveStudent, fetchAllUsers, setTeacherVerified } from '../../lib/data/profiles'
 import { reinstateAccount, suspendAccount } from '../../lib/data/moderation'
 import { deleteAccount, setUserAdmin, setUserRole } from '../../lib/data/adminUsers'
@@ -46,6 +48,9 @@ function isPending(user: Profile): boolean {
 export function UsersSection() {
   const { profile } = useAuth()
   const users = useQuery(() => fetchAllUsers(), [])
+  const pupilIds = (users.data ?? []).filter((u) => u.role === 'student').map((u) => u.id)
+  // A failure just leaves the flames out.
+  const flameCounts = useQuery(() => fetchPupilFlameCounts(pupilIds).catch(() => null), [pupilIds.join(',')])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [resetTarget, setResetTarget] = useState<Profile>()
@@ -257,7 +262,13 @@ export function UsersSection() {
                 </div>
                 {user.role === 'student' && (
                   <div className="text-text-muted text-xs">
-                    🔥 {user.streak} · {user.xp ?? 0} XP (level {computeLevel(user.xp ?? 0).level}) · ⭐ {user.stars}
+                    {flameCounts.data !== null && (
+                      <>
+                        <PupilFlamesLine flames={flameCounts.data?.get(user.id) ?? (flameCounts.data ? 0 : undefined)} />
+                        {' · '}
+                      </>
+                    )}
+                    {user.xp ?? 0} XP (level {computeLevel(user.xp ?? 0).level}) · ⭐ {user.stars}
                   </div>
                 )}
               </div>

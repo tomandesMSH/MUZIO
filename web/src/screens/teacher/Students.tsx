@@ -22,7 +22,7 @@ import { getErrorMessage } from '../../lib/errors'
 import type { Profile } from '../../lib/data/types'
 import { NavIcon } from '../../components/layout/NavIcon'
 import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
-import { flamesLabel } from '../../lib/flames'
+import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
 
 export function Students() {
   const navigate = useNavigate()
@@ -227,8 +227,13 @@ export function Students() {
                   <div className="min-w-0">
                     <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
                     <div className="text-text-muted text-xs">
-                      🔥 {student.streak} · {student.xp ?? 0} XP
-                      {flameCounts.data && ` · ${flamesLabel(flameCounts.data.get(student.id) ?? 0)}`}
+                      {flameCounts.data !== null && (
+                        <>
+                          <PupilFlamesLine flames={flameCounts.data?.get(student.id) ?? (flameCounts.data ? 0 : undefined)} world={student.world} />
+                          {' · '}
+                        </>
+                      )}
+                      {student.xp ?? 0} XP
                     </div>
                   </div>
                 </button>

@@ -13,6 +13,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-22-plaminky-ucitel',
+    date: '2026-11-22',
+    title: 'Plamínky u žáků',
+    role: 'teacher',
+    items: ['U žáků teď místo série vidíte plamínky a fázi jejich hudebního světa, stejně jako je vidí žáci.'],
+  },
+  {
     id: '2026-11-22-noty-ucitel',
     date: '2026-11-22',
     title: 'Noty v PDF a hromadné označení',

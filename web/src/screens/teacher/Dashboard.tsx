@@ -12,6 +12,8 @@ import { refreshNavBadges } from '../../lib/navBadges'
 import { getErrorMessage } from '../../lib/errors'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { fetchStudents } from '../../lib/data/profiles'
+import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
+import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
 import { useToast } from '../../lib/useToast'
 import { useAuth } from '../../lib/AuthProvider'
 import { PickerMenu } from '../../components/ui/PickerMenu'
@@ -25,6 +27,12 @@ export function TeacherDashboard() {
   const navigate = useNavigate()
   const pending = useQuery(() => fetchPendingReview(), [])
   const students = useQuery(() => fetchStudents(), [])
+  const studentIds = (students.data ?? []).map((s) => s.id)
+  // A failure just leaves the flames out.
+  const flameCounts = useQuery(
+    () => fetchPupilFlameCounts(studentIds).catch(() => null),
+    [studentIds.join(',')],
+  )
   const [search, setSearch] = useState('')
   const [showAllInactive, setShowAllInactive] = useState(false)
   const { profile } = useAuth()
@@ -255,7 +263,11 @@ export function TeacherDashboard() {
                   <Avatar name={student.full_name} size={38} />
                   <div>
                     <div className="font-heading font-semibold text-sm">{student.full_name}</div>
-                    <div className="text-text-muted text-xs">Streak {student.streak} dní</div>
+                    {flameCounts.data !== null && (
+                      <div className="text-text-muted text-xs">
+                        <PupilFlamesLine flames={flameCounts.data?.get(student.id) ?? (flameCounts.data ? 0 : undefined)} world={student.world} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </button>
