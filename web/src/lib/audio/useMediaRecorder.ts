@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { pickRecorderType } from './audioFile'
 
 export type RecordingStatus = 'idle' | 'recording' | 'stopped' | 'error'
 
@@ -75,13 +76,18 @@ export function useMediaRecorder(maxSeconds = 60): MediaRecorderState {
     // records AAC (weaker than Opus at low rates), and keeps a class's
     // recordings within the free Supabase storage about twice as long as the
     // browser's default (often 128 kbps).
-    const recorder = new MediaRecorder(stream, { audioBitsPerSecond: 64_000 })
+    const mimeType =
+      typeof MediaRecorder.isTypeSupported === 'function' ? pickRecorderType((t) => MediaRecorder.isTypeSupported(t)) : undefined
+    const recorder = new MediaRecorder(stream, { audioBitsPerSecond: 64_000, ...(mimeType ? { mimeType } : {}) })
     recorderRef.current = recorder
     recorder.ondataavailable = (e) => {
       if (e.data.size > 0) chunksRef.current.push(e.data)
     }
     recorder.onstop = () => {
-      setBlob(new Blob(chunksRef.current, { type: 'audio/wav' }))
+      // The real format of the take (Safari leaves recorder.mimeType empty
+      // until data arrives, so the chunk's own type counts too).
+      const type = recorder.mimeType || chunksRef.current[0]?.type || mimeType || 'audio/webm'
+      setBlob(new Blob(chunksRef.current, { type }))
       setStatus('stopped')
       cleanup()
     }

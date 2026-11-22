@@ -1,3 +1,4 @@
+import { recordedFormat } from './audio/audioFile'
 // Sending a recording to the teacher: upload the sound, add the practice_logs
 // row, update the streak. Used by the recording screen and by "Odeslat znovu"
 // for a recording that didn't go through (lib/pendingUploads.ts).
@@ -34,7 +35,7 @@ export class SubmitError extends Error {
 export async function submitRecording(input: RecordingToSend): Promise<{ session: PracticeSessionResult | null }> {
   let audioUrl = input.audioUrl
   try {
-    if (!audioUrl) audioUrl = await uploadRecording(input.userId, input.blob, input.format)
+    if (!audioUrl) audioUrl = await uploadRecording(input.userId, input.blob, input.format ?? recordedFormat(input.blob.type))
     await insertPracticeLog(input.userId, audioUrl, input.assignmentId, input.durationSeconds, input.note, input.ownPieceId)
   } catch (err) {
     throw new SubmitError(err, audioUrl)

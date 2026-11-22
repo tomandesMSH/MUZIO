@@ -74,3 +74,28 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} kB`
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`
 }
+
+// What the browser's own recorder produced (MediaRecorder: MP4/AAC in Safari,
+// usually WebM/Opus in Chrome and Firefox), stored under its real type and
+// extension. Labelling it "audio/wav" made Safari refuse to play a WebM take.
+export function recordedFormat(type: string): { extension: string; contentType: string } {
+  const base = type.split(';')[0].trim().toLowerCase()
+  if (base === 'audio/mp4' || base === 'video/mp4' || base === 'audio/x-m4a') return { extension: 'm4a', contentType: 'audio/mp4' }
+  if (base === 'audio/ogg') return { extension: 'ogg', contentType: 'audio/ogg' }
+  if (base === 'audio/wav' || base === 'audio/x-wav') return { extension: 'wav', contentType: 'audio/wav' }
+  return { extension: 'webm', contentType: 'audio/webm' }
+}
+
+// The recorder's format, best first: AAC in MP4 plays in every browser
+// (Safari included); WebM/Opus is the fallback where MP4 can't be recorded.
+export const RECORDER_TYPES = ['audio/mp4;codecs=mp4a.40.2', 'audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus']
+
+export function pickRecorderType(isSupported: (type: string) => boolean): string | undefined {
+  return RECORDER_TYPES.find((type) => {
+    try {
+      return isSupported(type)
+    } catch {
+      return false
+    }
+  })
+}

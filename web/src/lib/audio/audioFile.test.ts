@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { checkAudioFile, formatFileSize, MAX_AUDIO_FILE_MB, readAudioDuration } from './audioFile'
+import { checkAudioFile, formatFileSize, MAX_AUDIO_FILE_MB, readAudioDuration, recordedFormat, pickRecorderType } from './audioFile'
 
 const MB = 1024 * 1024
 
@@ -87,5 +87,22 @@ describe('readAudioDuration', () => {
   it('gives up after the timeout', async () => {
     fakeAudio(null)
     expect(await readAudioDuration(new Blob(['x']), 10)).toBeNull()
+  })
+})
+
+describe('recordedFormat', () => {
+  it('stores a take under its real type, not as WAV', () => {
+    expect(recordedFormat('audio/webm;codecs=opus')).toEqual({ extension: 'webm', contentType: 'audio/webm' })
+    expect(recordedFormat('audio/mp4;codecs=mp4a.40.2')).toEqual({ extension: 'm4a', contentType: 'audio/mp4' })
+    expect(recordedFormat('audio/ogg;codecs=opus')).toEqual({ extension: 'ogg', contentType: 'audio/ogg' })
+    expect(recordedFormat('')).toEqual({ extension: 'webm', contentType: 'audio/webm' })
+  })
+})
+
+describe('pickRecorderType', () => {
+  it('prefers AAC in MP4 (plays everywhere), then WebM/Opus', () => {
+    expect(pickRecorderType(() => true)).toBe('audio/mp4;codecs=mp4a.40.2')
+    expect(pickRecorderType((t) => t.startsWith('audio/webm'))).toBe('audio/webm;codecs=opus')
+    expect(pickRecorderType(() => false)).toBeUndefined()
   })
 })
