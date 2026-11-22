@@ -54,8 +54,8 @@ export function Settings() {
 
         {profile.is_moderator && (
           <div>
-            <h2 className="text-sm font-heading font-semibold mb-1">Moderace</h2>
-            <SettingsRow label="Nahlášený obsah" onClick={() => navigate('/moderator')} />
+            <h2 className="text-sm font-heading font-semibold mb-1">Admin</h2>
+            <SettingsRow label="Přepnout do Admin panelu" onClick={() => navigate('/moderator')} />
           </div>
         )}
 

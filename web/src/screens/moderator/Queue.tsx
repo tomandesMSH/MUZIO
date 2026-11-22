@@ -11,7 +11,7 @@ import { Toast } from '../../components/ui/Toast'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import { fetchOpenReports, resolveReport, suspendAccount } from '../../lib/data/moderation'
-import { fetchProfilesByIds, fetchStudents } from '../../lib/data/profiles'
+import { fetchProfilesByIds, fetchAllStudents } from '../../lib/data/profiles'
 import { deletePracticeLog, fetchLogsByIds, fetchStudentLogs } from '../../lib/data/practiceLogs'
 import { signOut } from '../../lib/auth'
 import { isReauthed } from '../../lib/reauth'
@@ -228,7 +228,7 @@ export function Queue() {
 }
 
 function RecordingsSection() {
-  const students = useQuery(() => fetchStudents(), [])
+  const students = useQuery(() => fetchAllStudents(), [])
   const [search, setSearch] = useState('')
   const [selectedStudent, setSelectedStudent] = useState<Profile>()
   const logs = useQuery(

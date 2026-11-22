@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { myPupilScope } from './teacherScope'
 import { deleteAccount } from './adminUsers'
 import type { Profile } from './types'
 import type { WorldId } from '../world'
@@ -9,7 +10,14 @@ export async function fetchOwnProfile(userId: string): Promise<Profile> {
   return data as Profile
 }
 
+// The teacher panel's pupils: the teacher's own (see teacherScope.ts).
 export async function fetchStudents(): Promise<Profile[]> {
+  const [all, scope] = await Promise.all([fetchAllStudents(), myPupilScope()])
+  return scope ? all.filter((s) => scope.has(s.id)) : all
+}
+
+// Every pupil the account may read - for the admin panel.
+export async function fetchAllStudents(): Promise<Profile[]> {
   const { data, error } = await supabase.from('profiles').select('*').eq('role', 'student')
   if (error) throw error
   return (data ?? []) as Profile[]

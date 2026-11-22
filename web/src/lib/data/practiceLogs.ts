@@ -4,6 +4,7 @@ import { notifyPush } from '../push'
 import { toDateKey } from '../game-logic'
 import type { PracticeLog } from './types'
 import { FEEDBACK_IMAGES_BUCKET } from '../feedbackImages'
+import { myPupilScope } from './teacherScope'
 
 export async function fetchOwnLogs(userId: string): Promise<PracticeLog[]> {
   const { data, error } = await supabase
@@ -73,12 +74,13 @@ export async function fetchPracticeHistory(userId: string): Promise<{ created_at
   }))
 }
 
+// Waiting for the teacher - their own pupils only (teacherScope.ts).
 export async function fetchPendingReview(): Promise<PracticeLog[]> {
-  const { data, error } = await supabase
-    .from('practice_logs')
-    .select('*')
-    .is('teacher_comment', null)
-    .order('created_at', { ascending: true })
+  const scope = await myPupilScope()
+  if (scope?.size === 0) return []
+  let query = supabase.from('practice_logs').select('*').is('teacher_comment', null)
+  if (scope) query = query.in('user_id', [...scope])
+  const { data, error } = await query.order('created_at', { ascending: true })
   if (error) throw error
   return (data ?? []) as PracticeLog[]
 }
@@ -104,10 +106,11 @@ export async function markFeedbackSeen(ids: (string | number)[]): Promise<void> 
 
 // How many recordings wait for a grade (for the badge in the teacher's menu).
 export async function countPendingReview(): Promise<number> {
-  const { count, error } = await supabase
-    .from('practice_logs')
-    .select('id', { count: 'exact', head: true })
-    .is('teacher_comment', null)
+  const scope = await myPupilScope()
+  if (scope?.size === 0) return 0
+  let query = supabase.from('practice_logs').select('id', { count: 'exact', head: true }).is('teacher_comment', null)
+  if (scope) query = query.in('user_id', [...scope])
+  const { count, error } = await query
   if (error) throw error
   return count ?? 0
 }

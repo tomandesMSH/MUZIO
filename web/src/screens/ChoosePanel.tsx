@@ -41,7 +41,7 @@ export function ChoosePanel() {
         >
           <div className="font-heading font-semibold">Admin panel</div>
           <div className="text-text-muted text-xs mt-1">
-            Všichni uživatelé, resety hesel, bany, nahlášený obsah a nahrávky.
+            Celá škola: všichni uživatelé a nahrávky, schvalování, resety hesel, nahlášený obsah, migrace.
           </div>
         </button>
         <button
@@ -50,7 +50,7 @@ export function ChoosePanel() {
           onClick={() => navigate('/teacher', { replace: true })}
         >
           <div className="font-heading font-semibold">Učitelský panel</div>
-          <div className="text-text-muted text-xs mt-1">Žáci, učebny, zadání a hodnocení nahrávek.</div>
+          <div className="text-text-muted text-xs mt-1">Jen tvoji žáci a třídy: zadání, hodnocení nahrávek, pošta.</div>
         </button>
       </div>
 
