@@ -14,6 +14,7 @@ const users = [
   { ...base, id: 't2', full_name: 'Tereza Učitelka', role: 'teacher', is_moderator: true },
 ] as Profile[]
 
+vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }))
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../lib/AuthProvider', () => ({ useAuth: () => ({ profile: { id: 'me' } }) }))
 vi.mock('../../lib/data/profiles', () => ({

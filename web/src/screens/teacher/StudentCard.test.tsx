@@ -71,8 +71,8 @@ describe('StudentCard', () => {
   it('a pupil outside the teacher classrooms is locked, with the way to get access', async () => {
     memberOf = []
     renderCard()
-    expect(await screen.findByText('K informacím tohoto žáka nemáš přístup')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'tady' })).toHaveAttribute('href', '/teacher/classrooms')
+    expect((await screen.findAllByText('K informacím tohoto žáka nemáš přístup')).length).toBeGreaterThan(0)
+    for (const link of screen.getAllByRole('link', { name: 'tady' })) expect(link).toHaveAttribute('href', '/teacher/classrooms')
     expect(screen.queryByRole('button', { name: 'Zadat úkol' })).toBeNull()
     memberOf = [{ id: 'c1', name: 'Housle' }]
   })

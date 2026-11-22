@@ -58,24 +58,40 @@ function FakeCard() {
   )
 }
 
+const TITLE = 'K informacím tohoto žáka nemáš přístup'
+const TEXT = 'Žák není v žádné z tvých tříd. Až ho do některé přidáš, uvidíš jeho cvičení, plamínky, úkoly i nahrávky.'
+
+function Action({ hasClassrooms, className = '' }: { hasClassrooms: boolean; className?: string }) {
+  return (
+    <p className={className}>
+      {hasClassrooms ? 'Přidej ho do třídy ' : 'Založ si třídu '}
+      <Link to="/teacher/classrooms" className="font-semibold text-coral-dark underline underline-offset-4">
+        tady
+      </Link>
+      .
+    </p>
+  )
+}
+
+// Classic style: a card over the blur. Modern style (index.css,
+// .locked-classic / .locked-modern): big thin text straight on it.
 export function LockedPupil({ hasClassrooms }: { hasClassrooms: boolean }) {
   return (
     <div className="relative">
       <FakeCard />
-      <div className="absolute inset-0 flex items-start justify-center pt-10 px-2">
+      <div className="locked-classic absolute inset-0 flex items-start justify-center pt-10 px-2">
         <div className="max-w-sm rounded-2xl bg-bg-card shadow-clay p-5 text-center space-y-2">
           <div aria-hidden className="text-2xl">🔒</div>
-          <h2 className="font-heading font-semibold">K informacím tohoto žáka nemáš přístup</h2>
-          <p className="text-sm text-text-muted">
-            Žák není v žádné z tvých tříd. Až ho do některé přidáš, uvidíš jeho cvičení, plamínky, úkoly i nahrávky.
-          </p>
-          <p className="text-sm">
-            {hasClassrooms ? 'Přidej ho do třídy ' : 'Založ si třídu '}
-            <Link to="/teacher/classrooms" className="font-semibold text-coral-dark underline underline-offset-2">
-              tady
-            </Link>
-            .
-          </p>
+          <h2 className="font-heading font-semibold">{TITLE}</h2>
+          <p className="text-sm text-text-muted">{TEXT}</p>
+          <Action hasClassrooms={hasClassrooms} className="text-sm" />
+        </div>
+      </div>
+      <div className="locked-modern absolute inset-0 items-start justify-center pt-8 px-4">
+        <div className="max-w-xl text-center space-y-4">
+          <h2 className="font-heading font-extralight text-3xl md:text-5xl leading-tight tracking-tight">{TITLE}</h2>
+          <p className="font-light text-base md:text-lg text-text-muted">{TEXT}</p>
+          <Action hasClassrooms={hasClassrooms} className="font-light text-base md:text-lg" />
         </div>
       </div>
     </div>

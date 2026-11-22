@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
@@ -47,6 +48,7 @@ function isPending(user: Profile): boolean {
 // refuses moderators anyway.
 export function UsersSection() {
   const { profile } = useAuth()
+  const navigate = useNavigate()
   const users = useQuery(() => fetchAllUsers(), [])
   const pupilIds = (users.data ?? []).filter((u) => u.role === 'student').map((u) => u.id)
   // A failure just leaves the flames out.
@@ -255,7 +257,17 @@ export function UsersSection() {
             <div className="flex items-center gap-2.5 min-w-0">
               <Avatar name={user.full_name} size={38} />
               <div className="min-w-0">
-                <div className="font-heading font-semibold text-sm truncate">{user.full_name}</div>
+                {user.role === 'student' ? (
+                  <button
+                    type="button"
+                    className="block max-w-full truncate text-left font-heading font-semibold text-sm hover:underline underline-offset-2"
+                    onClick={() => navigate(`/moderator/students/${user.id}`)}
+                  >
+                    {user.full_name} <span className="font-body font-normal text-xs text-text-muted">· karta žáka ›</span>
+                  </button>
+                ) : (
+                  <div className="font-heading font-semibold text-sm truncate">{user.full_name}</div>
+                )}
                 <div className="text-text-muted text-xs truncate">
                   {user.role === 'teacher' ? 'Učitel' : 'Žák'}
                   {user.username ? ` · ${user.username}` : ''}

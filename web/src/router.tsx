@@ -137,4 +137,12 @@ export const router = createBrowserRouter([
       </RequireModerator>
     ),
   },
+  {
+    path: '/moderator/students/:id',
+    element: (
+      <RequireModerator>
+        <Screen><StudentCard asAdmin /></Screen>
+      </RequireModerator>
+    ),
+  },
 ])

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { PupilFlames } from '../../components/teacher/PupilFlames'
 import { TeacherDaysEditor } from '../../components/teacher/TeacherDaysEditor'
 import { fetchImportedFlames, fetchPupilFlameDays } from '../../lib/data/pupilFlames'
@@ -14,7 +14,7 @@ import { StudentNotes } from '../../components/teacher/StudentNotes'
 import { MessageToPupil } from '../../components/teacher/MessageToPupil'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchStudents } from '../../lib/data/profiles'
+import { fetchAllStudents, fetchStudents } from '../../lib/data/profiles'
 import { fetchStudentLogs } from '../../lib/data/practiceLogs'
 import { isReviewed, isSkipped } from '../../lib/grading'
 import { BeforeAfter } from '../../components/feedback/BeforeAfter'
@@ -26,17 +26,24 @@ import { NavIcon } from '../../components/layout/NavIcon'
 
 const RECENT = 5
 
+// The admin panel has no menu around it (like the admin dashboard).
+function Shell({ asAdmin, children }: { asAdmin: boolean; children: ReactNode }) {
+  return asAdmin ? <div className="max-w-3xl mx-auto p-6">{children}</div> : <AppShell role="teacher">{children}</AppShell>
+}
+
 // A pupil at a glance for the teacher: practice calendar, assignments, the
 // latest recordings and the teacher's own notes.
-export function StudentCard() {
+// asAdmin: the same card in the admin panel (/moderator/students/:id) - any
+// pupil of the school, read only (no assignments, days, mail or notes).
+export function StudentCard({ asAdmin = false }: { asAdmin?: boolean }) {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { profile } = useAuth()
-  const students = useQuery(() => fetchStudents(), [])
+  const students = useQuery(() => (asAdmin ? fetchAllStudents() : fetchStudents()), [asAdmin])
   const logs = useQuery(() => fetchStudentLogs(id), [id])
   const assignments = useQuery(
-    () => (profile ? fetchPupilAssignments(profile.id, id).catch(() => []) : Promise.resolve([])),
-    [profile?.id, id],
+    () => (profile && !asAdmin ? fetchPupilAssignments(profile.id, id).catch(() => []) : Promise.resolve([])),
+    [profile?.id, id, asAdmin],
   )
   const pieceIds = [...new Set((logs.data ?? []).flatMap((l) => (l.own_piece_id ? [l.own_piece_id] : [])))]
   const pieces = useQuery(() => fetchPiecesByIds(pieceIds).catch(() => new Map()), [pieceIds.join(',')])
@@ -47,8 +54,8 @@ export function StudentCard() {
   // (RLS); the card says so instead of showing empty sections. A failed
   // check (null) leaves the card as it is.
   const memberOf = useQuery(
-    () => (profile ? fetchStudentClassroomsForTeacher(profile.id, id).catch(() => null) : Promise.resolve(null)),
-    [profile?.id, id],
+    () => (profile && !asAdmin ? fetchStudentClassroomsForTeacher(profile.id, id).catch(() => null) : Promise.resolve(null)),
+    [profile?.id, id, asAdmin],
   )
   const ownClassrooms = useQuery(
     () => (profile ? fetchTeacherClassrooms(profile.id).catch(() => null) : Promise.resolve(null)),
@@ -66,18 +73,26 @@ export function StudentCard() {
 
   if (students.data && !pupil) {
     return (
-      <AppShell role="teacher">
+      <Shell asAdmin={asAdmin}>
         <p className="text-sm text-text-muted">Žák nenalezen.</p>
-      </AppShell>
+      </Shell>
     )
   }
 
   return (
-    <AppShell role="teacher">
+    <Shell asAdmin={asAdmin}>
       <div className="space-y-5 flex-1">
-        <button className="text-sm text-text-muted" onClick={() => navigate('/teacher/students')}>
-          ← Žáci
+        <button
+          className="text-sm text-text-muted"
+          onClick={() => (asAdmin ? navigate('/moderator', { state: { tab: 'users' } }) : navigate('/teacher/students'))}
+        >
+          {asAdmin ? '← Admin · Uživatelé' : '← Žáci'}
         </button>
+        {asAdmin && (
+          <p className="rounded-xl bg-bg-card-alt px-3 py-2 text-xs text-text-muted">
+            Díváš se jako admin: všechna cvičení žáka, jen pro čtení. Úkoly, poštu a poznámky má učitel v učitelském panelu.
+          </p>
+        )}
 
         {!pupil ? (
           <Skeleton rows={2} />
@@ -91,7 +106,7 @@ export function StudentCard() {
                 {locked ? '' : lastAt ? ` · naposledy ${new Date(lastAt).toLocaleDateString('cs-CZ')}` : ' · zatím bez nahrávky'}
               </p>
             </div>
-            {!locked && (<div className="flex gap-2">
+            {!locked && !asAdmin && (<div className="flex gap-2">
               <Button className="!px-3 !py-1.5 text-xs" onClick={() => setAssignOpen(true)}>
                 Zadat úkol
               </Button>
@@ -117,9 +132,11 @@ export function StudentCard() {
             logs={list.map((l) => ({ created_at: l.created_at, duration_seconds: l.duration_seconds ?? null }))}
             today={today}
           />
-          <p className="mt-1.5 text-[11px] text-text-muted">
-            Vidíš nahrávky k úkolům a vlastním skladbám. Samostatné cvičení jen tehdy, když ho žák sdílí.
-          </p>
+          {!asAdmin && (
+            <p className="mt-1.5 text-[11px] text-text-muted">
+              Vidíš nahrávky k úkolům a vlastním skladbám. Samostatné cvičení jen tehdy, když ho žák sdílí.
+            </p>
+          )}
         </div>
 
         {pupil && flameDays.data && (
@@ -129,15 +146,15 @@ export function StudentCard() {
           </div>
         )}
 
-        {pupil && (
+        {pupil && !asAdmin && (
           <div>
             <h2 className="text-sm font-heading font-semibold mb-2">Připsat den cvičení</h2>
             <TeacherDaysEditor studentId={id} onChanged={flameDays.refetch} />
           </div>
         )}
 
-        <div className="grid gap-5 md:grid-cols-2">
-          <div>
+        <div className={asAdmin ? '' : 'grid gap-5 md:grid-cols-2'}>
+          {!asAdmin && (<div>
             <h2 className="text-sm font-heading font-semibold mb-2">
               Úkoly{assignments.data && assignments.data.length > 0 ? ` · hotovo ${doneCount} z ${assignments.data.length}` : ''}
             </h2>
@@ -161,7 +178,7 @@ export function StudentCard() {
                 )
               })}
             </ul>
-          </div>
+          </div>)}
 
           <div>
             <h2 className="text-sm font-heading font-semibold mb-2">Poslední nahrávky</h2>
@@ -172,7 +189,8 @@ export function StudentCard() {
                 <li key={log.id}>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-xl bg-bg-card px-3 py-2 text-left shadow-clay-sm"
+                    disabled={asAdmin}
+                    className="flex w-full items-center gap-2 rounded-xl bg-bg-card px-3 py-2 text-left shadow-clay-sm disabled:cursor-default"
                     onClick={() => navigate('/teacher/grading', { state: { studentId: id, logId: String(log.id) } })}
                   >
                     <span className="text-xs text-text-muted tabular-nums shrink-0">
@@ -187,6 +205,8 @@ export function StudentCard() {
                       </span>
                     ) : isSkipped(log) ? (
                       <span className="shrink-0 text-[10px] text-text-muted">bez hodnocení</span>
+                    ) : asAdmin ? (
+                      <span className="shrink-0 text-[10px] text-text-muted">čeká na hodnocení</span>
                     ) : (
                       <span className="shrink-0 rounded-full bg-coral-tint px-2 py-0.5 text-[10px] font-heading font-semibold text-coral-dark">
                         Ohodnotit
@@ -212,23 +232,25 @@ export function StudentCard() {
           }
         />
 
-        {profile && (
+        {profile && !asAdmin && (
           <div>
             <h2 className="text-sm font-heading font-semibold mb-2">Hudební pošta</h2>
             <MessageToPupil teacherId={profile.id} studentId={id} />
           </div>
         )}
 
-        <div>
-          <h2 className="text-sm font-heading font-semibold mb-2">
-            Moje poznámky <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
-          </h2>
-          <StudentNotes studentId={id} />
-        </div>
+        {!asAdmin && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold mb-2">
+              Moje poznámky <span className="font-body font-normal text-xs text-text-muted">(vidíš jen ty)</span>
+            </h2>
+            <StudentNotes studentId={id} />
+          </div>
+        )}
         </>
         )}
       </div>
-      {pupil && (
+      {pupil && !asAdmin && (
         <AssignToStudentModal
           open={assignOpen}
           studentId={id}
@@ -240,6 +262,6 @@ export function StudentCard() {
           }}
         />
       )}
-    </AppShell>
+    </Shell>
   )
 }

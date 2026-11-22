@@ -215,9 +215,9 @@ export function Students() {
           <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">
             {pending.length > 0 ? 'Schválení žáci' : 'Žáci'}
           </h2>
-          <div className="space-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
+          <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
             {approved.map((student) => (
-              <div key={student.id} className="w-full rounded-2xl bg-bg-card shadow-clay-sm p-3.5 space-y-2.5">
+              <div key={student.id} className="w-full rounded-2xl bg-bg-card shadow-clay-sm p-4 space-y-3">
               <div className="flex items-center justify-between gap-2.5">
                 <button
                   className="flex items-center gap-2.5 min-w-0 text-left"
