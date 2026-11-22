@@ -22,7 +22,7 @@ import { getErrorMessage } from '../../lib/errors'
 import type { Profile } from '../../lib/data/types'
 import { NavIcon } from '../../components/layout/NavIcon'
 import { fetchPupilFlameCounts } from '../../lib/data/pupilFlames'
-import { PupilFlamesLine } from '../../components/teacher/PupilFlamesLine'
+import { PupilFlamesLine, worldPhaseText } from '../../components/teacher/PupilFlamesLine'
 
 export function Students() {
   const navigate = useNavigate()
@@ -224,18 +224,7 @@ export function Students() {
                   onClick={() => navigate(`/teacher/students/${student.id}`)}
                 >
                   <Avatar name={student.full_name} size={38} />
-                  <div className="min-w-0">
-                    <div className="font-heading font-semibold text-sm truncate">{student.full_name}</div>
-                    <div className="text-text-muted text-xs">
-                      {flameCounts.data !== null && !(flameCounts.data && !flameCounts.data.has(student.id)) && (
-                        <>
-                          <PupilFlamesLine flames={flameCounts.data ? (flameCounts.data.get(student.id) ?? null) : undefined} world={student.world} />
-                          {' · '}
-                        </>
-                      )}
-                      {student.xp ?? 0} XP
-                    </div>
-                  </div>
+                  <div className="min-w-0 font-heading font-semibold text-sm truncate">{student.full_name}</div>
                 </button>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <Button
@@ -251,6 +240,21 @@ export function Students() {
                   {renderDeleteButton(student)}
                 </div>
               </div>
+              {(() => {
+                // Flames, world and XP as separate pieces that wrap whole,
+                // never mid-phrase. No flames for a pupil outside the
+                // teacher's classrooms (the database doesn't give them).
+                const flames = flameCounts.data ? flameCounts.data.get(student.id) : undefined
+                const known = flameCounts.data !== null && !(flameCounts.data && flames === undefined)
+                const world = flames !== undefined ? worldPhaseText(flames, student.world) : undefined
+                return (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+                    {known && <PupilFlamesLine flames={flames} />}
+                    {world && <span className="whitespace-nowrap">{world}</span>}
+                    <span className="whitespace-nowrap">{student.xp ?? 0} XP</span>
+                  </div>
+                )
+              })()}
               <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
                 <span className="text-xs text-text-muted">Hvězdy za vystoupení</span>
                 <div className="flex items-center gap-2">

@@ -11,10 +11,16 @@ export function PupilFlamesLine({ flames, world }: { flames: number | undefined 
   if (flames === undefined) return <span className="inline-flex items-center gap-1">…</span>
   const { phasesDone } = flameProgress(flames)
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
       <FlameIcon lit={flames > 0} className="h-3.5 w-3.5 shrink-0" />
       {flamesLabel(flames)}
       {world ? ` · ${worldInfo(world).name}, fáze ${phasesDone} ze ${PHASES_PER_CYCLE}` : ''}
     </span>
   )
+}
+
+// "Hudební hrad · fáze 1 ze 4", or undefined without a world.
+export function worldPhaseText(flames: number, world: WorldId | null | undefined): string | undefined {
+  if (!world) return undefined
+  return `${worldInfo(world).name} · fáze ${flameProgress(flames).phasesDone} ze ${PHASES_PER_CYCLE}`
 }
