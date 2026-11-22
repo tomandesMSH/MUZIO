@@ -1,6 +1,6 @@
 # 🎹 Muzio
 
-Webová aplikace pro žáky **ZUŠ Moravský Krumlov**, která děti hravou formou motivuje k pravidelnému cvičení na nástroj. Žáci nahrávají cvičení z prohlížeče a učitel je poslouchá a hodnotí.
+Webová aplikace pro žáky hudebních škol, která děti hravou formou motivuje k pravidelnému cvičení na nástroj. Žáci nahrávají cvičení z prohlížeče a učitel je poslouchá a hodnotí.
 
 **Aplikace:** [muzio.tomandes.eu](https://muzio.tomandes.eu) · **Dokumentace:** [tomandes.eu/Muzio-Docs](https://tomandes.eu/Muzio-Docs/)
 

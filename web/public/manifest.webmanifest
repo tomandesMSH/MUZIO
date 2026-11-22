@@ -1,7 +1,7 @@
 {
   "name": "Muzio",
   "short_name": "Muzio",
-  "description": "Uč se hudbu hravě, každý den. Cvičení pro žáky ZUŠ Moravský Krumlov.",
+  "description": "Uč se hudbu hravě, každý den. Cvičení na nástroj pro žáky hudebních škol.",
   "lang": "cs",
   "start_url": "/",
   "scope": "/",

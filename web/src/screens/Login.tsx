@@ -305,15 +305,6 @@ export function Login() {
           <img src="/keyboard-utils-logo.png" alt="Keyboard Utils" className="h-10 w-10 object-contain" />
         </a>
         <a
-          href="https://www.zusmk.cz/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-14 h-14 bg-white rounded-lg shadow-clay-sm opacity-90 hover:opacity-100 transition flex items-center justify-center"
-          aria-label="ZUŠ Moravský Krumlov"
-        >
-          <img src="/zus-mk-logo.png" alt="ZUŠ Moravský Krumlov" className="h-11 w-11 object-contain" />
-        </a>
-        <a
           href="https://tomandes.eu/Muzio-Docs/"
           target="_blank"
           rel="noopener noreferrer"

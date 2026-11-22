@@ -104,7 +104,7 @@ export async function buildArchive(
     'nahravky.csv': encoder.encode(toCsv(recordingRows(data))),
     'profil.json': encoder.encode(profileJson(data)),
     'PRECTI-ME.txt': encoder.encode(
-      'Tvoje data z aplikace Muzio (ZUŠ Moravský Krumlov).\r\n\r\n' +
+      'Tvoje data z aplikace Muzio.\r\n\r\n' +
         'nahravky.csv: všechny nahrávky s hodnocením a komentáři (otevře se v Excelu)\r\n' +
         'profil.json: profil, XP, hvězdy, třídy, odznaky a souhlas\r\n' +
         'nahravky/: zvuk nahrávek\r\n' +
