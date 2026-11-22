@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { Avatar } from '../ui/Avatar'
+import { QrCode } from '../ui/QrCode'
 import { useQuery } from '../../lib/data/useQuery'
 import {
   cancelClassroomInvite,
@@ -91,9 +92,12 @@ function InviteContent({ classroomId, classroomName, joinCode, onClose }: Invite
             </Button>
           )}
         </div>
-        <div className="rounded-xl bg-bg-card-alt py-3 text-center">
-          <div className="text-[11px] text-text-muted">nebo kód v Třídách</div>
-          <div className="font-heading font-bold text-3xl tracking-[0.3em]">{joinCode}</div>
+        <div className="flex flex-col items-center gap-3 rounded-xl bg-bg-card-alt py-4 text-center sm:flex-row sm:justify-center sm:gap-6">
+          <QrCode value={link} label={`QR kód: odkaz do třídy ${classroomName}`} className="h-40 w-40 rounded-lg" />
+          <div>
+            <div className="text-[11px] text-text-muted">Naskenuj telefonem, nebo zadej kód v Třídách</div>
+            <div className="font-heading font-bold text-3xl tracking-[0.3em]">{joinCode}</div>
+          </div>
         </div>
       </section>
 
