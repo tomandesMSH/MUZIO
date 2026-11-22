@@ -11,6 +11,7 @@ import { needsGuardianConsent } from '../lib/consent'
 import { getErrorMessage } from '../lib/errors'
 import { ReportFormModal } from '../components/ui/ReportFormModal'
 import { isTeacherAdmin } from '../lib/roles'
+import { takeJoinCode } from './JoinByLink'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
 import { NavIcon } from '../components/layout/NavIcon'
@@ -46,6 +47,12 @@ export function Login() {
 
   useEffect(() => {
     if (!authLoading && session && profile) {
+      // Came from a class link (/pripojit/<kód>): back there to join.
+      const joinCode = takeJoinCode()
+      if (joinCode && profile.role === 'student') {
+        navigate(`/pripojit/${encodeURIComponent(joinCode)}`, { replace: true })
+        return
+      }
       // A teacher who is also an admin picks a panel on every login.
       const home = isTeacherAdmin(profile)
         ? '/panel'

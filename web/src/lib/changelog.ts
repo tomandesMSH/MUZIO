@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-22-pozvanky-ucitel',
+    date: '2026-11-22',
+    title: 'Pozvánky do tříd',
+    role: 'teacher',
+    items: [
+      'V Učebnách u Žáků je tlačítko „Pozvat“: odkaz do třídy ke zkopírování nebo sdílení a kód velkým písmem.',
+      'Žáka školy můžete najít podle jména a poslat mu pozvánku. Přijme ji na své nástěnce.',
+    ],
+  },
+  {
+    id: '2026-11-22-pozvanky',
+    date: '2026-11-22',
+    title: 'Pozvánky do tříd',
+    role: 'student',
+    items: ['Učitel ti může poslat pozvánku do třídy nebo odkaz. Pozvánku přijmeš jedním klepnutím na nástěnce.'],
+  },
+  {
     id: '2026-11-22-plaminky-ucitel',
     date: '2026-11-22',
     title: 'Plamínky u žáků',

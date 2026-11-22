@@ -10,6 +10,8 @@ export type NotifyRequest =
   | { type: 'announcement'; announcementId: string }
   // Hudební pošta (migration 0052): to one pupil.
   | { type: 'message'; messageId: string }
+  // Pozvánka do třídy (migration 0062): to the invited pupil.
+  | { type: 'invite'; inviteId: string }
   | { type: 'reminders' }
   // "Oznámit čištění" by an admin (migration 0046): to every pupil.
   | { type: 'cleanup'; noticeId: string }
@@ -51,6 +53,13 @@ export interface MessageRow {
   teacher_id: string
   student_id: string
   body: string
+}
+
+export interface InviteRow {
+  id: string
+  student_id: string
+  invited_by: string | null
+  classroom_name: string
 }
 
 export interface Settings {
@@ -97,6 +106,7 @@ export interface Db {
   getAssignment(id: string): Promise<AssignmentRow | null>
   getAnnouncement(id: string): Promise<AnnouncementRow | null>
   getMessage(id: string): Promise<MessageRow | null>
+  getInvite(id: string): Promise<InviteRow | null>
   getName(userId: string): Promise<string | null>
   // Explicit recipients, or [] = the whole classroom.
   assignmentRecipients(assignmentId: string): Promise<string[]>
@@ -257,6 +267,15 @@ export function pupilMessage(message: MessageRow, teacherName: string | null): M
   }
 }
 
+export function inviteMessage(invite: InviteRow, teacherName: string | null): Message {
+  return {
+    title: 'Pozvánka do třídy',
+    body: `${teacherName ?? 'Učitel'} tě zve do třídy „${invite.classroom_name}“.`,
+    url: '/student/classes',
+    tag: `invite-${invite.id}`,
+  }
+}
+
 export function recordingMessage(log: LogRow, pupilName: string | null): Message {
   return {
     title: 'Nová nahrávka 🎧',
@@ -311,6 +330,7 @@ export function parseRequest(body: unknown): NotifyRequest | null {
     return { type: 'announcement', announcementId: b.announcementId as string }
   }
   if (b.type === 'message' && id(b.messageId)) return { type: 'message', messageId: b.messageId as string }
+  if (b.type === 'invite' && id(b.inviteId)) return { type: 'invite', inviteId: b.inviteId as string }
   if (b.type === 'reminders') return { type: 'reminders' }
   if (b.type === 'cleanup' && id(b.noticeId)) return { type: 'cleanup', noticeId: b.noticeId as string }
   if (b.type === 'test') return { type: 'test' }
@@ -443,6 +463,15 @@ export async function handleNotify(request: NotifyRequest | null, bearer: string
     const text = pupilMessage(message, await deps.db.getName(message.teacher_id))
     // Same setting as assignments and announcements.
     return { status: 200, body: { sent: await deliver(deps, [message.student_id], (s) => s.assignments, text) } }
+  }
+
+  if (request.type === 'invite') {
+    const invite = await deps.db.getInvite(request.inviteId)
+    if (!invite || invite.invited_by !== caller) return forbidden
+    if (!(await deps.db.claim('invite', invite.id))) return { status: 200, body: { sent: 0 } }
+    const text = inviteMessage(invite, await deps.db.getName(caller))
+    // Same setting as assignments and announcements.
+    return { status: 200, body: { sent: await deliver(deps, [invite.student_id], (s) => s.assignments, text) } }
   }
 
   if (request.type === 'announcement') {

@@ -21,6 +21,7 @@ vi.mock('../../lib/data/classrooms', () => ({
   leaveClassroom: m.leave,
 }))
 vi.mock('../../lib/data/practiceLogs', () => ({ fetchCompletedAssignmentIds: async () => new Set(['a1']) }))
+vi.mock('../../components/classrooms/InvitesCard', () => ({ InvitesCard: () => null }))
 
 const renderPage = () =>
   render(

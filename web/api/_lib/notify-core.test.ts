@@ -15,6 +15,7 @@ import {
   type Deps,
   type LogRow,
   type MessageRow,
+  type InviteRow,
   type Message,
   type ReminderCandidate,
   type Settings,
@@ -33,6 +34,7 @@ function setup(opts: {
   assignments?: AssignmentRow[]
   announcements?: AnnouncementRow[]
   messages?: MessageRow[]
+  invites?: InviteRow[]
   recipients?: Record<string, string[]>
   members?: Record<string, string[]>
   teachers?: Record<string, string[]>
@@ -58,6 +60,7 @@ function setup(opts: {
     getAssignment: async (id) => opts.assignments?.find((a) => a.id === id) ?? null,
     getAnnouncement: async (id) => opts.announcements?.find((a) => a.id === id) ?? null,
     getMessage: async (id) => opts.messages?.find((m) => m.id === id) ?? null,
+    getInvite: async (id) => opts.invites?.find((i) => i.id === id) ?? null,
     getName: async (id) => ({ p1: 'Pavel', t1: 'Jana Nováková' })[id] ?? null,
     assignmentRecipients: async (id) => opts.recipients?.[id] ?? [],
     classroomMembers: async (id) => opts.members?.[id] ?? [],
@@ -218,6 +221,20 @@ describe('notify', () => {
     expect((await handleNotify({ type: 'message', messageId: 'M1' }, 'jwt', deps)).body.sent).toBe(0)
     const other = setup({ caller: 't2', messages: [message], subs: [sub('p1')] })
     expect((await handleNotify({ type: 'message', messageId: 'M1' }, 'jwt', other.deps)).status).toBe(403)
+  })
+
+  it('invite: from the teacher who invited to that one pupil, once', async () => {
+    const invite: InviteRow = { id: 'I1', student_id: 'p1', invited_by: 't1', classroom_name: 'Klavír 3.A' }
+    const { deps, sent } = setup({ caller: 't1', invites: [invite], subs: [sub('p1'), sub('p2')] })
+    expect(parseRequest({ type: 'invite', inviteId: 'I1' })).toEqual({ type: 'invite', inviteId: 'I1' })
+    expect((await handleNotify({ type: 'invite', inviteId: 'I1' }, 'jwt', deps)).body.sent).toBe(1)
+    expect(sent[0]).toMatchObject({
+      to: 'p1',
+      message: { title: 'Pozvánka do třídy', body: 'Jana Nováková tě zve do třídy „Klavír 3.A“.', url: '/student/classes' },
+    })
+    expect((await handleNotify({ type: 'invite', inviteId: 'I1' }, 'jwt', deps)).body.sent).toBe(0)
+    const other = setup({ caller: 't2', invites: [invite], subs: [sub('p1')] })
+    expect((await handleNotify({ type: 'invite', inviteId: 'I1' }, 'jwt', other.deps)).status).toBe(403)
   })
 
   it('a long announcement is shortened', () => {

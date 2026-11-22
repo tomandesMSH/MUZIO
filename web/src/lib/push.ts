@@ -96,6 +96,7 @@ export type NotifyEvent =
   | { type: 'assignment'; assignmentId: string }
   | { type: 'announcement'; announcementId: string }
   | { type: 'message'; messageId: string }
+  | { type: 'invite'; inviteId: string }
   | { type: 'cleanup'; noticeId: string }
   | { type: 'test' }
 

@@ -31,6 +31,7 @@ import { fetchProfilesByIds } from '../../lib/data/profiles'
 import { ClassAnnouncements } from '../../components/classrooms/ClassAnnouncements'
 import { WeeklyGoalPicker } from '../../components/classrooms/WeeklyGoalPicker'
 import { ClassLeague } from '../../components/gamification/ClassLeague'
+import { InviteModal } from '../../components/classrooms/InviteModal'
 import { useToast } from '../../lib/useToast'
 import { getErrorMessage } from '../../lib/errors'
 import type { Assignment, Classroom } from '../../lib/data/types'
@@ -136,6 +137,7 @@ function ClassroomDetail({
   const [assignmentSubmitting, setAssignmentSubmitting] = useState(false)
   const [assignmentError, setAssignmentError] = useState<string>()
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
   const [editing, setEditing] = useState<Assignment>()
   const [copying, setCopying] = useState<Assignment>()
   const [removing, setRemoving] = useState<Assignment>()
@@ -290,7 +292,22 @@ function ClassroomDetail({
         <ClassLeague classroomId={classroom.id} top={50} />
 
         <div>
-          <h2 className="text-sm font-heading font-semibold text-text-muted mb-2">Žáci ({members.data?.length ?? 0})</h2>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-heading font-semibold text-text-muted">Žáci ({members.data?.length ?? 0})</h2>
+            <Button className="!px-3 !py-1.5 text-xs" onClick={() => setInviteOpen(true)}>
+              + Pozvat
+            </Button>
+          </div>
+          <InviteModal
+            open={inviteOpen}
+            classroomId={classroom.id}
+            classroomName={classroom.name}
+            joinCode={classroom.join_code}
+            onClose={() => {
+              setInviteOpen(false)
+              members.refetch()
+            }}
+          />
           <div className="space-y-2">
             {members.data?.map((member) => (
               <div
@@ -310,7 +327,7 @@ function ClassroomDetail({
               </div>
             ))}
             {members.data?.length === 0 && (
-              <p className="text-text-muted text-sm">Zatím se nikdo nepřipojil - sdílej kód výše.</p>
+              <p className="text-text-muted text-sm">Zatím se nikdo nepřipojil. Klepni na „Pozvat“ a pošli žákům odkaz.</p>
             )}
           </div>
         </div>

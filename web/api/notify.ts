@@ -49,6 +49,17 @@ function supabaseDb(url: string, serviceKey: string) {
         .maybeSingle()
       return data
     },
+    async getInvite(id) {
+      const { data } = await sb
+        .from('classroom_invites')
+        .select('id, student_id, invited_by, classrooms(name)')
+        .eq('id', id)
+        .maybeSingle()
+      if (!data) return null
+      const room = data.classrooms as { name?: string } | { name?: string }[] | null
+      const name = Array.isArray(room) ? room[0]?.name : room?.name
+      return { id: data.id, student_id: data.student_id, invited_by: data.invited_by, classroom_name: name ?? 'třída' }
+    },
     async getName(userId) {
       const { data } = await sb.from('profiles').select('full_name').eq('id', userId).maybeSingle()
       return data?.full_name ?? null

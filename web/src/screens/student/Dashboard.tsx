@@ -20,6 +20,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { PendingUploads } from '../../components/audio/PendingUploads'
 import { AnnouncementsCard } from '../../components/classrooms/AnnouncementsCard'
 import { MailCard } from '../../components/classrooms/MailCard'
+import { InvitesCard } from '../../components/classrooms/InvitesCard'
 import { CleanupNoticeBanner } from '../../components/cleanup/CleanupNoticeBanner'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
@@ -148,6 +149,7 @@ export function StudentDashboard() {
         {totalFlames !== undefined && (
           <WorldProgress world={profile.world} progress={flameProgress(totalFlames)} />
         )}
+        <InvitesCard />
         <MailCard studentId={profile.id} />
         <AnnouncementsCard />
         <PendingUploads

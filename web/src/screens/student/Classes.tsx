@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Toast } from '../../components/ui/Toast'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { InvitesCard } from '../../components/classrooms/InvitesCard'
 import { useAuth } from '../../lib/AuthProvider'
 import { useQuery } from '../../lib/data/useQuery'
 import {
@@ -85,6 +86,8 @@ export function Classes() {
       />
       <div className="space-y-5 flex-1">
         <h1 className="text-xl">Třídy</h1>
+
+        <InvitesCard onJoined={classrooms.refetch} />
 
         <form onSubmit={handleJoin} className="rounded-2xl bg-bg-card shadow-clay-sm p-4 space-y-2.5">
           <div className="font-heading font-semibold text-sm">Připojit se ke třídě</div>
