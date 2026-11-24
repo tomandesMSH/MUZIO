@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Login } from './screens/Login'
 import { ChoosePanel } from './screens/ChoosePanel'
 import { JoinByLink } from './screens/JoinByLink'
+import { JoinSchool } from './screens/JoinSchool'
 import { RequireRole } from './components/routing/RequireRole'
 import { RequireModerator } from './components/routing/RequireModerator'
 import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, WorldPicker, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Classes, StudentCard, Queue, Playground } from './screens.lazy'
@@ -11,6 +12,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
   { path: '/panel', element: <ChoosePanel /> },
   { path: '/pripojit/:code', element: <JoinByLink /> },
+  { path: '/skola/:code', element: <JoinSchool /> },
   {
     path: '/student',
     element: (
