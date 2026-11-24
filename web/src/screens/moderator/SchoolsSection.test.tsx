@@ -23,7 +23,7 @@ describe('SchoolsSection', () => {
   it('lists the schools with their numbers, admins and open links', async () => {
     render(<SchoolsSection />)
     expect(await screen.findByText('ZUŠ Javorová')).toBeInTheDocument()
-    expect(screen.getByText('3 učitelů · 40 žáků · 5 tříd')).toBeInTheDocument()
+    expect(screen.getByText('Učitelé: 3 · žáci: 40 · třídy: 5')).toBeInTheDocument()
     expect(screen.getByText('Správce: Eva Malá')).toBeInTheDocument()
     expect(screen.getByText('Správce: zatím nikdo')).toBeInTheDocument()
     expect(await screen.findByDisplayValue(/\/skola\/KMNPQRSTUV$/)).toBeInTheDocument()

@@ -10,7 +10,7 @@ import { setThemeChoice, useTheme } from '../lib/theme'
 import { needsGuardianConsent } from '../lib/consent'
 import { getErrorMessage } from '../lib/errors'
 import { ReportFormModal } from '../components/ui/ReportFormModal'
-import { isTeacherAdmin } from '../lib/roles'
+import { hasPanelChoice } from '../lib/roles'
 import { takeJoinCode } from './JoinByLink'
 import { takeSchoolCode } from '../lib/data/schools'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
@@ -63,7 +63,7 @@ export function Login() {
         return
       }
       // A teacher who is also an admin picks a panel on every login.
-      const home = isTeacherAdmin(profile)
+      const home = hasPanelChoice(profile)
         ? '/panel'
         : profile.role === 'teacher'
           ? '/teacher'

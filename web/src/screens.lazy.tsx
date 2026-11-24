@@ -21,6 +21,7 @@ export const Classes = lazy(() => import('./screens/student/Classes').then((m) =
 export const Settings = lazy(() => import('./screens/student/Settings').then((m) => ({ default: m.Settings })))
 export const TeacherSettings = lazy(() => import('./screens/teacher/Settings').then((m) => ({ default: m.Settings })))
 export const Queue = lazy(() => import('./screens/moderator/Queue').then((m) => ({ default: m.Queue })))
+export const SchoolAdmin = lazy(() => import('./screens/school/SchoolAdmin').then((m) => ({ default: m.SchoolAdmin })))
 export const Playground = lazy(() => import('./screens/moderator/Playground').then((m) => ({ default: m.Playground })))
 
 export function Screen({ children }: { children: ReactNode }) {

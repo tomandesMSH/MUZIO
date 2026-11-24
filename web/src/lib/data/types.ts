@@ -38,6 +38,10 @@ export interface Profile {
   // The pupil's musical world (lib/world.ts). Null until they pick one;
   // absent until migration 0043 is applied.
   world?: WorldId | null
+  // The school the account belongs to, and whether this teacher is its
+  // admin (migration 0064). Absent before it.
+  school_id?: string
+  is_school_admin?: boolean
 }
 
 export interface Classroom {

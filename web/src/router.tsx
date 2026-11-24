@@ -5,7 +5,8 @@ import { JoinByLink } from './screens/JoinByLink'
 import { JoinSchool } from './screens/JoinSchool'
 import { RequireRole } from './components/routing/RequireRole'
 import { RequireModerator } from './components/routing/RequireModerator'
-import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, WorldPicker, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Classes, StudentCard, Queue, Playground } from './screens.lazy'
+import { RequireSchoolAdmin } from './components/routing/RequireSchoolAdmin'
+import { Screen, StudentDashboard, Lessons, Recording, Feedback, Profile, WorldPicker, TeacherDashboard, Students, Grading, Classrooms, TeacherProfile, Settings, TeacherSettings, Classes, StudentCard, Queue, Playground, SchoolAdmin } from './screens.lazy'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -131,6 +132,14 @@ export const router = createBrowserRouter([
       <RequireRole role="teacher">
         <Screen><TeacherSettings /></Screen>
       </RequireRole>
+    ),
+  },
+  {
+    path: '/sprava-skoly',
+    element: (
+      <RequireSchoolAdmin>
+        <Screen><SchoolAdmin /></Screen>
+      </RequireSchoolAdmin>
     ),
   },
   {
