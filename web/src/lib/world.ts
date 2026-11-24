@@ -14,9 +14,9 @@ export interface WorldInfo {
 export const WORLDS: WorldInfo[] = [
   {
     id: 'zahradka',
-    name: 'Hudební zahrádka',
-    tagline: 'Každé cvičení tvoji hudbu zalije.',
-    phases: ['Semínko', 'Klíček', 'Pupen', 'Květ'],
+    name: 'Strom zpěvných ptáků',
+    tagline: 'Čím víc hraješ, tím víc jich přiletí.',
+    phases: ['Kmen', 'Větve', 'Listí', 'Ptáci zpívají'],
   },
   {
     id: 'hrad',
@@ -26,15 +26,15 @@ export const WORLDS: WorldInfo[] = [
   },
   {
     id: 'vesmir',
-    name: 'Hudební vesmír',
-    tagline: 'Odpočítávání začíná prvním tónem.',
-    phases: ['Odpočítávání', 'Vzlet', 'Mezi hvězdami', 'Nová planeta'],
+    name: 'Hudební vláček',
+    tagline: 'Každý tón je další kus kolejí.',
+    phases: ['Koleje', 'Lokomotiva', 'Vagony', 'Nádraží a odjezd'],
   },
   {
     id: 'podium',
-    name: 'Hudební pódium',
-    tagline: 'Za oponou čeká tvůj koncert.',
-    phases: ['Zkouška', 'Reflektory', 'Plný sál', 'Potlesk'],
+    name: 'Houslařská dílna',
+    tagline: 'Z kusu dřeva vlastní nástroj.',
+    phases: ['Prkno a šablona', 'Tělo', 'Krk a šnek', 'Struny a smyčec'],
   },
 ]
 

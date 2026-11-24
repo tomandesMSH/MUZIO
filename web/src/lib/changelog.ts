@@ -13,6 +13,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-24-nove-svety',
+    date: '2026-11-24',
+    title: 'Nové hudební světy',
+    role: 'student',
+    items: [
+      'Vedle hradu jsou tři nové světy: Strom zpěvných ptáků, Hudební vláček a Houslařská dílna. Kdo měl zahrádku, vesmír nebo pódium, je teď v jednom z nich se stejnými plamínky. Svět si můžeš kdykoli změnit.',
+    ],
+  },
+  {
     id: '2026-11-22-pozvanky-ucitel',
     date: '2026-11-22',
     title: 'Pozvánky do tříd',

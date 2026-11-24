@@ -59,7 +59,7 @@ describe('StudentCard', () => {
     renderCard()
     expect(await screen.findByText('Plamínky a svět')).toBeInTheDocument()
     expect(screen.getByText(/Celkem 2 plamínky/)).toBeInTheDocument()
-    expect(screen.getByText('Hudební zahrádka')).toBeInTheDocument()
+    expect(screen.getByText('Strom zpěvných ptáků')).toBeInTheDocument()
   })
 
   it('opens a recording for grading', async () => {
