@@ -18,9 +18,6 @@ interface ArtSpec {
 
 const ART: Partial<Record<WorldId, ArtSpec>> = {
   hrad: { kind: 'lines', count: 7, frames: [1, 2, 3, 4, 5, 6, 7], ext: 'svg' },
-  zahradka: { kind: 'picture', count: 7, frames: [7], ext: 'webp' },
-  vesmir: { kind: 'picture', count: 7, frames: [7], ext: 'webp' },
-  podium: { kind: 'picture', count: 7, frames: [7], ext: 'webp' },
 }
 
 export interface WorldArt {

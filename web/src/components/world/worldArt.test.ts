@@ -22,12 +22,8 @@ describe('worldArt', () => {
     expect(worldCover('hrad')?.url).toMatch(/hrad-7\.svg$/)
   })
 
-  it('a world with only its last picture: that one stands in, filling in with the flames', () => {
-    const start = worldArt('zahradka', 0, 0)
-    expect(start).toMatchObject({ kind: 'picture', reveal: 0 })
-    expect(start?.url).toMatch(/worlds\/zahradka\/zahradka-7\.webp$/)
-    expect(worldArt('vesmir', 2, 14)?.reveal).toBe(0.5)
-    expect(worldArt('podium', 4, 28)).toMatchObject({ reveal: 1 })
-    expect(worldCover('podium')?.url).toMatch(/podium-7\.webp$/)
+  it('a world without artwork: nothing, the placeholder is shown', () => {
+    expect(worldArt('zahradka', 0, 0)).toBeUndefined()
+    expect(worldCover('podium')).toBeUndefined()
   })
 })
