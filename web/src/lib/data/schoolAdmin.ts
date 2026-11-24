@@ -40,3 +40,14 @@ export async function fetchSchoolOverview(): Promise<SchoolOverview> {
   if (error) throw error
   return data as SchoolOverview
 }
+
+// Step 6 (migration 0069): approving pupils and verifying teachers of the school.
+export async function approveSchoolPupil(studentId: string): Promise<void> {
+  const { error } = await supabase.rpc('school_admin_approve_pupil', { p_student: studentId })
+  if (error) throw error
+}
+
+export async function setSchoolTeacherVerified(teacherId: string, verified: boolean): Promise<void> {
+  const { error } = await supabase.rpc('school_admin_set_verified', { p_teacher: teacherId, p_on: verified })
+  if (error) throw error
+}

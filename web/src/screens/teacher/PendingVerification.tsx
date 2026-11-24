@@ -24,8 +24,8 @@ export function PendingVerification() {
     <div className="max-w-sm md:max-w-md mx-auto p-6 pt-20 text-center space-y-5">
       <h1 className="text-xl">Čekáš na ověření</h1>
       <p className="text-text-muted text-sm">
-        Nový učitelský účet musí nejdřív ručně ověřit administrátor/moderátor, než získá přístup k žákům a jejich
-        nahrávkám. Ozvi se mu, ať tě ověří.
+        Učitelský účet musí ověřit správce tvé školy, než získá přístup k žákům a jejich nahrávkám. Ozvi se mu, ať
+        tě ověří, nebo ať ti pošle odkaz do školy.
       </p>
       <Button className="w-full" onClick={handleRefresh} disabled={checking}>
         {checking ? 'Kontroluju…' : 'Zkontrolovat znovu'}

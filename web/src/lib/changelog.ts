@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-24-schvalovani-ucitel',
+    date: '2026-11-24',
+    title: 'Schvalování žáků',
+    role: 'teacher',
+    items: [
+      'Žák, který se připojí kódem nebo odkazem vaší třídy (nebo přijme pozvánku), je schválený hned. Schvalujete jen ty, kdo přišli bez kódu.',
+      'Nový učitelský účet se zakládá z odkazu od správce školy.',
+    ],
+  },
+  {
+    id: '2026-11-24-kod-tridy-zak',
+    date: '2026-11-24',
+    title: 'Kód třídy hned po registraci',
+    role: 'student',
+    items: ['Máš od učitele kód třídy? Zadáš ho hned po registraci a nemusíš čekat na schválení.'],
+  },
+  {
     id: '2026-11-24-nove-svety',
     date: '2026-11-24',
     title: 'Nové hudební světy',

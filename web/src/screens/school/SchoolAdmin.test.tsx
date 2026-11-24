@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { SchoolAdmin } from './SchoolAdmin'
 
 const createSchoolInvite = vi.fn(async (_school: string, _role: string) => 'ABCDEFGHJK')
+const approve = vi.fn(async (_id: string) => {})
+const setVerified = vi.fn(async (_id: string, _on: boolean) => {})
 
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
 vi.mock('../../lib/auth', () => ({ signOut: async () => {} }))
@@ -23,6 +25,8 @@ vi.mock('../../lib/data/schoolAdmin', () => ({
     ],
     classrooms: [{ id: 'c1', name: 'Klavír 1', teacher: 'Eva Malá', members: 1 }],
   }),
+  approveSchoolPupil: (id: string) => approve(id),
+  setSchoolTeacherVerified: (id: string, on: boolean) => setVerified(id, on),
 }))
 vi.mock('../../lib/data/schools', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../lib/data/schools')>()),
@@ -68,5 +72,22 @@ describe('SchoolAdmin', () => {
     await screen.findByText('ZUŠ Javorová')
     fireEvent.click(screen.getByRole('tab', { name: 'Třídy' }))
     expect(screen.getByText('1 žák')).toBeInTheDocument()
+  })
+
+  it('verifies a teacher, but not oneself', async () => {
+    renderPanel()
+    await screen.findByText('ZUŠ Javorová')
+    // Eva Malá (t1) is the signed-in admin: no button for her.
+    expect(screen.getAllByRole('button', { name: /Ověřit|Zrušit ověření/ })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Ověřit' }))
+    await waitFor(() => expect(setVerified).toHaveBeenCalledWith('t2', true))
+  })
+
+  it('approves a waiting pupil', async () => {
+    renderPanel()
+    await screen.findByText('ZUŠ Javorová')
+    fireEvent.click(screen.getByRole('tab', { name: 'Žáci' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Schválit' }))
+    await waitFor(() => expect(approve).toHaveBeenCalledWith('p2'))
   })
 })
