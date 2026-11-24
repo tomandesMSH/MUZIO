@@ -3,12 +3,13 @@ import { Button } from '../components/ui/Button'
 import { roleHome } from '../components/routing/RequireRole'
 import { useAuth } from '../lib/AuthProvider'
 import { signOut } from '../lib/auth'
-import { isTeacherAdmin } from '../lib/roles'
+import { hasPanelChoice, isSchoolAdmin, isTeacherAdmin } from '../lib/roles'
 import { BannedScreen } from './BannedScreen'
 import { ConnectionProblem } from './ConnectionProblem'
 
-// Shown right after every login to an account that is both teacher and admin,
-// so they pick which panel to open instead of always landing in the same one.
+// Shown right after every login to a teacher who is also an admin or a
+// school admin, so they pick which panel to open instead of always landing
+// in the same one.
 export function ChoosePanel() {
   const navigate = useNavigate()
   const { session, profile, loading, profileError } = useAuth()
@@ -17,7 +18,7 @@ export function ChoosePanel() {
   if (!session) return <Navigate to="/login" replace />
   if (!profile) return profileError ? <ConnectionProblem /> : <Navigate to="/login" replace />
   if (profile.is_banned) return <BannedScreen />
-  if (!isTeacherAdmin(profile)) return <Navigate to={roleHome(profile.role)} replace />
+  if (!hasPanelChoice(profile)) return <Navigate to={roleHome(profile.role)} replace />
 
   async function handleLogout() {
     await signOut()
@@ -34,16 +35,28 @@ export function ChoosePanel() {
       </div>
 
       <div className="space-y-3">
-        <button
-          type="button"
-          className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"
-          onClick={() => navigate('/moderator', { replace: true })}
-        >
-          <div className="font-heading font-semibold">Admin panel</div>
-          <div className="text-text-muted text-xs mt-1">
-            Celá škola: všichni uživatelé a nahrávky, schvalování, resety hesel, nahlášený obsah, migrace.
-          </div>
-        </button>
+        {isTeacherAdmin(profile) && (
+          <button
+            type="button"
+            className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"
+            onClick={() => navigate('/moderator', { replace: true })}
+          >
+            <div className="font-heading font-semibold">Admin panel</div>
+            <div className="text-text-muted text-xs mt-1">
+              Celé MUZIO: všechny školy, uživatelé a nahrávky, schvalování, resety hesel, nahlášený obsah, migrace.
+            </div>
+          </button>
+        )}
+        {isSchoolAdmin(profile) && (
+          <button
+            type="button"
+            className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"
+            onClick={() => navigate('/sprava-skoly', { replace: true })}
+          >
+            <div className="font-heading font-semibold">Správa školy</div>
+            <div className="text-text-muted text-xs mt-1">Tvoje škola: učitelé a pozvánky pro ně, žáci, třídy.</div>
+          </button>
+        )}
         <button
           type="button"
           className="w-full text-left rounded-2xl bg-bg-card shadow-clay-sm p-4 transition active:scale-95"

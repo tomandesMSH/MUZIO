@@ -5,7 +5,7 @@ import { useAuth } from '../lib/AuthProvider'
 import { useQuery } from '../lib/data/useQuery'
 import { fetchSchoolInviteInfo, INVITE_ROLE_NAMES, redeemSchoolInvite, rememberSchoolCode } from '../lib/data/schools'
 import { getErrorMessage } from '../lib/errors'
-import { isTeacherAdmin } from '../lib/roles'
+import { hasPanelChoice } from '../lib/roles'
 
 // The school link (Admin -> Školy): /skola/<kód>. Shows which school and
 // role it is for; a teacher account takes it with one tap, anyone else
@@ -55,10 +55,10 @@ export function JoinSchool() {
           <p className="text-lg font-heading font-semibold">Jsi ve škole {invite.school_name} 🎉</p>
           <p className="text-sm text-text-muted">
             {invite.role === 'school_admin'
-              ? 'Jsi správce školy. Pozvánky pro další učitele dostaneš od admina MUZIA.'
+              ? 'Jsi správce školy. V panelu Správa školy pozveš další učitele.'
               : 'Teď si můžeš založit třídy a pozvat do nich žáky.'}
           </p>
-          <Button className="w-full" onClick={() => navigate(profile && isTeacherAdmin(profile) ? '/panel' : '/teacher', { replace: true })}>
+          <Button className="w-full" onClick={() => navigate(invite.role === 'school_admin' || (profile && hasPanelChoice(profile)) ? '/panel' : '/teacher', { replace: true })}>
             Pokračovat
           </Button>
         </>

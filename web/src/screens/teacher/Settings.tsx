@@ -59,6 +59,13 @@ export function Settings() {
           </div>
         )}
 
+        {profile.is_school_admin && (
+          <div>
+            <h2 className="text-sm font-heading font-semibold mb-1">Škola</h2>
+            <SettingsRow label="Přepnout do Správy školy" onClick={() => navigate('/sprava-skoly')} />
+          </div>
+        )}
+
         <div>
           <h2 className="text-sm font-heading font-semibold mb-1">Nápověda</h2>
           <SettingsRow label="Dokumentace" onClick={openDocs} />

@@ -8,3 +8,14 @@ import type { Profile } from './data/types'
 export function isTeacherAdmin(profile: Pick<Profile, 'role' | 'is_moderator'>): boolean {
   return profile.role === 'teacher' && !!profile.is_moderator
 }
+
+// The admin of a school (migration 0064): a teacher with is_school_admin,
+// who also gets the school admin panel (/sprava-skoly).
+export function isSchoolAdmin(profile: Pick<Profile, 'role' | 'is_school_admin'>): boolean {
+  return profile.role === 'teacher' && !!profile.is_school_admin
+}
+
+// A teacher with more than one panel picks one after logging in (/panel).
+export function hasPanelChoice(profile: Pick<Profile, 'role' | 'is_moderator' | 'is_school_admin'>): boolean {
+  return isTeacherAdmin(profile) || isSchoolAdmin(profile)
+}
