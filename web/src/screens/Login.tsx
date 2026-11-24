@@ -12,7 +12,7 @@ import { getErrorMessage } from '../lib/errors'
 import { ReportFormModal } from '../components/ui/ReportFormModal'
 import { hasPanelChoice } from '../lib/roles'
 import { takeJoinCode } from './JoinByLink'
-import { takeSchoolCode } from '../lib/data/schools'
+import { peekSchoolCode, takeSchoolCode } from '../lib/data/schools'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
 import { NavIcon } from '../components/layout/NavIcon'
@@ -42,6 +42,9 @@ export function Login() {
 
   const isMinor = dateOfBirth ? needsGuardianConsent(dateOfBirth) : false
   const isStudentRegistration = mode === 'register' && portal === 'student'
+  // A teacher account is made only from a school link (/skola/<kód>, step 6
+  // of the school plan); the link keeps its code in this browser.
+  const teacherNeedsLink = mode === 'register' && portal === 'teacher' && !peekSchoolCode()
 
   function toggleDarkMode() {
     // From the login screen it's an explicit choice (Profile can set it back to the system).
@@ -182,6 +185,18 @@ export function Login() {
           <Button type="button" className="w-full" onClick={() => setMode('login')}>
             Zpět na přihlášení
           </Button>
+        </div>
+      ) : teacherNeedsLink ? (
+        <div className="space-y-3 rounded-2xl bg-bg-card shadow-clay-sm p-4 text-sm">
+          <p className="font-heading font-semibold">Učitelský účet se zakládá z odkazu</p>
+          <p className="text-text-muted">
+            Odkaz ti pošle správce tvé školy. Otevři ho a účet si založíš tam. Pokud tvoje škola v MUZIU ještě
+            není, napiš na{' '}
+            <a href="mailto:tomandes@tuta.io" className="underline underline-offset-2 hover:text-text-primary">
+              tomandes@tuta.io
+            </a>
+            .
+          </p>
         </div>
       ) : (
       <form className="space-y-4" onSubmit={handleSubmit}>

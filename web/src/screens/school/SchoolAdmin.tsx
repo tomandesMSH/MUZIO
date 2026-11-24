@@ -6,7 +6,7 @@ import { SlidingTabs } from '../../components/ui/SlidingTabs'
 import { useAuth } from '../../lib/AuthProvider'
 import { signOut } from '../../lib/auth'
 import { useQuery } from '../../lib/data/useQuery'
-import { fetchSchoolOverview, type SchoolOverview } from '../../lib/data/schoolAdmin'
+import { approveSchoolPupil, fetchSchoolOverview, setSchoolTeacherVerified, type SchoolOverview } from '../../lib/data/schoolAdmin'
 import { cancelSchoolInvite, createSchoolInvite, fetchOpenInvites, type SchoolInvite } from '../../lib/data/schools'
 import { getErrorMessage } from '../../lib/errors'
 import { InviteRow } from '../../components/schools/InviteRow'
@@ -25,8 +25,8 @@ const TABS: { id: Tab; label: string }[] = [
 ]
 
 // Správa školy (/sprava-skoly): the school admin's panel, always just their
-// own school (migrations 0067, 0068). Teachers come in through links made
-// here; approving pupils and verifying teachers comes in step 6 of the plan.
+// own school (migrations 0067-0069). Teachers come in through links made
+// here; the admin also approves pupils and verifies teachers.
 export function SchoolAdmin() {
   const navigate = useNavigate()
   const { profile } = useAuth()
@@ -66,6 +66,7 @@ export function SchoolAdmin() {
       {data && tab === 'teachers' && (
         <TeachersTab
           data={data}
+          myId={profile?.id}
           schoolId={profile?.school_id ?? data.school?.id ?? ''}
           invites={invites.data ?? []}
           onChanged={() => {
@@ -74,7 +75,7 @@ export function SchoolAdmin() {
           }}
         />
       )}
-      {data && tab === 'pupils' && <PupilsTab data={data} />}
+      {data && tab === 'pupils' && <PupilsTab data={data} onChanged={overview.refetch} />}
       {data && tab === 'classrooms' && <ClassroomsTab data={data} />}
     </div>
   )
@@ -82,11 +83,13 @@ export function SchoolAdmin() {
 
 function TeachersTab({
   data,
+  myId,
   schoolId,
   invites,
   onChanged,
 }: {
   data: SchoolOverview
+  myId?: string
   schoolId: string
   invites: SchoolInvite[]
   onChanged: () => void
@@ -146,7 +149,18 @@ function TeachersTab({
                 {t.username} · {count(t.classrooms, 'třída', 'třídy', 'tříd')}
               </div>
             </div>
-            {!t.is_verified && <span className="text-xs font-semibold text-coral-dark">neověřený</span>}
+            <div className="flex items-center gap-2 shrink-0">
+              {!t.is_verified && <span className="text-xs font-semibold text-coral-dark">neověřený</span>}
+              {t.id !== myId && (
+                <Button
+                  variant={t.is_verified ? 'ghost' : 'primary'}
+                  disabled={busy === t.id}
+                  onClick={() => run(t.id, () => setSchoolTeacherVerified(t.id, !t.is_verified))}
+                >
+                  {t.is_verified ? 'Zrušit ověření' : 'Ověřit'}
+                </Button>
+              )}
+            </div>
           </li>
         ))}
       </ul>
@@ -154,10 +168,27 @@ function TeachersTab({
   )
 }
 
-function PupilsTab({ data }: { data: SchoolOverview }) {
+function PupilsTab({ data, onChanged }: { data: SchoolOverview; onChanged: () => void }) {
   const [query, setQuery] = useState('')
+  const [busy, setBusy] = useState<string>()
+  const [error, setError] = useState<string>()
   const q = query.trim().toLowerCase()
-  const pupils = q ? data.pupils.filter((p) => p.full_name.toLowerCase().includes(q)) : data.pupils
+  const found = q ? data.pupils.filter((p) => p.full_name.toLowerCase().includes(q)) : data.pupils
+  // Waiting for approval first.
+  const pupils = [...found].sort((a, b) => Number(a.is_approved) - Number(b.is_approved))
+
+  async function approve(id: string) {
+    setBusy(id)
+    setError(undefined)
+    try {
+      await approveSchoolPupil(id)
+      onChanged()
+    } catch (err) {
+      setError(getErrorMessage(err, 'Schválit se nepovedlo, zkus to znovu.'))
+    } finally {
+      setBusy(undefined)
+    }
+  }
 
   return (
     <div className="space-y-3">
@@ -169,6 +200,7 @@ function PupilsTab({ data }: { data: SchoolOverview }) {
         className="w-full rounded-xl bg-bg-card-alt shadow-clay-press px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-coral"
       />
       <p className="text-xs text-text-muted">Žáků ve škole: {data.pupils.length}</p>
+      {error && <p className="text-sm text-coral-dark">{error}</p>}
       <ul className="rounded-2xl bg-bg-card shadow-clay-sm divide-y divide-border">
         {pupils.length === 0 && <li className="p-4 text-sm text-text-muted">Nikdo takový tu není.</li>}
         {pupils.map((p) => (
@@ -182,7 +214,14 @@ function PupilsTab({ data }: { data: SchoolOverview }) {
             {p.is_banned ? (
               <span className="text-xs font-semibold text-coral-dark">pozastavený</span>
             ) : (
-              !p.is_approved && <span className="text-xs font-semibold text-coral-dark">čeká na schválení</span>
+              !p.is_approved && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-semibold text-coral-dark">čeká na schválení</span>
+                  <Button disabled={busy === p.id} onClick={() => approve(p.id)}>
+                    Schválit
+                  </Button>
+                </div>
+              )
             )}
           </li>
         ))}
