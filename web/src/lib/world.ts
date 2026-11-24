@@ -15,26 +15,26 @@ export const WORLDS: WorldInfo[] = [
   {
     id: 'zahradka',
     name: 'Hudební zahrádka',
-    tagline: 'Nech svou hudbu rozkvést.',
-    phases: ['Kořínky', 'Dva lístky', 'Poupě', 'Rozkvetlá rostlina'],
+    tagline: 'Každé cvičení tvoji hudbu zalije.',
+    phases: ['Semínko', 'Klíček', 'Pupen', 'Květ'],
   },
   {
     id: 'hrad',
     name: 'Hudební hrad',
-    tagline: 'Postav si vlastní hudební království.',
-    phases: ['Základy hradu', 'Hradby', 'Věže', 'Hotový hrad s vlajkami'],
+    tagline: 'Kámen po kameni, tón po tónu.',
+    phases: ['Základní kámen', 'Zdi', 'Věže', 'Vlajky nad hradem'],
   },
   {
     id: 'vesmir',
     name: 'Hudební vesmír',
-    tagline: 'Vydej se s hudbou až ke hvězdám.',
-    phases: ['Raketa na rampě', 'Start', 'Na oběžné dráze', 'Přistání na planetě'],
+    tagline: 'Odpočítávání začíná prvním tónem.',
+    phases: ['Odpočítávání', 'Vzlet', 'Mezi hvězdami', 'Nová planeta'],
   },
   {
     id: 'podium',
     name: 'Hudební pódium',
-    tagline: 'Staň se hvězdou vlastního koncertu.',
-    phases: ['Opona se otevírá', 'Světla', 'Klavír', 'Koncert'],
+    tagline: 'Za oponou čeká tvůj koncert.',
+    phases: ['Zkouška', 'Reflektory', 'Plný sál', 'Potlesk'],
   },
 ]
 

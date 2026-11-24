@@ -33,7 +33,7 @@ function FakeCard() {
       </div>
       <div className="rounded-2xl bg-bg-card shadow-clay-sm p-4 text-sm">
         <div className="font-heading font-semibold">Hudební hrad</div>
-        <div className="text-xs text-text-muted">Fáze 2 ze 4: Hradby · 17 plamínků</div>
+        <div className="text-xs text-text-muted">Fáze 2 ze 4: Zdi · 17 plamínků</div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
