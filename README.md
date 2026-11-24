@@ -1,4 +1,4 @@
-# 🎹 Muzio
+# MUZIO
 
 Webová aplikace pro žáky hudebních škol, která děti hravou formou motivuje k pravidelnému cvičení na nástroj. Žáci nahrávají cvičení z prohlížeče a učitel je poslouchá a hodnotí.
 
@@ -9,6 +9,7 @@ Webová aplikace pro žáky hudebních škol, která děti hravou formou motivuj
 ## Co umí
 
 **Žák**
+
 - nahrávání s odpočtem, poslechem před odesláním a automatickým ořezem ticha
 - úkoly od učitele s termíny a vlastní skladby
 - metronom a ladička
@@ -16,6 +17,7 @@ Webová aplikace pro žáky hudebních škol, která děti hravou formou motivuj
 - notifikace, oznámení od učitele, stažení vlastních dat (GDPR)
 
 **Učitel**
+
 - třídy s kódem pro připojení, úkoly s notami pro [Keyboard Utils](https://github.com/tomandesMSH/Keyboard-Utils)
 - hodnocení nahrávek: noty 1–5, komentáře s odkazy na čas v nahrávce, hlasový komentář, obrázky, odznaky
 - karta žáka, soukromé poznámky, týdenní přehled tříd a export známek do Excelu
