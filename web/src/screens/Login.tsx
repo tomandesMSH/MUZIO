@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { PasswordInput } from '../components/ui/PasswordInput'
@@ -12,6 +12,7 @@ import { getErrorMessage } from '../lib/errors'
 import { ReportFormModal } from '../components/ui/ReportFormModal'
 import { isTeacherAdmin } from '../lib/roles'
 import { takeJoinCode } from './JoinByLink'
+import { takeSchoolCode } from '../lib/data/schools'
 import { getLastUsername, getRememberMe, saveLastUsername, setRememberMe } from '../lib/rememberMe'
 import { ConnectionProblem } from './ConnectionProblem'
 import { NavIcon } from '../components/layout/NavIcon'
@@ -22,9 +23,11 @@ type Portal = 'student' | 'teacher'
 
 export function Login() {
   const navigate = useNavigate()
+  // A school link (/skola/<kód>) can open straight on teacher registration.
+  const linkState = useLocation().state as { mode?: Mode; portal?: Portal } | null
   const { session, profile, loading: authLoading, profileError } = useAuth()
-  const [mode, setMode] = useState<Mode>('login')
-  const [portal, setPortal] = useState<Portal>('student')
+  const [mode, setMode] = useState<Mode>(linkState?.mode ?? 'login')
+  const [portal, setPortal] = useState<Portal>(linkState?.portal ?? 'student')
   const [reportOpen, setReportOpen] = useState(false)
   const [username, setUsername] = useState(() => getLastUsername())
   const [remember, setRemember] = useState(() => getRememberMe())
@@ -47,6 +50,12 @@ export function Login() {
 
   useEffect(() => {
     if (!authLoading && session && profile) {
+      // Came from a school link (/skola/<kód>): back there to take it.
+      const schoolCode = takeSchoolCode()
+      if (schoolCode) {
+        navigate(`/skola/${encodeURIComponent(schoolCode)}`, { replace: true })
+        return
+      }
       // Came from a class link (/pripojit/<kód>): back there to join.
       const joinCode = takeJoinCode()
       if (joinCode && profile.role === 'student') {

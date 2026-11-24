@@ -77,6 +77,10 @@ export function describeAction(entry: Pick<AdminAction, 'action' | 'details'>): 
       return `obnovil(a) ${d.count} ztracených nahrávek`
     case 'cleanup_recordings':
       return `uklidil(a) ${d.count} starých nahrávek (do ${d.before})`
+    case 'create_school':
+      return `založil(a) školu ${d.school ?? ''}`.trim()
+    case 'join_school':
+      return `${d.role === 'school_admin' ? 'přidal(a) se jako správce do školy' : 'přidal(a) se jako učitel do školy'} ${d.school ?? ''}`.trim()
     default:
       return entry.action
   }
