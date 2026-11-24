@@ -6,23 +6,23 @@
 //   SMTP_HOST, SMTP_PORT (465 = TLS, 587 = STARTTLS), SMTP_USER, SMTP_PASS:
 //   the mailbox that sends the code, e.g. muzio@tomandes.eu at the domain's
 //   mail provider (or Gmail: smtp.gmail.com, 465, an app password),
-//   MIGRATION_FROM (optional, default "Muzio <SMTP_USER>").
+//   MIGRATION_FROM (optional, default "MUZIO <SMTP_USER>").
 import { createClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
 import { handleMigrate, parseMigrateRequest, type MigrateDeps } from './_lib/migrate-core.js'
 
 function codeEmail(code: string): { subject: string; text: string; html: string } {
   const text = [
-    `Tvůj kód pro přenos dat z Base44 do Muzia: ${code}`,
+    `Tvůj kód pro přenos dat z Base44 do MUZIA: ${code}`,
     '',
-    'Platí 15 minut. Zadej ho v Muziu na obrazovce Migrace a vyber si uživatelské jméno a heslo.',
+    'Platí 15 minut. Zadej ho v MUZIU na obrazovce Migrace a vyber si uživatelské jméno a heslo.',
     'Pokud jsi o kód nežádal(a), tento e-mail ignoruj.',
   ].join('\n')
-  const html = `<p>Tvůj kód pro přenos dat z Base44 do Muzia:</p>
+  const html = `<p>Tvůj kód pro přenos dat z Base44 do MUZIA:</p>
 <p style="font-size:28px;font-weight:600;letter-spacing:4px;font-family:monospace">${code}</p>
-<p>Platí 15 minut. Zadej ho v Muziu na obrazovce Migrace a vyber si uživatelské jméno a heslo.</p>
+<p>Platí 15 minut. Zadej ho v MUZIU na obrazovce Migrace a vyber si uživatelské jméno a heslo.</p>
 <p style="color:#777">Pokud jsi o kód nežádal(a), tento e-mail ignoruj.</p>`
-  return { subject: `Muzio: kód ${code}`, text, html }
+  return { subject: `MUZIO: kód ${code}`, text, html }
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: 'Migrace zatím není nastavená.' }, { status: 503 })
   }
   const smtpPort = Number(env.SMTP_PORT ?? 465)
-  const from = env.MIGRATION_FROM ?? `Muzio <${smtpUser}>`
+  const from = env.MIGRATION_FROM ?? `MUZIO <${smtpUser}>`
   const mailer = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,

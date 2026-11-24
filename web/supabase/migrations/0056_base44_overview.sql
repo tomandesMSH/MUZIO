@@ -1,5 +1,5 @@
 -- Přehled migrace z Base44: which of the Base44 pupils have already moved
--- their data to Muzio (0055), so the teacher can nudge the others. Names and
+-- their data to MUZIO (0055), so the teacher can nudge the others. Names and
 -- numbers only - no e-mail, no hash.
 --
 -- For an admin (is_moderator()) and a verified teacher (is_admin()).

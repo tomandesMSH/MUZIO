@@ -3,7 +3,7 @@ import { Button } from '../ui/Button'
 import { isChunkLoadError } from '../../lib/chunkError'
 
 // A screen is downloaded when first opened (router.tsx). That fails when the
-// phone is offline, or when a new Muzio was deployed meanwhile and the old
+// phone is offline, or when a new MUZIO was deployed meanwhile and the old
 // file is gone. Online: reload once to get the new version. Offline: say so.
 const RELOAD_KEY = 'muzio-chunk-reload'
 
@@ -41,7 +41,7 @@ export class ScreenErrorBoundary extends Component<{ children: ReactNode }, Stat
         </h1>
         <p className="text-sm text-text-muted">
           {offline
-            ? 'Jsi offline a tahle část Muzia ještě není uložená v zařízení. Zkus to, až budeš online.'
+            ? 'Jsi offline a tahle část MUZIA ještě není uložená v zařízení. Zkus to, až budeš online.'
             : 'Zkus stránku načíst znovu.'}
         </p>
         <Button onClick={() => window.location.reload()}>Načíst znovu</Button>

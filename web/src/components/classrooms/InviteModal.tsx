@@ -46,7 +46,7 @@ function InviteContent({ classroomId, classroomName, joinCode, onClose }: Invite
 
   async function share() {
     try {
-      await navigator.share({ title: `Třída ${classroomName} v Muziu`, text: `Připoj se do třídy ${classroomName}:`, url: link })
+      await navigator.share({ title: `Třída ${classroomName} v MUZIU`, text: `Připoj se do třídy ${classroomName}:`, url: link })
     } catch {
       // Closed the share sheet - nothing to do.
     }

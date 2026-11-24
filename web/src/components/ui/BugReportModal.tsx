@@ -49,7 +49,7 @@ export function BugReportModal({ open, onClose }: { open: boolean; onClose: () =
         <form onSubmit={send} className="space-y-3">
           <h2 className="font-heading font-semibold text-lg">Nahlásit chybu</h2>
           <p className="text-sm text-text-muted">
-            Muzio je v betě. Napiš, co se pokazilo a co se zrovna dělo. Verze aplikace a stránka se pošlou samy.
+            MUZIO je v betě. Napiš, co se pokazilo a co se zrovna dělo. Verze aplikace a stránka se pošlou samy.
           </p>
           <textarea
             aria-label="Popis chyby"

@@ -70,7 +70,7 @@ export function Sidebar({ role }: { role: 'student' | 'teacher' }) {
       <div className="flex items-center gap-2.5 mb-6 px-1">
         <img src="/favicon.svg" alt="" className="w-8 h-8 shrink-0" />
         <span className="flex flex-col leading-tight">
-          <span className="font-heading font-bold text-base">Muzio</span>
+          <span className="font-heading font-bold text-base">MUZIO</span>
           <span className="text-[11px] text-text-muted">beta</span>
         </span>
       </div>

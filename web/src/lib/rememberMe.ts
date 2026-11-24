@@ -1,4 +1,4 @@
-// "Zapamatuj si mě" on the login screen. Checked (the default, and how Muzio
+// "Zapamatuj si mě" on the login screen. Checked (the default, and how MUZIO
 // always worked): the Supabase session lives in localStorage and survives
 // closing the browser. Unchecked: it lives in sessionStorage, so closing the
 // browser logs out - for shared computers at school. The choice itself and

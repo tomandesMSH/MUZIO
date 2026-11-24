@@ -1,4 +1,4 @@
-// Is a newer Muzio deployed than the one running? The build writes its id to
+// Is a newer MUZIO deployed than the one running? The build writes its id to
 // /version.json (vite.config.ts). An installed app or a tab left open for
 // days would otherwise keep running old code.
 export const CHECK_EVERY_MS = 10 * 60_000

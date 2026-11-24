@@ -22,14 +22,14 @@ describe('MigrationForm', () => {
 
     fireEvent.change(field('Kód z e-mailu'), { target: { value: '12 34 56' } })
     fireEvent.change(field('Celé jméno'), { target: { value: 'Pavel Novák' } })
-    fireEvent.change(field('Uživatelské jméno pro Muzio (bez diakritiky)'), { target: { value: 'PavelN' } })
+    fireEvent.change(field('Uživatelské jméno pro MUZIO (bez diakritiky)'), { target: { value: 'PavelN' } })
     fireEvent.change(field('Nové heslo'), { target: { value: 'tajne123' } })
     fireEvent.change(field('Heslo znovu'), { target: { value: 'tajne123' } })
     fireEvent.change(field('Datum narození'), { target: { value: '2000-01-01' } })
     fireEvent.click(screen.getByRole('checkbox'))
     fireEvent.click(screen.getByRole('button', { name: 'Přenést a vytvořit účet' }))
 
-    expect(await screen.findByText('Hotovo, vítej v Muziu')).toBeInTheDocument()
+    expect(await screen.findByText('Hotovo, vítej v MUZIU')).toBeInTheDocument()
     expect(screen.getByText(/12 plamínků, hvězdy 4, odznaky 2/)).toBeInTheDocument()
     expect(completeMigration).toHaveBeenCalledWith(
       expect.objectContaining({ email: 'pavel@example.com', code: '123456', username: 'PavelN', password: 'tajne123' }),
@@ -44,7 +44,7 @@ describe('MigrationForm', () => {
     await screen.findByText(/Kód jsme poslali/)
     fireEvent.change(field('Kód z e-mailu'), { target: { value: '123456' } })
     fireEvent.change(field('Celé jméno'), { target: { value: 'Pavel' } })
-    fireEvent.change(field('Uživatelské jméno pro Muzio (bez diakritiky)'), { target: { value: 'paveln' } })
+    fireEvent.change(field('Uživatelské jméno pro MUZIO (bez diakritiky)'), { target: { value: 'paveln' } })
     fireEvent.change(field('Nové heslo'), { target: { value: 'tajne123' } })
     fireEvent.change(field('Heslo znovu'), { target: { value: 'jine1234' } })
     fireEvent.change(field('Datum narození'), { target: { value: '2000-01-01' } })

@@ -55,7 +55,7 @@ export function Settings() {
     }
   }
 
-  // Everything Muzio keeps about the pupil, as a ZIP (lib/exportMyData.ts).
+  // Everything MUZIO keeps about the pupil, as a ZIP (lib/exportMyData.ts).
   async function downloadData() {
     if (!profile) return
     setExporting('data')
@@ -105,7 +105,7 @@ export function Settings() {
           <SettingsRow label="Styl" right={<StylePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
           <SettingsRow label="Zvuk při dokončení" right={<Switch checked={sounds} onChange={toggleSounds} />} />
-          <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
+          <InstallAppRow onInstalled={() => show('MUZIO je na ploše')} />
         </div>
 
         <div>
@@ -161,7 +161,7 @@ export function Settings() {
           Odhlásit se
         </Button>
         <p className="text-center text-[11px] text-text-muted" title={__APP_VERSION__}>
-          Muzio beta · {appVersionLabel()}
+          MUZIO beta · {appVersionLabel()}
         </p>
       </div>
       {passwordOpen && (

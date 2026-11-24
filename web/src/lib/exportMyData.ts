@@ -1,4 +1,4 @@
-// "Stáhnout moje data" (GDPR): everything Muzio keeps about the pupil in one
+// "Stáhnout moje data" (GDPR): everything MUZIO keeps about the pupil in one
 // ZIP - the recordings with the teacher's comments as a table, the profile,
 // the recordings' sound, the teacher's voice comments and pictures.
 // The archive is put together here (tested with a fake download); the ZIP
@@ -104,7 +104,7 @@ export async function buildArchive(
     'nahravky.csv': encoder.encode(toCsv(recordingRows(data))),
     'profil.json': encoder.encode(profileJson(data)),
     'PRECTI-ME.txt': encoder.encode(
-      'Tvoje data z aplikace Muzio.\r\n\r\n' +
+      'Tvoje data z aplikace MUZIO.\r\n\r\n' +
         'nahravky.csv: všechny nahrávky s hodnocením a komentáři (otevře se v Excelu)\r\n' +
         'profil.json: profil, XP, hvězdy, třídy, odznaky a souhlas\r\n' +
         'nahravky/: zvuk nahrávek\r\n' +

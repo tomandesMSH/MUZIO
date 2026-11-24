@@ -1,4 +1,4 @@
-// "Add Muzio to the home screen" (issue #4). Chrome / Edge / Android fire
+// "Add MUZIO to the home screen" (issue #4). Chrome / Edge / Android fire
 // beforeinstallprompt once the app is installable; we keep the event so the
 // Profile can show the real install dialog later. Safari (iPhone, iPad, Mac)
 // never fires it - there the pupil adds the app by hand, so we explain how.

@@ -148,7 +148,7 @@ export function ExportGradesModal({ students, onClose }: { students: Profile[]; 
             {busy === 'detail' ? 'Připravuji…' : '⬇ Všechny nahrávky s komentáři'}
           </Button>
           <p className="text-[11px] text-text-muted">
-            Soubor CSV se otevře v Excelu (nebo Tabulkách Google). Noty jsou hodnocení 1 až 5 z Muzia, ne školní známky.
+            Soubor CSV se otevře v Excelu (nebo Tabulkách Google). Noty jsou hodnocení 1 až 5 z MUZIA, ne školní známky.
           </p>
           {message && <p className="text-sm text-text-muted" role="status">{message}</p>}
         </div>

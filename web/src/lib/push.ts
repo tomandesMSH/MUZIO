@@ -10,7 +10,7 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undef
 
 export type PushSupport =
   | 'ready'
-  // iPhone / iPad: only Muzio added to the home screen gets notifications.
+  // iPhone / iPad: only MUZIO added to the home screen gets notifications.
   | 'needs-install'
   | 'unsupported'
   // The server keys aren't set up (VITE_VAPID_PUBLIC_KEY).
@@ -146,7 +146,7 @@ export function notifyPush(event: NotifyEvent): void {
 
 // "Registration failed - push service error" (AbortError): the browser
 // couldn't reach its own push service (Google's for Chrome, Microsoft's for
-// Edge) - nothing Muzio can fix, but the user can.
+// Edge) - nothing MUZIO can fix, but the user can.
 export function pushErrorText(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err)
   if ((err instanceof DOMException && err.name === 'AbortError') || /push service/i.test(message)) {

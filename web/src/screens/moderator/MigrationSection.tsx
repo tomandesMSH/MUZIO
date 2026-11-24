@@ -4,7 +4,7 @@ import { fetchBase44Overview } from '../../components/teacher/Base44Overview'
 import { flamesLabel } from '../../lib/flames'
 
 // Admin -> Migrace: every pupil from the Base44 app and whether they have
-// moved their data to Muzio yet (migrations 0055, 0056).
+// moved their data to MUZIO yet (migrations 0055, 0056).
 export function MigrationSection() {
   const rows = useQuery(() => fetchBase44Overview(), [])
   const list = rows.data ?? []
@@ -32,7 +32,7 @@ export function MigrationSection() {
                 <tr className="text-left text-xs text-text-muted border-b border-border">
                   <th className="py-2 px-3 font-semibold">Žák v Base44</th>
                   <th className="py-2 px-3 font-semibold">Stav</th>
-                  <th className="py-2 px-3 font-semibold">Účet v Muziu</th>
+                  <th className="py-2 px-3 font-semibold">Účet v MUZIU</th>
                   <th className="py-2 px-3 font-semibold text-right">Plamínky</th>
                   <th className="py-2 px-3 font-semibold text-right">Hvězdy</th>
                   <th className="py-2 px-3 font-semibold text-right">Odznaky</th>

@@ -123,7 +123,7 @@ export async function handleMigrate(request: MigrateRequest | null, deps: Migrat
   const hash = emailHash(request.email)
   const found = await deps.findImport(hash)
   if (found === false) return fail(404, 'Tento e-mail v datech z Base44 nemáme. Zkontroluj, jestli je napsaný správně.')
-  if (found === 'claimed') return fail(409, 'Data k tomuto e-mailu už byla přenesena do Muzia.')
+  if (found === 'claimed') return fail(409, 'Data k tomuto e-mailu už byla přenesena do MUZIA.')
 
   const now = deps.now.getTime()
 

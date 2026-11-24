@@ -18,8 +18,8 @@ import { importSql, maskEmail, parseDump, rowsOf } from './base44-dump.mjs'
 // users.stars; flames are the distinct days in `practice_days` (recordings
 // and days the teacher added) and `completed_tasks`; badges are the
 // teacher-given rows of `badge_awards` (badge_key like note_hunter). The
-// automatic badges (first recording, days practised) Muzio counts by itself,
-// and Hudební posel has no Muzio counterpart, so those are skipped.
+// automatic badges (first recording, days practised) MUZIO counts by itself,
+// and Hudební posel has no MUZIO counterpart, so those are skipped.
 export function pupilsFrom(tables) {
   if (!tables.users) throw new Error('V dumpu chybí tabulka users. Spusť --inspect a uprav pupilsFrom().')
   const days = new Map()

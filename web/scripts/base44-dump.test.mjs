@@ -35,7 +35,7 @@ describe('parseDump', () => {
 })
 
 describe('badges and output', () => {
-  it('maps Base44 badge names to Muzio ids, skips the automatic ones', () => {
+  it('maps Base44 badge names to MUZIO ids, skips the automatic ones', () => {
     expect(badgeId('Akordový kouzelník')).toBe('akordovy-kouzelnik')
     expect(badgeId('KONCERTNÍ HVĚZDA')).toBe('koncertni-hvezda')
     expect(badgeId('První nahrávka')).toBeNull()
@@ -58,7 +58,7 @@ describe('badges and output', () => {
 })
 
 describe('Base44 badge keys', () => {
-  it('maps the export keys, skips the ones without a Muzio badge', () => {
+  it('maps the export keys, skips the ones without a MUZIO badge', () => {
     expect(badgeId('note_hunter')).toBe('lovec-not')
     expect(badgeId('brave_musician')).toBe('odvazny-muzikant')
     expect(badgeId('music_messenger')).toBeNull()

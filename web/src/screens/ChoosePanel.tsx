@@ -27,7 +27,7 @@ export function ChoosePanel() {
   return (
     <div className="max-w-sm md:max-w-md mx-auto p-6 pt-16 space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-bold mb-1">Muzio</h1>
+        <h1 className="text-2xl font-heading font-bold mb-1">MUZIO</h1>
         <p className="text-text-muted text-sm">
           Ahoj, {profile.full_name}. Který panel chceš otevřít?
         </p>

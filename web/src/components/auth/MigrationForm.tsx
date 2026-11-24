@@ -12,7 +12,7 @@ function Label({ children }: { children: React.ReactNode }) {
   return <div className="text-xs font-semibold text-text-muted mb-1.5">{children}</div>
 }
 
-// Login -> Migrace: a pupil from the Base44 app moves to Muzio with their
+// Login -> Migrace: a pupil from the Base44 app moves to MUZIO with their
 // flames, stars and badges. 1) the old e-mail gets a code, 2) with the code
 // they choose a username and password, 3) done, signed in.
 export function MigrationForm() {
@@ -91,7 +91,7 @@ export function MigrationForm() {
   if (step === 'done' && summary) {
     return (
       <div className="space-y-4">
-        <h2 className="font-heading font-semibold text-lg">Hotovo, vítej v Muziu</h2>
+        <h2 className="font-heading font-semibold text-lg">Hotovo, vítej v MUZIU</h2>
         <p className="text-sm text-text-muted">
           Přeneseno: {flamesLabel(summary.flames)}, hvězdy {summary.stars}, odznaky {summary.badges}
           {summary.messages ? `, zprávy od paní učitelky ${summary.messages}` : ''}. Přihlašuj se
@@ -103,7 +103,7 @@ export function MigrationForm() {
           </p>
         )}
         <Button className="w-full" disabled={busy} onClick={enter}>
-          Pokračovat do Muzia
+          Pokračovat do MUZIA
         </Button>
       </div>
     )
@@ -114,7 +114,7 @@ export function MigrationForm() {
       <form className="space-y-4" onSubmit={sendCode}>
         <p className="text-sm text-text-muted">
           Cvičil(a) jsi v předchozí aplikaci paní učitelky? Zadej e-mail, kterým ses do ní přihlašoval(a). Pošleme na
-          něj kód a tvoje plamínky, hvězdy a odznaky přeneseme do nového účtu v Muziu.
+          něj kód a tvoje plamínky, hvězdy a odznaky přeneseme do nového účtu v MUZIU.
         </p>
         <div>
           <Label>E-mail z předchozí aplikace</Label>
@@ -128,7 +128,7 @@ export function MigrationForm() {
         <Button type="submit" className="w-full" disabled={busy || !email.includes('@')}>
           {busy ? 'Posílám…' : 'Poslat kód'}
         </Button>
-        <p className="text-xs text-text-muted">E-mail používáme jen k ověření, v Muziu se neukládá.</p>
+        <p className="text-xs text-text-muted">E-mail používáme jen k ověření, v MUZIU se neukládá.</p>
       </form>
     )
   }
@@ -152,7 +152,7 @@ export function MigrationForm() {
         <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
       </div>
       <div>
-        <Label>Uživatelské jméno pro Muzio (bez diakritiky)</Label>
+        <Label>Uživatelské jméno pro MUZIO (bez diakritiky)</Label>
         <Input
           placeholder="napr. tomask"
           value={username}
@@ -200,8 +200,8 @@ export function MigrationForm() {
           />
           <span>
             {isMinor
-              ? 'Jako zákonný zástupce potvrzuji souhlas se zpracováním osobních údajů dítěte (jméno, audio nahrávky, pokrok) v appce Muzio.'
-              : 'Souhlasím se zpracováním svých osobních údajů (jméno, audio nahrávky, pokrok) v appce Muzio.'}
+              ? 'Jako zákonný zástupce potvrzuji souhlas se zpracováním osobních údajů dítěte (jméno, audio nahrávky, pokrok) v appce MUZIO.'
+              : 'Souhlasím se zpracováním svých osobních údajů (jméno, audio nahrávky, pokrok) v appce MUZIO.'}
           </span>
         </label>
       )}

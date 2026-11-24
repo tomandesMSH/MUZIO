@@ -20,7 +20,7 @@ export async function fetchBase44Overview(): Promise<Base44Row[]> {
   return (data ?? []) as Base44Row[]
 }
 
-// Who of the Base44 pupils has moved their data to Muzio (migration 0056),
+// Who of the Base44 pupils has moved their data to MUZIO (migration 0056),
 // the ones still missing on top. Nothing shows without the migration or data.
 export function Base44Overview({ rows: given }: { rows?: Base44Row[] }) {
   const loaded = useQuery(() => (given ? Promise.resolve(given) : fetchBase44Overview().catch(() => [])), [given])

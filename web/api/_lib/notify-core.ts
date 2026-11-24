@@ -314,7 +314,7 @@ export function largestFilesMessage(noticeId: string, deleteAfter: string): Mess
 // A tag of its own each time: with the same tag the phone would just swap it
 // for the previous test quietly, and it would look like nothing came.
 export function testMessage(now: Date): Message {
-  return { title: 'Muzio 🎵', body: 'Notifikace fungují. Takhle ti dáme vědět.', url: '/', tag: `test-${now.getTime()}` }
+  return { title: 'MUZIO 🎵', body: 'Notifikace fungují. Takhle ti dáme vědět.', url: '/', tag: `test-${now.getTime()}` }
 }
 
 // "Poslat zkušební" can be pressed again after this many seconds.

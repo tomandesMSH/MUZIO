@@ -58,7 +58,7 @@ export function JoinByLink() {
 
   return (
     <div className="max-w-sm mx-auto p-6 pt-20 text-center space-y-4">
-      <h1 className="text-2xl font-heading font-bold">Muzio</h1>
+      <h1 className="text-2xl font-heading font-bold">MUZIO</h1>
       {!isPupil ? (
         <p className="text-sm text-text-muted">Tenhle odkaz je pro žáky: připojí je do třídy. Pošli ho svým žákům.</p>
       ) : state.kind === 'joining' ? (

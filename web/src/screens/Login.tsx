@@ -104,7 +104,7 @@ export function Login() {
       >
         <NavIcon name={darkMode ? 'sun' : 'moon'} className="w-[18px] h-[18px]" />
       </button>
-      <h1 className="text-2xl font-heading font-bold mb-1">Muzio</h1>
+      <h1 className="text-2xl font-heading font-bold mb-1">MUZIO</h1>
       <p className="text-text-muted text-sm">Uč se hudbu hravě, každý den.</p>
       <p className="text-text-muted text-xs opacity-70 mb-8">Dříve známé jako Keyboard Hero.</p>
 
@@ -150,7 +150,7 @@ export function Login() {
         <div className="space-y-4">
           <h2 className="font-heading font-semibold text-lg">Zapomněli jste heslo?</h2>
           <p className="text-sm text-text-muted">
-            Muzio nepracuje s e-maily, takže si heslo nemůžeš obnovit sám. Nové ti nastaví někdo, kdo tě zná:
+            MUZIO nepracuje s e-maily, takže si heslo nemůžeš obnovit sám. Nové ti nastaví někdo, kdo tě zná:
           </p>
           <ul className="space-y-2 text-sm">
             <li className="rounded-2xl bg-bg-card shadow-clay-sm p-3.5">
@@ -254,8 +254,8 @@ export function Login() {
             />
             <span>
               {isMinor
-                ? 'Jako zákonný zástupce potvrzuji souhlas se zpracováním osobních údajů dítěte (jméno, audio nahrávky, pokrok) v appce Muzio.'
-                : 'Souhlasím se zpracováním svých osobních údajů (jméno, audio nahrávky, pokrok) v appce Muzio.'}
+                ? 'Jako zákonný zástupce potvrzuji souhlas se zpracováním osobních údajů dítěte (jméno, audio nahrávky, pokrok) v appce MUZIO.'
+                : 'Souhlasím se zpracováním svých osobních údajů (jméno, audio nahrávky, pokrok) v appce MUZIO.'}
             </span>
           </label>
         )}
@@ -309,7 +309,7 @@ export function Login() {
           target="_blank"
           rel="noopener noreferrer"
           className="w-14 h-14 bg-white rounded-lg shadow-clay-sm opacity-90 hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5"
-          aria-label="Dokumentace Muzio"
+          aria-label="Dokumentace MUZIO"
           title="Dokumentace: návody pro žáky a učitele"
         >
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="#181717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

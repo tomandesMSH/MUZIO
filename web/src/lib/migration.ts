@@ -1,5 +1,5 @@
 // Migrace z Base44 (api/migrate.ts, migration 0055): the e-mail from the old
-// app gets a code; with the code a new Muzio account is made and the flames,
+// app gets a code; with the code a new MUZIO account is made and the flames,
 // stars and badges come over.
 
 export interface MigrationSummary {

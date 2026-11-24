@@ -20,7 +20,7 @@ interface NotificationsModalProps {
 
 const SUPPORT_TEXT = {
   'needs-install':
-    'Na iPhonu a iPadu chodí notifikace jen do Muzia přidaného na plochu: v Safari klepni na Sdílet → Přidat na plochu, otevři Muzio z plochy a zapni je tam.',
+    'Na iPhonu a iPadu chodí notifikace jen do MUZIA přidaného na plochu: v Safari klepni na Sdílet → Přidat na plochu, otevři MUZIO z plochy a zapni je tam.',
   unsupported: 'Tenhle prohlížeč notifikace neumí. Zkus Chrome, Edge, Firefox nebo Safari.',
   'not-configured': 'Notifikace ještě nejsou na serveru nastavené.',
 }

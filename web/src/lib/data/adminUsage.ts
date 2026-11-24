@@ -1,6 +1,6 @@
 import { supabase } from '../supabase'
 
-// How much of the Supabase plan Muzio uses (migration 0032).
+// How much of the Supabase plan MUZIO uses (migration 0032).
 
 export interface Usage {
   database_bytes: number

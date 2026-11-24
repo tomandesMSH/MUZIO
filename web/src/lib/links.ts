@@ -1,4 +1,4 @@
-// Muzio's user guide (repo Muzio-Docs on GitHub Pages).
+// MUZIO's user guide (repo Muzio-Docs on GitHub Pages).
 export const DOCS_URL = 'https://tomandes.eu/Muzio-Docs/'
 
 export function openDocs() {

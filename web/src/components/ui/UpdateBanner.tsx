@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { CHECK_EVERY_MS, fetchDeployedVersion, isNewVersion } from '../../lib/appVersion'
 import { onAppResume } from '../../lib/appResume'
 
-// "Nová verze Muzia je připravená - Obnovit": checks on coming back to the app
+// "Nová verze MUZIA je připravená - Obnovit": checks on coming back to the app
 // and every 10 minutes. Above the bottom bar on a phone.
 export function UpdateBanner({ running = __APP_VERSION__ }: { running?: string }) {
   const [available, setAvailable] = useState(false)
@@ -29,7 +29,7 @@ export function UpdateBanner({ running = __APP_VERSION__ }: { running?: string }
       role="status"
       className="fixed left-4 right-4 bottom-24 md:bottom-6 z-50 mx-auto flex max-w-sm items-center gap-3 rounded-xl bg-ink px-4 py-3 text-sm text-cream shadow-xl"
     >
-      <span className="flex-1">Nová verze Muzia je připravená.</span>
+      <span className="flex-1">Nová verze MUZIA je připravená.</span>
       <button className="font-heading font-semibold text-coral" onClick={() => window.location.reload()}>
         Obnovit
       </button>

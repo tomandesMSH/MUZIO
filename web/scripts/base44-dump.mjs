@@ -127,8 +127,8 @@ export function maskEmail(value) {
   return typeof value === 'string' && value.includes('@') ? value.replace(/^(.).*(@.*)$/, '$1***$2') : value
 }
 
-// Base44 badge names -> Muzio teacher badge ids (migration 0045). The ones
-// Muzio counts by itself (first recording, days practised) are left out.
+// Base44 badge names -> MUZIO teacher badge ids (migration 0045). The ones
+// MUZIO counts by itself (first recording, days practised) are left out.
 export const BADGE_IDS = {
   // The badge_key values of the Base44 export.
   'note hunter': 'lovec-not',

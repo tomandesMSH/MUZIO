@@ -5,7 +5,7 @@
 --
 --   base44_import.messages - [{ body, created_at, read }], filled by
 --                            web/scripts/import-base44.mjs
---   pupil_messages.source  - 'base44' for these; they have no Muzio teacher
+--   pupil_messages.source  - 'base44' for these; they have no MUZIO teacher
 --                            (teacher_id null), the app shows
 --                            "Z předchozí aplikace"
 --   apply_base44_import    - now also copies the messages

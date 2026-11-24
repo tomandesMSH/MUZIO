@@ -1,5 +1,5 @@
 -- Migrace z Base44: pupils who used the teacher's Base44 prototype bring
--- their flames, stars and badges into a new Muzio account.
+-- their flames, stars and badges into a new MUZIO account.
 --
 --   base44_import   - one row per Base44 pupil, filled once from the export
 --                     (web/scripts/import-base44.mjs). The e-mail is stored
@@ -97,7 +97,7 @@ begin
       values (p_user, null, v_badge, p_user, 'base44');
       v_badges := v_badges + 1;
     exception when check_violation then
-      -- A badge Muzio doesn't know: skipped.
+      -- A badge MUZIO doesn't know: skipped.
       null;
     end;
   end loop;

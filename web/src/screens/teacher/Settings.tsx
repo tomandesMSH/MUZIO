@@ -44,7 +44,7 @@ export function Settings() {
           <SettingsRow label="Vzhled" right={<ThemePicker />} />
           <SettingsRow label="Styl" right={<StylePicker />} />
           <SettingsRow label="Notifikace" onClick={() => setNotificationsOpen(true)} />
-          <InstallAppRow onInstalled={() => show('Muzio je na ploše')} />
+          <InstallAppRow onInstalled={() => show('MUZIO je na ploše')} />
         </div>
 
         <div>
@@ -72,7 +72,7 @@ export function Settings() {
           Odhlásit se
         </Button>
         <p className="text-center text-[11px] text-text-muted" title={__APP_VERSION__}>
-          Muzio beta · {appVersionLabel()}
+          MUZIO beta · {appVersionLabel()}
         </p>
       </div>
       {passwordOpen && (

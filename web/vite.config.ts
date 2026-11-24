@@ -24,7 +24,7 @@ export default defineConfig(({ command }) => ({
     rollupOptions: {
       output: {
         // Libraries change less often than the app: their own files stay
-        // cached in the browser across Muzio updates.
+        // cached in the browser across MUZIO updates.
         manualChunks(id) {
           if (id.includes('node_modules/@supabase')) return 'supabase'
           if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'react'

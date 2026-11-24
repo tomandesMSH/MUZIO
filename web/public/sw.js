@@ -1,4 +1,4 @@
-// Muzio's service worker:
+// MUZIO's service worker:
 //  * push notifications (see src/lib/push.ts and api/notify.ts);
 //  * opening the app offline: the page (network first, the saved copy when
 //    offline) and the built files under /assets/ (their names change with
@@ -67,7 +67,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data ? event.data.text() : '' }
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Muzio', {
+    self.registration.showNotification(data.title || 'MUZIO', {
       body: data.body || '',
       icon: '/icon-192.png',
       // The small icon in the phone's status bar: Android draws only its
@@ -80,7 +80,7 @@ self.addEventListener('push', (event) => {
   )
 })
 
-// A tap opens the page it's about - in an open Muzio tab if there is one.
+// A tap opens the page it's about - in an open MUZIO tab if there is one.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const url = new URL(event.notification.data?.url || '/', self.location.origin).href

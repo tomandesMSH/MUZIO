@@ -1,4 +1,4 @@
--- How much of the Supabase plan Muzio uses (Admin -> Využití), so the admin
+-- How much of the Supabase plan MUZIO uses (Admin -> Využití), so the admin
 -- sees the free tier filling up without opening the dashboard.
 --
 -- admin_usage() returns one JSON object:
